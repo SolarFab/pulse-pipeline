@@ -150,6 +150,7 @@ VENUE_COORDINATES: dict[str, tuple[float, float]] = {
     "Genezarthkirche": (52.4766, 13.4229),
     "Rixdorfer Schmiede – Feine Klingen": (52.4753, 13.4470),
     "Rixdorfer Schmiede": (52.4753, 13.4470),
+    "Froschkönig": (52.4788, 13.4283),
 }
 
 # Cache: venue_name → (lat, lng) to avoid re-geocoding the same venue
