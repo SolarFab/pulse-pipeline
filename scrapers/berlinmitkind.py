@@ -1,18 +1,20 @@
 """
 berlinmitkind.de scraper — family events in Berlin.
 
-Uses WordPress REST API to fetch posts from category "veranstaltungstipp" (ID 68).
-Event details are embedded in free-text content. Each post may contain one or
-multiple events, each with a bold summary line at the end following a pattern like:
-  "DD.MM.YYYY, HH:MM-HH:MM, venue name, website.de"
+Two data sources:
+1. WordPress REST API posts from category "veranstaltungstipp" (ID 68) — curated tips
+2. Events Manager RSS feed (?post_type=event) — full calendar with 500+ events
 
-The scraper extracts individual events from these summary lines.
+The RSS feed is the primary source (structured date/time/venue).
+Blog posts add curated events with richer descriptions.
 """
 
 from __future__ import annotations
 
 import logging
 import re
+import xml.etree.ElementTree as ET
+from datetime import date, datetime
 from html import unescape
 from typing import Any
 
@@ -23,6 +25,7 @@ logger = logging.getLogger(__name__)
 WP_API = "https://berlinmitkind.de/wp-json/wp/v2/posts"
 CATEGORY_ID = 68  # "veranstaltungstipp"
 PAGE_SIZE = 50
+EVENT_RSS_URL = "https://berlinmitkind.de/feed/?post_type=event"
 
 # Regex to strip HTML tags
 _STRIP_HTML = re.compile(r"<[^>]+>")
@@ -49,19 +52,36 @@ class BerlinMitKindScraper(BaseScraper):
     source_name = "berlinmitkind"
 
     def scrape(self) -> list[dict[str, Any]]:
-        posts = self._fetch_all_posts()
-        logger.info("berlinmitkind: fetched %d posts", len(posts))
+        today_str = date.today().isoformat()
 
-        events: list[dict[str, Any]] = []
+        # Source 1: Events Manager RSS feed (primary — structured data, 500+ events)
+        rss_events = self._fetch_rss_events()
+        logger.info("berlinmitkind: %d events from RSS feed", len(rss_events))
+
+        # Source 2: Blog posts (curated tips with richer descriptions)
+        posts = self._fetch_all_posts()
+        logger.info("berlinmitkind: fetched %d blog posts", len(posts))
+        blog_events: list[dict[str, Any]] = []
         for post in posts:
             parsed = self._parse_post(post)
-            events.extend(parsed)
+            blog_events.extend(parsed)
+        logger.info("berlinmitkind: %d events from blog posts", len(blog_events))
 
-        # Filter out old events
-        filtered = [e for e in events if str(e.get("start_time", ""))[:10] >= _MIN_DATE]
+        # Merge: RSS events + blog events, deduplicate by source_id
+        seen_ids: set[str] = set()
+        events: list[dict[str, Any]] = []
+        for e in rss_events + blog_events:
+            sid = e.get("source_id", "")
+            if sid not in seen_ids:
+                seen_ids.add(sid)
+                events.append(e)
+
+        # Filter: future events only
+        filtered = [e for e in events if str(e.get("start_time", ""))[:10] >= today_str]
         logger.info(
-            "berlinmitkind: extracted %d events from %d posts (%d filtered as too old)",
-            len(filtered), len(posts), len(events) - len(filtered),
+            "berlinmitkind: %d future events total (%d RSS + %d blog, %d past filtered)",
+            len(filtered), len(rss_events), len(blog_events),
+            len(events) - len(filtered),
         )
         return filtered
 
@@ -95,6 +115,115 @@ class BerlinMitKindScraper(BaseScraper):
             page += 1
 
         return posts
+
+    def _fetch_rss_events(self) -> list[dict[str, Any]]:
+        """Fetch events from the Events Manager RSS feed."""
+        try:
+            resp = self.get(EVENT_RSS_URL)
+        except Exception as e:
+            logger.error("berlinmitkind: failed to fetch RSS feed: %s", e)
+            return []
+
+        try:
+            root = ET.fromstring(resp.text)
+        except ET.ParseError as e:
+            logger.error("berlinmitkind: failed to parse RSS XML: %s", e)
+            return []
+
+        events: list[dict[str, Any]] = []
+        for item in root.findall(".//item"):
+            event = self._parse_rss_item(item)
+            if event:
+                events.append(event)
+
+        return events
+
+    def _parse_rss_item(self, item: ET.Element) -> dict[str, Any] | None:
+        """Parse a single RSS <item> into an event dict.
+
+        RSS description format:
+          "DD.MM.YYYY - HH:MM <br/>Venue Name <br/>Street <br/>City"
+        or:
+          "DD.MM.YYYY - HH:MM-HH:MM <br/>Venue Name <br/>..."
+        """
+        title = item.findtext("title", "").strip()
+        link = item.findtext("link", "").strip()
+        pub_date = item.findtext("pubDate", "").strip()
+        desc_raw = item.findtext("description", "").strip()
+
+        if not title or not link:
+            return None
+
+        # Parse description: split by <br/> to get date/time, venue, address
+        desc_text = unescape(desc_raw)
+        parts = [p.strip() for p in re.split(r"<br\s*/?>", desc_text) if p.strip()]
+
+        # Part 0: "DD.MM.YYYY - HH:MM" or "DD.MM.YYYY - HH:MM-HH:MM"
+        start_time = None
+        end_time = None
+        venue_name = None
+        address = None
+
+        if parts:
+            date_line = parts[0]
+            # Extract date
+            date_match = re.search(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", date_line)
+            if date_match:
+                day, month, year = date_match.groups()
+                date_str = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
+
+                # Extract time range or single time
+                time_range = re.search(r"(\d{1,2}:\d{2})\s*[-–]\s*(\d{1,2}:\d{2})", date_line)
+                single_time = re.search(r"(\d{1,2}:\d{2})", date_line)
+
+                if time_range:
+                    start_time = f"{date_str}T{time_range.group(1)}:00"
+                    end_time = f"{date_str}T{time_range.group(2)}:00"
+                elif single_time:
+                    start_time = f"{date_str}T{single_time.group(1)}:00"
+                else:
+                    start_time = date_str
+            elif pub_date:
+                # Fallback to pubDate
+                try:
+                    dt = datetime.strptime(pub_date, "%a, %d %b %Y %H:%M:%S %z")
+                    start_time = dt.strftime("%Y-%m-%dT%H:%M:%S")
+                except ValueError:
+                    return None
+
+        if not start_time:
+            return None
+
+        # Part 1: venue name, Part 2+: address parts
+        if len(parts) >= 2:
+            venue_name = _strip_html(parts[1])
+        if len(parts) >= 3:
+            address_parts = [_strip_html(p) for p in parts[2:]]
+            address = ", ".join(address_parts)
+
+        if not venue_name:
+            venue_name = "Berlin"
+
+        # Extract date from link slug for source_id (more stable than title)
+        date_from_link = re.search(r"(\d{4}-\d{2}-\d{2})", link)
+        date_key = date_from_link.group(1) if date_from_link else start_time[:10]
+
+        return {
+            "title": title,
+            "venue_name": venue_name,
+            "address": address,
+            "start_time": start_time,
+            "end_time": end_time,
+            "description": None,  # RSS has no descriptions
+            "price": None,
+            "source_url": link,
+            "source_id": f"bmk-cal-{title[:40]}-{date_key}",
+            "category": "family",
+            "subcategory": "family-event",
+            "tags": ["family-friendly"],
+            "image_url": None,
+            "source": self.source_name,
+        }
 
     def _parse_post(self, post: dict) -> list[dict[str, Any]]:
         """Extract events from a single WordPress post."""
@@ -321,6 +450,7 @@ class BerlinMitKindScraper(BaseScraper):
             "source_url": source_url or post_link,
             "source_id": f"bmk-{title[:40]}-{start_date}",
             "category": "family",
+            "subcategory": "family-event",
             "tags": ["family-friendly"],
             "image_url": image_url,
             "source": self.source_name,
@@ -377,6 +507,7 @@ class BerlinMitKindScraper(BaseScraper):
             "source_url": post_link,
             "source_id": f"bmk-{title[:40]}-{start_date}",
             "category": "family",
+            "subcategory": "family-event",
             "tags": ["family-friendly"],
             "image_url": image_url,
             "source": self.source_name,
