@@ -22,8 +22,8 @@ CATEGORY_URL = f"{BASE_URL}/produkt-kategorie/kurs/"
 
 VENUE_NAME = "Rixdorfer Schmiede – Feine Klingen"
 VENUE_ADDRESS = "Richardstraße 100, 12043 Berlin"
-VENUE_LAT = 52.4753
-VENUE_LNG = 13.4470
+VENUE_LAT = 52.4772
+VENUE_LNG = 13.4411
 
 _STRIP_HTML = re.compile(r"<[^>]+>")
 

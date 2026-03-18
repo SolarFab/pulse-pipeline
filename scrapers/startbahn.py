@@ -25,8 +25,8 @@ PAGE_SIZE = 50
 
 VENUE_NAME = "Startbahn – Genezarethkirche"
 VENUE_ADDRESS = "Herrfurthplatz 14, 12049 Berlin"
-VENUE_LAT = 52.4766
-VENUE_LNG = 13.4229
+VENUE_LAT = 52.4770
+VENUE_LNG = 13.4221
 
 _STRIP_HTML = re.compile(r"<[^>]+>")
 

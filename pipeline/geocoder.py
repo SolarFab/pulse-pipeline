@@ -145,12 +145,14 @@ VENUE_COORDINATES: dict[str, tuple[float, float]] = {
     # --- Misc ---
     "ComicInvasion": (52.5108, 13.3880),  # Museum für Kommunikation
     "Ziegelei 10": (52.5285, 13.3710),
-    "Startbahn – Genezarethkirche": (52.4766, 13.4229),
-    "Genezarethkirche": (52.4766, 13.4229),
-    "Genezarthkirche": (52.4766, 13.4229),
-    "Rixdorfer Schmiede – Feine Klingen": (52.4753, 13.4470),
-    "Rixdorfer Schmiede": (52.4753, 13.4470),
-    "Froschkönig": (52.4788, 13.4283),
+    "Startbahn – Genezarethkirche": (52.4770, 13.4221),
+    "Genezarethkirche": (52.4770, 13.4221),
+    "Genezarthkirche": (52.4770, 13.4221),
+    "Rixdorfer Schmiede – Feine Klingen": (52.4772, 13.4411),
+    "Rixdorfer Schmiede": (52.4772, 13.4411),
+    "Froschkönig": (52.4768, 13.4239),
+    "Rotbart Rixdorf": (52.4743, 13.4492),
+    "Rotbart": (52.4743, 13.4492),
 }
 
 # Cache: venue_name → (lat, lng) to avoid re-geocoding the same venue

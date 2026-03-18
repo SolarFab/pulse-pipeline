@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import date, timedelta
+from datetime import date
 from html import unescape
 from typing import Any
 
@@ -22,8 +22,8 @@ WP_API = "https://froschkoenig-berlin.de/wp-json/wp/v2/posts"
 
 VENUE_NAME = "Froschkönig"
 VENUE_ADDRESS = "Weisestraße 17, 12049 Berlin"
-VENUE_LAT = 52.4788
-VENUE_LNG = 13.4283
+VENUE_LAT = 52.4768
+VENUE_LNG = 13.4239
 
 _STRIP_HTML = re.compile(r"<[^>]+>")
 
@@ -32,7 +32,6 @@ DESCRIPTION = (
     "Jeden Mittwoch ab 20:30 im Froschkönig, Neukölln. Eintritt frei."
 )
 
-WEEKS_AHEAD = 4
 
 
 class FroschkoenigScraper(BaseScraper):
@@ -41,16 +40,8 @@ class FroschkoenigScraper(BaseScraper):
     def scrape(self) -> list[dict[str, Any]]:
         events = self._from_wp_api()
 
-        # If WP API didn't return enough future events, generate upcoming Wednesdays
-        today = date.today()
-        existing_dates = {e["start_time"][:10] for e in events}
-
-        if len(events) < WEEKS_AHEAD:
-            generated = self._generate_wednesdays(today, existing_dates)
-            events.extend(generated)
-
-        # Filter past events
-        today_str = today.isoformat()
+        # Only use dates from the website — no generation
+        today_str = date.today().isoformat()
         future = [e for e in events if e["start_time"][:10] >= today_str]
         logger.info("froschkoenig: %d future events", len(future))
         return future
@@ -128,43 +119,6 @@ class FroschkoenigScraper(BaseScraper):
 
         return events
 
-    def _generate_wednesdays(
-        self, today: date, existing: set[str],
-    ) -> list[dict[str, Any]]:
-        """Generate upcoming Wednesday events not already in the list."""
-        events = []
-        # Find next Wednesday
-        days_ahead = (2 - today.weekday()) % 7  # Wednesday = 2
-        if days_ahead == 0:
-            days_ahead = 0  # include today if it's Wednesday
-        next_wed = today + timedelta(days=days_ahead)
-
-        for i in range(WEEKS_AHEAD):
-            d = next_wed + timedelta(weeks=i)
-            date_str = d.isoformat()
-            if date_str in existing:
-                continue
-
-            events.append({
-                "title": "Stummfilm & Piano",
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "start_time": f"{date_str}T20:30:00",
-                "end_time": None,
-                "description": DESCRIPTION,
-                "price": "Free",
-                "source_url": "https://froschkoenig-berlin.de/",
-                "source_id": f"froschkoenig-stummfilm-{date_str}",
-                "category": "culture",
-                "subcategory": "cinema",
-                "tags": ["silent-film", "live-piano", "neukölln", "free"],
-                "image_url": None,
-                "source": self.source_name,
-            })
-
-        return events
 
 
 def _strip_html(text: str) -> str:
