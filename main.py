@@ -44,6 +44,7 @@ def get_scrapers() -> dict:
     from scrapers.planetarium import PlanetariumScraper
     from scrapers.berlinmitkind import BerlinMitKindScraper
     from scrapers.startbahn import StartbahnScraper
+    from scrapers.venues.feine_klingen import FeineKlingenScraper
 
     return {
         "kulturdaten": KulturdatenScraper,
@@ -64,6 +65,7 @@ def get_scrapers() -> dict:
         "planetarium": PlanetariumScraper,
         "berlinmitkind": BerlinMitKindScraper,
         "startbahn": StartbahnScraper,
+        "feine_klingen": FeineKlingenScraper,
     }
 
 
