@@ -30,8 +30,8 @@ SUBCATEGORIES = {
     "music": ["jazz-blues", "electronic", "classical", "rock-pop", "hip-hop", "live-concert", "world-folk", "latin"],
     "nightlife": ["club-night", "bar-event", "party", "comedy", "karaoke"],
     "culture": ["exhibition", "theater", "cinema", "reading", "gallery", "festival"],
-    "food": ["brunch", "tasting", "pop-up", "dining-event"],
-    "markets": ["flea-market", "weekly-market", "design-market", "food-market"],
+    "food": ["brunch", "tasting", "pop-up", "dining-event", "food-market", "weekly-market"],
+    "markets": ["flea-market", "design-market", "pop-up-fashion", "secondhand", "craft-market"],
     "workshops": ["creative-workshop", "language", "digital-skills", "dance-class", "craft"],
     "meetups": ["networking", "community", "tech-startup", "talk-panel", "activism"],
     "outdoors": ["walking-tour", "sports", "yoga-fitness", "bike-tour", "outdoor-cinema"],
@@ -45,8 +45,8 @@ Categories (pick exactly one):
 - music: concerts, live bands, jazz, classical, electronic, singer-songwriter
 - nightlife: club nights, raves, DJ sets, parties, bar events, comedy, karaoke
 - culture: exhibitions, theater, cinema, readings, galleries, festivals
-- food: brunch, tastings, pop-up dinners, dining events
-- markets: flea markets, weekly markets, design markets, food markets
+- food: brunch, tastings, pop-up dinners, dining events, food markets, street food, farmers markets
+- markets: flea markets, design markets, pop-up fashion, secondhand, craft markets (shopping-focused)
 - workshops: creative workshops, language classes, digital skills, dance classes, craft
 - meetups: networking, community events, tech/startup, talks/panels, activism
 - outdoors: walking tours, sports, yoga/fitness, bike tours, outdoor cinema
@@ -56,8 +56,8 @@ Subcategories per category:
 - music: jazz-blues, electronic, classical, rock-pop, hip-hop, live-concert, world-folk, latin
 - nightlife: club-night, bar-event, party, comedy, karaoke
 - culture: exhibition, theater, cinema, reading, gallery, festival
-- food: brunch, tasting, pop-up, dining-event
-- markets: flea-market, weekly-market, design-market, food-market
+- food: brunch, tasting, pop-up, dining-event, food-market, weekly-market
+- markets: flea-market, design-market, pop-up-fashion, secondhand, craft-market
 - workshops: creative-workshop, language, digital-skills, dance-class, craft
 - meetups: networking, community, tech-startup, talk-panel, activism
 - outdoors: walking-tour, sports, yoga-fitness, bike-tour, outdoor-cinema
@@ -67,13 +67,13 @@ CATEGORIZATION RULES — follow these strictly:
 1. Categorize by the PRIMARY ACTIVITY the attendee goes for, not the venue type.
 2. Live music (bands, concerts, singer-songwriter) at any venue → "music", even if it's at a bar.
 3. DJ sets / techno / dance-focused events → "nightlife", even if there's live music too.
-4. Any market (flea, food, farmers, craft, design) → "markets", even if food is sold there.
+4. Shopping markets (flea, design, fashion, craft, secondhand) → "markets".
 5. Art exhibitions, museum shows, gallery openings → "culture", even if there's a DJ or party after.
-6. Street food markets → "markets" (NOT "food"). The market IS the event.
+6. Street food markets, food festivals, farmers markets → "food" (the food IS the event).
 7. Food events at restaurants, pop-ups, tastings → "food".
 8. Comedy / stand-up / kabarett → "nightlife" (subcategory: comedy).
 9. Yoga, fitness, sports → "outdoors" (not workshops).
-10. If the title or venue contains "Markt", "Market", "Flohmarkt" → almost certainly "markets".
+10. If the title or venue contains "Flohmarkt", "Trödelmarkt", "Designmarkt" → "markets" (shopping). If it contains "Streetfood", "Wochenmarkt", "Bauernmarkt" → "food".
 11. Events that are not real public events (police stations, administrative services) → quality_score: 0.0.
 
 TAG RULES — very important:

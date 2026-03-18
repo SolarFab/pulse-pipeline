@@ -369,14 +369,14 @@ class MarkthalleScraper(BaseScraper):
 
     def _infer_category(self, title: str, description: str) -> str:
         combined = (title + " " + description).lower()
-        if any(w in combined for w in ("flohmarkt", "markt", "market", "vintage", "secondhand")):
-            return "market"
-        if any(w in combined for w in ("food", "essen", "street food", "kochen", "cooking", "dinner")):
+        if any(w in combined for w in ("flohmarkt", "vintage", "secondhand", "designmarkt")):
+            return "markets"
+        if any(w in combined for w in ("food", "essen", "street food", "kochen", "cooking", "dinner", "wochenmarkt", "bauernmarkt")):
             return "food"
         if any(w in combined for w in ("konzert", "musik", "music", "jazz", "band")):
             return "music"
         if any(w in combined for w in ("party", "disko", "disco", "dance", "tanzen")):
             return "nightlife"
         if any(w in combined for w in ("kinder", "family", "familie")):
-            return "social"
-        return "social"
+            return "family"
+        return "meetups"

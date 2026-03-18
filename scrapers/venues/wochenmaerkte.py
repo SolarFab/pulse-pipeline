@@ -81,7 +81,7 @@ DESCRIPTION = (
     "Wöchentlicher Markt mit frischem Obst, Gemüse, Blumen und regionalen Produkten."
 )
 
-TAGS = ["wochenmarkt", "markt", "regional", "bio"]
+TAGS = ["weekly-market", "farmers-market", "regional", "bio"]
 
 
 def _slug(name: str) -> str:
@@ -128,8 +128,8 @@ class WochenmaerkteScraper(BaseScraper):
                     "price": "Eintritt frei",
                     "source_url": "",
                     "source_id": f"wochenmarkt-{slug}-{d.isoformat()}",
-                    "category": "market",
-                    "subcategory": "wochenmarkt",
+                    "category": "food",
+                    "subcategory": "weekly-market",
                     "tags": TAGS,
                     "source_tags": [],
                     "source": self.source_name,

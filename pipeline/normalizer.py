@@ -17,7 +17,9 @@ from pydantic import BaseModel, field_validator, model_validator
 logger = logging.getLogger(__name__)
 
 VALID_CATEGORIES = {
-    "music", "nightlife", "food", "culture",
+    "music", "nightlife", "food", "culture", "markets",
+    "workshops", "meetups", "outdoors", "family",
+    # Legacy aliases (resolved below)
     "entertainment", "wellness", "social", "market",
 }
 
@@ -94,9 +96,12 @@ class RawEvent(BaseModel):
             "fitness": "wellness",
             "meetup": "social",
             "networking": "social",
-            "flohmarkt": "market",
-            "flea market": "market",
-            "markt": "market",
+            "flohmarkt": "markets",
+            "flea market": "markets",
+            "markt": "markets",
+            "wochenmarkt": "food",
+            "street food": "food",
+            "bauernmarkt": "food",
         }
         resolved = aliases.get(cat, cat)
         return resolved if resolved in VALID_CATEGORIES else None

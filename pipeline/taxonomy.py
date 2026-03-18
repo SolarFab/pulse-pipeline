@@ -35,7 +35,7 @@ SOURCE_TAG_CATEGORY_MAP: dict[str, tuple[str, str | None]] = {
     "attraction.category.Parties": ("nightlife", "party"),
     # Markets
     "attraction.category.Markets": ("markets", None),
-    "attraction.category.WeeklyMarkets": ("markets", "weekly-market"),
+    "attraction.category.WeeklyMarkets": ("food", "weekly-market"),
     # Food
     "attraction.category.FoodAndDrink": ("food", None),
     # Workshops
@@ -205,23 +205,35 @@ SUBCATEGORY_KEYWORDS: dict[str, dict[str, list[str]]] = {
             "dinner", "dining", "abendessen", "kulinarisch",
             "food event", "kitchen", "chef", "kochen",
         ],
-    },
-    "markets": {
-        "flea-market": [
-            "flea market", "flohmarkt", "trödel", "troedel",
-            "antik", "antique", "second hand", "secondhand",
+        "food-market": [
+            "food market", "street food", "streetfood",
+            "food festival", "food truck", "markthalle",
         ],
         "weekly-market": [
             "wochenmarkt", "weekly market", "bauernmarkt",
             "farmers market", "farmer",
         ],
+    },
+    "markets": {
+        "flea-market": [
+            "flea market", "flohmarkt", "trödel", "troedel",
+            "antik", "antique",
+        ],
         "design-market": [
             "design market", "designmarkt", "kunstmarkt",
             "art market", "handmade", "maker market",
         ],
-        "food-market": [
-            "food market", "street food", "streetfood",
-            "food festival", "food truck", "markthalle",
+        "pop-up-fashion": [
+            "pop-up fashion", "fashion market", "mode markt",
+            "fashion pop-up", "vintage fashion", "kleidertausch",
+        ],
+        "secondhand": [
+            "second hand", "secondhand", "vintage", "thrift",
+            "gebraucht", "used clothing", "büchertausch",
+        ],
+        "craft-market": [
+            "craft market", "kunsthandwerk", "handwerkermarkt",
+            "artisan market", "töpfermarkt", "keramikmarkt",
         ],
     },
     "workshops": {
