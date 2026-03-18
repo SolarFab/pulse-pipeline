@@ -1,0 +1,35 @@
+name: Daily Scrape
+
+on:
+  schedule:
+    # 4am Berlin time (2am UTC in winter, 2am UTC in summer = 4am CEST)
+    - cron: "0 2 * * *"
+  workflow_dispatch: # allow manual trigger
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+  ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  EVENTBRITE_API_KEY: ${{ secrets.EVENTBRITE_API_KEY }}
+  MEETUP_API_KEY: ${{ secrets.MEETUP_API_KEY }}
+  LOG_LEVEL: INFO
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -e .
+
+      - name: Run all scrapers
+        run: python main.py --run-all
