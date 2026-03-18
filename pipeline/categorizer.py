@@ -75,6 +75,7 @@ CATEGORIZATION RULES — follow these strictly:
 9. Yoga, fitness, sports → "outdoors" (not workshops).
 10. If the title or venue contains "Flohmarkt", "Trödelmarkt", "Designmarkt" → "markets" (shopping). If it contains "Streetfood", "Wochenmarkt", "Bauernmarkt" → "food".
 11. Events that are not real public events (police stations, administrative services) → quality_score: 0.0.
+12. Events explicitly for children/kids/families → "family". Keywords: "für Kinder", "für Kids", "Kindertheater", "Puppentheater", "Krabbelgruppe", "Bilderbuchkino", "Vorlesestunde", "Familiencafé", "Kindercafé", "Familienkonzert", "Kinderkonzert", "Kinderfest". A children's theater show is "family", NOT "culture". A kids concert is "family", NOT "music".
 
 TAG RULES — very important:
 - Tags MUST be in English, even if the event description is in German.
