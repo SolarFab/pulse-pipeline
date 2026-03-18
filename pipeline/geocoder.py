@@ -145,6 +145,9 @@ VENUE_COORDINATES: dict[str, tuple[float, float]] = {
     # --- Misc ---
     "ComicInvasion": (52.5108, 13.3880),  # Museum für Kommunikation
     "Ziegelei 10": (52.5285, 13.3710),
+    "Startbahn – Genezarethkirche": (52.4766, 13.4229),
+    "Genezarethkirche": (52.4766, 13.4229),
+    "Genezarthkirche": (52.4766, 13.4229),
 }
 
 # Cache: venue_name → (lat, lng) to avoid re-geocoding the same venue
