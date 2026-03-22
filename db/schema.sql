@@ -134,3 +134,30 @@ CREATE POLICY "Public can submit events"
 
 -- Service role has full access (pipeline uses service key, bypasses RLS)
 -- No policy needed — service role bypasses RLS by default in Supabase
+
+-- ─────────────────────────────────────────
+-- VIEW: events_with_coords
+-- ─────────────────────────────────────────
+-- Read-only view that resolves lat/lng from the venues table.
+-- Prefer venue coords; fall back to event-level coords (legacy).
+-- Frontend/API queries this view instead of the events table directly.
+CREATE OR REPLACE VIEW events_with_coords AS
+SELECT
+    e.id, e.title, e.venue_name, e.venue_id,
+    COALESCE(v.lat, e.lat) AS lat,
+    COALESCE(v.lng, e.lng) AS lng,
+    COALESCE(v.neighborhood, e.neighborhood) AS neighborhood,
+    COALESCE(v.address, e.address) AS address,
+    e.start_time, e.end_time, e.category, e.subcategory, e.tags,
+    e.description, e.price, e.price_cents, e.image_url,
+    e.source, e.source_url, e.source_id, e.source_tags,
+    e.submitted_by, e.submission_link, e.status,
+    e.fingerprint, e.quality_score, e.is_active,
+    e.created_at, e.updated_at
+FROM events e
+LEFT JOIN venues v ON e.venue_id = v.id;
+
+-- RLS: allow public reads on the view (inherits from underlying tables)
+-- Views in Supabase need their own security policy when using the REST API.
+-- The anon/authenticated roles need SELECT on the view.
+GRANT SELECT ON events_with_coords TO anon, authenticated;

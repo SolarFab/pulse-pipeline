@@ -14,6 +14,8 @@ import httpx
 from dotenv import load_dotenv
 from supabase import create_client
 
+from db.supabase import get_venues_by_names, upsert_venue
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -243,24 +245,96 @@ def geocode_event(event: dict) -> tuple[float, float] | None:
 
 def geocode_inline(events: list[dict]) -> list[dict]:
     """Geocode events inline during the pipeline. Mutates events in place.
-    Only geocodes events that are missing lat/lng. No rate-limit sleep for cached hits.
-    Skips geocoding for large batches (>500) to avoid hour-long waits."""
-    need_geocoding = sum(1 for e in events if not (e.get("lat") and e.get("lng")))
-    if need_geocoding > 500:
-        logger.info("Skipping inline geocoding for %d events (too many). Run geocoder separately.", need_geocoding)
-        logger.info("Inline geocoded 0 / %d events", len(events))
+
+    1. Check venues DB table for known coords (instant, no API calls).
+    2. Fall back to hardcoded VENUE_COORDINATES dict.
+    3. Fall back to Nominatim for truly unknown venues.
+    4. Insert newly geocoded venues into the venues table for future runs.
+    """
+    if not events:
         return events
-    count = 0
+
+    # Step 1: Bulk lookup all venue names from venues DB table (for coords + venue_id linking)
+    all_venue_names = list({e["venue_name"] for e in events if e.get("venue_name")})
+    db_venues = get_venues_by_names(all_venue_names) if all_venue_names else {}
+
+    # Link venue_id for events that already have coords
+    linked = 0
     for event in events:
-        if event.get("lat") and event.get("lng"):
-            continue
+        if event.get("lat") and event.get("lng") and not event.get("venue_id"):
+            vname = (event.get("venue_name") or "").lower().strip()
+            if vname in db_venues and db_venues[vname].get("id"):
+                event["venue_id"] = db_venues[vname]["id"]
+                linked += 1
+    if linked:
+        logger.info("Linked %d events to existing venues", linked)
+
+    # Collect events that need geocoding
+    need_coords = [e for e in events if not (e.get("lat") and e.get("lng"))]
+    if not need_coords:
+        logger.info("All %d events already have coordinates", len(events))
+        return events
+
+    from_db = 0
+    still_need = []
+    for event in need_coords:
+        vname = (event.get("venue_name") or "").lower().strip()
+        if vname and vname in db_venues:
+            v = db_venues[vname]
+            if v.get("lat") and v.get("lng"):
+                event["lat"] = v["lat"]
+                event["lng"] = v["lng"]
+                if v.get("id"):
+                    event["venue_id"] = v["id"]
+                from_db += 1
+                continue
+        still_need.append(event)
+
+    logger.info("Geocoded %d events from venues DB, %d still need coords", from_db, len(still_need))
+
+    # Step 2+3: Hardcoded dict + Nominatim for remaining
+    if len(still_need) > 500:
+        logger.info("Skipping Nominatim geocoding for %d events (too many). Run geocoder separately.", len(still_need))
+        return events
+
+    from_nominatim = 0
+    new_venues: list[dict] = []  # venues to insert into DB after geocoding
+    for event in still_need:
         coords = geocode_event(event)
         if coords:
             event["lat"], event["lng"] = coords
-            count += 1
-        # Nominatim rate limit: 1 req/sec (cache avoids redundant calls)
+            from_nominatim += 1
+            # Track for DB insert
+            vname = event.get("venue_name")
+            if vname and vname.lower().strip() not in db_venues:
+                new_venues.append({
+                    "name": vname,
+                    "lat": coords[0],
+                    "lng": coords[1],
+                    "address": event.get("address"),
+                    "neighborhood": event.get("neighborhood"),
+                })
+                db_venues[vname.lower().strip()] = {"lat": coords[0], "lng": coords[1]}
+        # Nominatim rate limit
         time.sleep(2.0)
-    logger.info("Inline geocoded %d / %d events", count, len(events))
+
+    # Step 4: Insert newly geocoded venues into DB and link venue_id
+    if new_venues:
+        inserted = 0
+        venue_id_map: dict[str, str] = {}
+        for v in new_venues:
+            vid = upsert_venue(v["name"], v["lat"], v["lng"], v.get("address"), v.get("neighborhood"))
+            if vid:
+                inserted += 1
+                venue_id_map[v["name"].lower().strip()] = vid
+        # Link venue_id to events that were just geocoded
+        for event in still_need:
+            vname = (event.get("venue_name") or "").lower().strip()
+            if vname in venue_id_map and not event.get("venue_id"):
+                event["venue_id"] = venue_id_map[vname]
+        logger.info("Inserted %d new venues into DB", inserted)
+
+    logger.info("Inline geocoded %d from DB + %d from Nominatim / %d events", from_db, from_nominatim, len(events))
     return events
 
 

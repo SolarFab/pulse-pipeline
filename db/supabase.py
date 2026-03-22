@@ -101,6 +101,41 @@ def upsert_events(events: list[dict[str, Any]], dry_run: bool = False) -> tuple[
     return success, fail + invalid_count
 
 
+def get_venues_by_names(names: list[str]) -> dict[str, dict[str, Any]]:
+    """Lookup venues by name. Returns {lowercase_name: {id, name, lat, lng, ...}}."""
+    if not names:
+        return {}
+    client = get_client()
+    result: dict[str, dict[str, Any]] = {}
+    # Batch in chunks of 500
+    for i in range(0, len(names), 500):
+        batch = names[i : i + 500]
+        data = client.table("venues").select("id,name,lat,lng,neighborhood,address").in_("name", batch).execute().data
+        for row in data or []:
+            result[row["name"].lower().strip()] = row
+    return result
+
+
+def upsert_venue(name: str, lat: float, lng: float, address: str | None = None, neighborhood: str | None = None) -> str | None:
+    """Insert or get a venue. Returns venue id."""
+    client = get_client()
+    try:
+        data = client.table("venues").upsert(
+            {"name": name, "lat": lat, "lng": lng, "address": address, "neighborhood": neighborhood},
+            on_conflict="name,lat,lng",
+            ignore_duplicates=True,
+        ).execute().data
+        if data:
+            return data[0]["id"]
+        # If ignore_duplicates returned nothing, fetch the existing one
+        existing = client.table("venues").select("id").eq("name", name).execute().data
+        if existing:
+            return existing[0]["id"]
+    except Exception as e:
+        logger.error("Failed to upsert venue '%s': %s", name, e)
+    return None
+
+
 def get_pending_events() -> list[dict]:
     """Fetch community-submitted events awaiting review."""
     client = get_client()
