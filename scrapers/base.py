@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from db.supabase import upsert_events
+from db.supabase import get_client, upsert_events
 from pipeline.categorizer import categorize_batch
 from pipeline.geocoder import geocode_inline
 from pipeline.normalizer import normalize
@@ -79,11 +79,29 @@ class BaseScraper(ABC):
 
         self.logger.info("Normalised: %d / %d", len(normalised), len(raw_events))
 
-        # Geocode (fills in missing lat/lng)
-        geocode_inline(normalised)
+        # Filter out events already in DB with complete categorization
+        fingerprints = [e["fingerprint"] for e in normalised if e.get("fingerprint")]
+        existing_fps: set[str] = set()
+        if fingerprints:
+            client = get_client()
+            # Check in batches (Supabase .in_() has limits)
+            for i in range(0, len(fingerprints), 500):
+                batch_fps = fingerprints[i : i + 500]
+                result = client.table("events").select("fingerprint").in_(
+                    "fingerprint", batch_fps
+                ).not_.is_("category", "null").not_.is_("subcategory", "null").not_.is_("tags", "null").execute()
+                for row in result.data or []:
+                    existing_fps.add(row["fingerprint"])
 
-        # Categorize (Claude fills in missing category/tags)
-        categorised = categorize_batch(normalised)
+        new_events = [e for e in normalised if e.get("fingerprint") not in existing_fps]
+        existing_events = [e for e in normalised if e.get("fingerprint") in existing_fps]
+        self.logger.info("New: %d, already categorized in DB: %d (skipping LLM)", len(new_events), len(existing_events))
+
+        # Geocode (fills in missing lat/lng)
+        geocode_inline(new_events)
+
+        # Categorize only new events (Claude fills in missing category/tags)
+        categorised = categorize_batch(new_events) + existing_events
 
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)
