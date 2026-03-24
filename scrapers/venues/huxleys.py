@@ -120,8 +120,9 @@ class HuxleysScraper(BaseScraper):
 
         # Extract artist name — remove date/time parts from text
         artist = text
-        # Remove patterns like "24März", "Beginn: 20:00", "Einlass: 19:00", "Ausverkauft"
-        artist = re.sub(r"\d{1,2}\s*(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\w*", "", artist, flags=re.IGNORECASE)
+        # Remove patterns like "24März", "01 Apr.", "Beginn: 20:00", "Einlass: 19:00", "Ausverkauft"
+        artist = re.sub(r"\d{1,2}\s*(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\w*\.?", "", artist, flags=re.IGNORECASE)
+        artist = re.sub(r"\d{1,2}\s+(?:Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)\.?", "", artist, flags=re.IGNORECASE)
         artist = re.sub(r"(?:Beginn|Einlass):\s*\d{1,2}:\d{2}", "", artist)
         artist = re.sub(r"Ausverkauft", "", artist, flags=re.IGNORECASE)
         artist = re.sub(r"\s*\|\s*", " ", artist)

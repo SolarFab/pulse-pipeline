@@ -127,7 +127,11 @@ def _parse_dt(value: Any) -> datetime | None:
             if dt:
                 dt = dt + timedelta(days=1)
                 return dt.replace(tzinfo=timezone.utc) if not dt.tzinfo else dt.astimezone(timezone.utc)
-        dt = dateparser.parse(s, dayfirst=True)
+        # Try ISO 8601 first (YYYY-MM-DD) — dayfirst must be False for ISO
+        if re.match(r"\d{4}-\d{2}-\d{2}", s):
+            dt = dateparser.parse(s, dayfirst=False)
+        else:
+            dt = dateparser.parse(s, dayfirst=True)
         if dt and not dt.tzinfo:
             # Assume Berlin time (UTC+1/+2), store as UTC
             # For simplicity, use UTC+1 (CET). Proper handling would use pytz/zoneinfo.
