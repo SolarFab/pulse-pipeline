@@ -137,7 +137,9 @@ def _apply_result(event: dict[str, Any], result: dict[str, Any]) -> None:
         valid_subs = SUBCATEGORIES.get(event["category"], [])
         if sub and sub in valid_subs:
             event["subcategory"] = sub
-        elif not event.get("subcategory"):
+        elif sub and not event.get("subcategory"):
+            # LLM returned something but it's not in valid_subs — store it anyway
+            # rather than writing None
             event["subcategory"] = sub
 
     raw_tags = result.get("tags") or []

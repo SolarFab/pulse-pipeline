@@ -89,7 +89,7 @@ class BaseScraper(ABC):
                 batch_fps = fingerprints[i : i + 500]
                 result = client.table("events").select("fingerprint").in_(
                     "fingerprint", batch_fps
-                ).not_.is_("category", "null").not_.is_("subcategory", "null").not_.is_("tags", "null").execute()
+                ).not_.is_("category", "null").not_.is_("tags", "null").execute()
                 for row in result.data or []:
                     existing_fps.add(row["fingerprint"])
 
