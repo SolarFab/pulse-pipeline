@@ -47,6 +47,7 @@ def get_scrapers() -> dict:
     from scrapers.venues.feine_klingen import FeineKlingenScraper
     from scrapers.venues.froschkoenig import FroschkoenigScraper
     from scrapers.venues.huxleys import HuxleysScraper
+    from scrapers.venues.themakery import TheMakeryScraper
 
     return {
         "kulturdaten": KulturdatenScraper,
@@ -70,6 +71,7 @@ def get_scrapers() -> dict:
         "feine_klingen": FeineKlingenScraper,
         "froschkoenig": FroschkoenigScraper,
         "huxleys": HuxleysScraper,
+        "themakery": TheMakeryScraper,
     }
 
 
