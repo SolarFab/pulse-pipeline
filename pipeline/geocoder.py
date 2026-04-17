@@ -339,9 +339,15 @@ def geocode_inline(events: list[dict]) -> list[dict]:
 
 
 def run(limit: int = 500, dry_run: bool = False):
-    """Geocode events missing coordinates."""
+    """Geocode events missing coordinates.
+
+    Strategy (in order):
+    1. Match venue name against the venues DB table (instant, bulk).
+    2. Check hardcoded VENUE_COORDINATES dict.
+    3. Fall back to Nominatim API for truly unknown venues.
+    """
     client = _get_supabase()
-    # Fetch events without lat/lng that have an address or venue_name
+    # Fetch events without lat/lng that have a venue_name
     data = (
         client.table("events")
         .select("id,venue_name,address,lat,lng")
@@ -352,11 +358,41 @@ def run(limit: int = 500, dry_run: bool = False):
     )
 
     logger.info("Found %d events to geocode", len(data))
+    if not data:
+        return 0, 0
+
+    # Step 1: Bulk lookup from venues DB table
+    all_venue_names = list({e["venue_name"] for e in data if e.get("venue_name")})
+    db_venues = get_venues_by_names(all_venue_names) if all_venue_names else {}
 
     updated = 0
     failed = 0
+    still_need = []
 
     for event in data:
+        vname = (event.get("venue_name") or "").lower().strip()
+        if vname and vname in db_venues:
+            v = db_venues[vname]
+            if v.get("lat") and v.get("lng"):
+                if not dry_run:
+                    try:
+                        client.table("events").update(
+                            {"lat": v["lat"], "lng": v["lng"], "venue_id": v.get("id")}
+                        ).eq("id", event["id"]).execute()
+                    except Exception as e:
+                        logger.warning("DB update failed, reconnecting: %s", e)
+                        client = _get_supabase()
+                        client.table("events").update(
+                            {"lat": v["lat"], "lng": v["lng"], "venue_id": v.get("id")}
+                        ).eq("id", event["id"]).execute()
+                updated += 1
+                continue
+        still_need.append(event)
+
+    logger.info("Geocoded %d from venues DB, %d still need coords", updated, len(still_need))
+
+    # Step 2+3: Hardcoded dict + Nominatim for remaining
+    for event in still_need:
         coords = geocode_event(event)
         if coords:
             lat, lng = coords
@@ -382,10 +418,10 @@ def run(limit: int = 500, dry_run: bool = False):
             failed += 1
             logger.debug("Failed to geocode: %s / %s", event.get("venue_name"), event.get("address"))
 
-        # Nominatim rate limit: 1 req/sec (but we cache, so often faster)
+        # Nominatim rate limit: 1 req/sec
         time.sleep(2.0)
 
-    logger.info("Geocoded %d events, %d failed", updated, failed)
+    logger.info("Geocoded %d events total, %d failed", updated, failed)
     return updated, failed
 
 
