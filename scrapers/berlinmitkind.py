@@ -83,7 +83,41 @@ class BerlinMitKindScraper(BaseScraper):
             len(filtered), len(rss_events), len(blog_events),
             len(events) - len(filtered),
         )
+
+        # Enrich RSS events that have no description
+        self._enrich_descriptions(filtered)
+
         return filtered
+
+    def _enrich_descriptions(self, events: list[dict[str, Any]]) -> None:
+        """Fetch og:description from event pages for events missing descriptions."""
+        import time as _time
+
+        need_desc = [e for e in events if not e.get("description") and e.get("source_url")]
+        if not need_desc:
+            return
+
+        logger.info("berlinmitkind: enriching descriptions for %d events", len(need_desc))
+        enriched = 0
+        for event in need_desc:
+            try:
+                resp = self.get(event["source_url"])
+                match = re.search(
+                    r'<meta\s+property="og:description"\s+content="([^"]+)"',
+                    resp.text,
+                )
+                if match:
+                    from html import unescape as html_unescape
+                    desc = html_unescape(match.group(1)).strip()
+                    if desc and len(desc) > 10:
+                        event["description"] = desc[:500]
+                        enriched += 1
+            except Exception as e:
+                logger.debug("berlinmitkind: description fetch failed for %s: %s", event.get("source_url"), e)
+
+            _time.sleep(0.5)
+
+        logger.info("berlinmitkind: enriched %d / %d events with descriptions", enriched, len(need_desc))
 
     def _fetch_all_posts(self) -> list[dict]:
         posts: list[dict] = []

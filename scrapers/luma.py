@@ -51,22 +51,62 @@ class LumaScraper(BaseScraper):
         events = self._scrape_paginated_api()
         if events:
             logger.info("luma: got %d events from paginated API", len(events))
-            return self._deduplicate(events)
+            unique = self._deduplicate(events)
+            self._enrich_descriptions(unique)
+            return unique
 
         # Strategy 2: place-based discover API
         events = self._scrape_place_api()
         if events:
             logger.info("luma: got %d events from place API", len(events))
-            return self._deduplicate(events)
+            unique = self._deduplicate(events)
+            self._enrich_descriptions(unique)
+            return unique
 
         # Strategy 3: scrape the Berlin page HTML for __NEXT_DATA__
         events = self._scrape_berlin_page()
         if events:
             logger.info("luma: got %d events from Berlin page fallback", len(events))
-            return self._deduplicate(events)
+            unique = self._deduplicate(events)
+            self._enrich_descriptions(unique)
+            return unique
 
         logger.warning("luma: all strategies failed, returning 0 events")
         return []
+
+    # ── Description enrichment ───────────────────────────────────────────────
+
+    def _enrich_descriptions(self, events: list[dict[str, Any]]) -> None:
+        """Fetch og:description from event pages for events missing descriptions."""
+        import time
+
+        need_desc = [e for e in events if not e.get("description") and e.get("source_url")]
+        if not need_desc:
+            return
+
+        logger.info("luma: enriching descriptions for %d events", len(need_desc))
+        enriched = 0
+        for event in need_desc:
+            try:
+                resp = self.get(event["source_url"])
+                match = re.search(
+                    r'<meta\s+(?:property="og:description"|name="description")\s+content="([^"]+)"',
+                    resp.text,
+                )
+                if match:
+                    import html
+                    desc = html.unescape(match.group(1)).strip()
+                    if desc and len(desc) > 10:
+                        event["description"] = desc[:500]
+                        enriched += 1
+            except Exception as e:
+                logger.debug("luma: description fetch failed for %s: %s", event.get("source_url"), e)
+
+            if enriched % 20 == 0 and enriched > 0:
+                logger.info("luma: enriched %d / %d descriptions", enriched, len(need_desc))
+            time.sleep(0.5)
+
+        logger.info("luma: enriched %d / %d events with descriptions", enriched, len(need_desc))
 
     # ── Strategy 1: Paginated geo API ─────────────────────────────────────────
 
