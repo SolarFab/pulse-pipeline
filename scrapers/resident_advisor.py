@@ -24,6 +24,7 @@ query GET_DEFAULT_EVENTS_LISTING($filters: FilterInputDtoInput, $pageSize: Int, 
       event {
         id
         title
+        content
         date
         startTime
         endTime
@@ -143,10 +144,19 @@ class ResidentAdvisorScraper(BaseScraper):
                 f"https://ra.co/events/{ra_id}" if ra_id else None
             )
 
-            # Artists for description
+            # Description from RA content + artist lineup
+            content = (event.get("content") or "").strip()
             artists = event.get("artists") or []
             artist_names = [a.get("name", "") for a in artists if a.get("name")]
-            description = f"With {', '.join(artist_names[:8])}" if artist_names else None
+            lineup = f"Lineup: {', '.join(artist_names[:10])}" if artist_names else ""
+            if content and lineup:
+                description = f"{content[:500]}\n\n{lineup}"
+            elif content:
+                description = content[:500]
+            elif lineup:
+                description = lineup
+            else:
+                description = None
 
             return {
                 "title": title,
