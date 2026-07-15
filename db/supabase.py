@@ -102,17 +102,47 @@ def upsert_events(events: list[dict[str, Any]], dry_run: bool = False) -> tuple[
 
 
 def get_venues_by_names(names: list[str]) -> dict[str, dict[str, Any]]:
-    """Lookup venues by name. Returns {lowercase_name: {id, name, lat, lng, ...}}."""
+    """Lookup venues by name, case- and whitespace-insensitively.
+
+    Returns {lowercase_trimmed_name: {id, name, lat, lng, ...}}.
+
+    Implementation note: this used to query with an exact .in_("name", ...)
+    match and normalize AFTERWARDS — so any case/spacing variant between
+    a scraped venue_name and venues.name silently failed to link, leaving
+    hundreds of events per day without coordinates (invisible on the map).
+    The venues table is small (~2.6k rows), so we fetch it whole in a few
+    paginated requests and match on normalized names instead.
+    """
     if not names:
         return {}
+    wanted = {n.lower().strip() for n in names if n}
+    if not wanted:
+        return {}
+
     client = get_client()
     result: dict[str, dict[str, Any]] = {}
-    # Batch in chunks of 500
-    for i in range(0, len(names), 500):
-        batch = names[i : i + 500]
-        data = client.table("venues").select("id,name,lat,lng,neighborhood,address").in_("name", batch).execute().data
-        for row in data or []:
-            result[row["name"].lower().strip()] = row
+    PAGE = 1000
+    page = 0
+    while True:
+        rows = (
+            client.table("venues")
+            .select("id,name,lat,lng,neighborhood,address")
+            .range(page * PAGE, page * PAGE + PAGE - 1)
+            .execute()
+            .data
+        ) or []
+        for row in rows:
+            key = (row.get("name") or "").lower().strip()
+            if key in wanted:
+                existing = result.get(key)
+                # Prefer entries that have coordinates
+                if existing is None or (not existing.get("lat") and row.get("lat")):
+                    result[key] = row
+        if len(rows) < PAGE:
+            break
+        page += 1
+
+    logger.debug("Venue lookup: %d requested names, %d matched", len(wanted), len(result))
     return result
 
 
