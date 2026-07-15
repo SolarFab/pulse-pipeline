@@ -100,6 +100,17 @@ def run_all(scrapers: dict) -> None:
     logger.info("═" * 50)
     logger.info("Total: %d upserted, %d failed", total_success, total_fail)
 
+    # Safety net: link freshly scraped events to known venues
+    # (case-insensitive) and geocode a bounded tail of stragglers —
+    # unlinked events have no coordinates and are invisible on the map.
+    if os.environ.get("DRY_RUN", "").lower() != "true":
+        try:
+            from pipeline.geocoder import run as geocode_run
+            logger.info("▶ venue linking & geocoding")
+            geocode_run(limit=1500)
+        except Exception as e:
+            logger.error("  ✗ venue linking/geocoding crashed: %s", e)
+
 
 def main():
     parser = argparse.ArgumentParser(description="NachtKarte event scraping pipeline")
