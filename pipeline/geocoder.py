@@ -9,6 +9,7 @@ import logging
 import os
 import re
 import time
+from datetime import datetime, timedelta, timezone
 
 import httpx
 from dotenv import load_dotenv
@@ -21,6 +22,9 @@ logger = logging.getLogger(__name__)
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 HEADERS = {"User-Agent": "Whatsupp/1.0 (Berlin event discovery app, contact@whatsupp.app)"}
+
+# Bound the slow Nominatim tail (2s per request) so the daily run stays fast.
+MAX_NOMINATIM_PER_RUN = 200
 
 
 def _get_supabase():
@@ -339,19 +343,23 @@ def geocode_inline(events: list[dict]) -> list[dict]:
 
 
 def run(limit: int = 500, dry_run: bool = False):
-    """Geocode events missing coordinates.
+    """Geocode current/future events missing coordinates.
 
     Strategy (in order):
-    1. Match venue name against the venues DB table (instant, bulk).
+    1. Match venue name against the venues DB table (instant, bulk,
+       case-insensitive via get_venues_by_names).
     2. Check hardcoded VENUE_COORDINATES dict.
-    3. Fall back to Nominatim API for truly unknown venues.
+    3. Fall back to Nominatim API for truly unknown venues (bounded).
     """
     client = _get_supabase()
-    # Fetch events without lat/lng that have a venue_name
+    # Only current/future events — past events don't need pins anymore.
+    since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
     data = (
         client.table("events")
         .select("id,venue_name,address,lat,lng")
         .is_("lat", "null")
+        .gte("start_time", since)
+        .order("start_time")
         .limit(limit)
         .execute()
         .data
@@ -390,6 +398,14 @@ def run(limit: int = 500, dry_run: bool = False):
         still_need.append(event)
 
     logger.info("Geocoded %d from venues DB, %d still need coords", updated, len(still_need))
+
+    # Bound the slow Nominatim tail so the daily run finishes quickly
+    if len(still_need) > MAX_NOMINATIM_PER_RUN:
+        logger.info(
+            "Capping Nominatim geocoding to %d of %d remaining events",
+            MAX_NOMINATIM_PER_RUN, len(still_need),
+        )
+        still_need = still_need[:MAX_NOMINATIM_PER_RUN]
 
     # Step 2+3: Hardcoded dict + Nominatim for remaining
     for event in still_need:
