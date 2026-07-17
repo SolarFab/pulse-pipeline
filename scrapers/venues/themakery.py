@@ -79,7 +79,7 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
         duration_match = re.search(r'(\d+)\s*<span>\s*Min\.\s*</span>', html)
         duration_min = int(duration_match.group(1)) if duration_match else None
 
-        # Next date — "09. Apr." or "09. Apr.   + 571 verfügbare Termine"
+        # Next date — "09. Apr." or "09. Apr.   + 571 verfügbare Termine" or "ausgebucht"
         date_match = re.search(r'(\d{1,2})\.\s*(\w{3,4})\.?', html[html.rfind("text-12-16"):] if "text-12-16" in html else html)
         start_time = None
         if date_match:
@@ -96,6 +96,12 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
                     start_time = dt.isoformat()
                 except ValueError:
                     pass
+
+        # Fallback: workshops are bookable anytime — use tomorrow 10:00
+        if not start_time:
+            from datetime import timedelta
+            dt = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0) + timedelta(days=1)
+            start_time = dt.isoformat()
 
         # Neighborhood — appears after "Berlin" tag
         neighborhood = None
@@ -203,7 +209,7 @@ class TheMakeryScraper(BaseScraper):
 
         self.logger.info("Fetched %d raw workshop HTML fragments", len(all_html))
 
-        # Parse
+        # Parse listing HTML
         events: list[dict[str, Any]] = []
         for html in all_html:
             parsed = _parse_workshop_html(html)
@@ -211,4 +217,51 @@ class TheMakeryScraper(BaseScraper):
                 events.append(parsed)
 
         self.logger.info("Parsed %d Berlin workshops from The Makery", len(events))
+
+        # Enrich with detail pages (description + address)
+        self._enrich_from_detail_pages(events)
+
         return events
+
+    def _enrich_from_detail_pages(self, events: list[dict[str, Any]]) -> None:
+        """Fetch detail pages to get descriptions and addresses."""
+        import httpx
+        import time
+
+        enriched = 0
+        for i, event in enumerate(events):
+            url = event.get("source_url")
+            if not url:
+                continue
+            try:
+                with httpx.Client(timeout=15, follow_redirects=True) as client:
+                    resp = client.get(url)
+                    if resp.status_code != 200:
+                        continue
+
+                html = resp.text
+
+                # Description — look for meta description or long paragraphs
+                meta = re.search(r'<meta name="description" content="([^"]+)"', html)
+                if meta:
+                    event["description"] = meta.group(1).strip()[:500]
+
+                # Address — look for street pattern in text
+                addr = re.search(
+                    r'(\w[\w\s.-]+(?:Str(?:aße|\.)|straße|weg|platz|allee|damm|ufer)\s*\d+[^,<]{0,30},\s*\d{5}\s*Berlin)',
+                    html,
+                )
+                if addr:
+                    event["address"] = addr.group(1).strip()
+
+                enriched += 1
+                # Respect rate limits
+                if (i + 1) % 10 == 0:
+                    self.logger.info("Enriched %d / %d workshops", enriched, len(events))
+                    time.sleep(1)
+
+            except Exception as e:
+                self.logger.debug("Detail fetch failed for %s: %s", url, e)
+                continue
+
+        self.logger.info("Enriched %d / %d workshops with descriptions", enriched, len(events))

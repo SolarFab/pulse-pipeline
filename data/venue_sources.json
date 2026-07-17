@@ -1,0 +1,1300 @@
+{
+  "SchwuZ": {
+    "lat": 52.4779,
+    "lng": 13.4405,
+    "address": "Rollbergstraße 26, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "website": "https://schwuz.ditix.shop/",
+      "ra": "34193",
+      "instagram": "schwuz"
+    }
+  },
+  "Arkaoda Berlin": {
+    "lat": 52.4801,
+    "lng": 13.4349,
+    "address": "Karl-Marx-Platz 16-18, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "website": "https://arkaoda.com/?/default/program",
+      "ra": "145577",
+      "instagram": "arkaodaberlin"
+    }
+  },
+  "Klunkerkranich": {
+    "lat": 52.4811,
+    "lng": 13.4357,
+    "address": "Karl-Marx-Straße 66, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "website": "https://klunkerkranich.org/events/",
+      "ra": "77598",
+      "instagram": "klunkerkranich"
+    }
+  },
+  "Donau 115": {
+    "lat": 52.4818,
+    "lng": 13.431,
+    "address": "Donaustraße 115, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "ra": "101911",
+      "instagram": "donau115"
+    }
+  },
+  "Das Gift": {
+    "lat": 52.4815,
+    "lng": 13.4315,
+    "address": "Donaustraße 119, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "ra": "70381",
+      "instagram": "dasgiftberlin"
+    }
+  },
+  "Sameheads": {
+    "lat": 52.479,
+    "lng": 13.4309,
+    "address": "Richardstraße 10, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "ra": "34420",
+      "instagram": "sameheads"
+    }
+  },
+  "Paolo Pinkel": {
+    "lat": 52.4812,
+    "lng": 13.4362,
+    "address": "Karl-Marx-Straße 55, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "website": "https://paolopinkel.berlin/",
+      "ra": "165044",
+      "instagram": "paolopinkelberlin"
+    }
+  },
+  "Kultstätte Keller": {
+    "lat": 52.4807,
+    "lng": 13.4357,
+    "address": "Karl-Marx-Straße 52, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "ra": "110817",
+      "instagram": "kellerkultur"
+    }
+  },
+  "Villa Neukölln": {
+    "lat": 52.4822,
+    "lng": 13.4245,
+    "address": "Hermannstraße 233, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "ra": "70683",
+      "instagram": "villaneukoelln"
+    }
+  },
+  "Soulcat Music Bar": {
+    "lat": 52.4858,
+    "lng": 13.4285,
+    "address": "Pannierstraße 53, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "website": "https://soulcat-berlin.com/",
+      "ra": "97070",
+      "instagram": "soulcat_bar_berlin"
+    }
+  },
+  "Heimathafen Neukölln": {
+    "lat": 52.4784,
+    "lng": 13.4382,
+    "address": "Karl-Marx-Straße 141, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "theater",
+    "sources": {
+      "website": "https://heimathafen-neukoelln.de/#schedule",
+      "ra": "26789",
+      "instagram": "heimathafen_neukoelln"
+    }
+  },
+  "Neuköllner Oper": {
+    "lat": 52.4783,
+    "lng": 13.4384,
+    "address": "Karl-Marx-Straße 131-133, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "theater",
+    "sources": {
+      "website": "https://www.neukoellneroper.de/spielplan/",
+      "instagram": "neukoellneroper"
+    }
+  },
+  "B-Lage": {
+    "lat": 52.4742,
+    "lng": 13.4363,
+    "address": "Mareschstraße 1, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "ra": "18862",
+      "instagram": "b_lage_nk"
+    }
+  },
+  "ORi": {
+    "lat": 52.4892,
+    "lng": 13.4263,
+    "address": "Friedelstraße 8, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "ra": "91470",
+      "instagram": "oriberlin"
+    }
+  },
+  "Silver Future": {
+    "lat": 52.4876,
+    "lng": 13.4381,
+    "address": "Weserstraße 206, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "ra": "38224",
+      "instagram": "silverfuture_bar"
+    }
+  },
+  "Little Stage Berlin": {
+    "lat": 52.4773,
+    "lng": 13.439,
+    "address": "Jonasstraße 22, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "club",
+    "sources": {
+      "ra": "48154",
+      "instagram": "littlestageberlin"
+    }
+  },
+  "Oyoun": {
+    "lat": 52.478,
+    "lng": 13.435,
+    "address": "Lucy-Lameck-Straße 32, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cultural",
+    "sources": {
+      "website": "https://oyoun.de/veranstaltungen/",
+      "ra": "191817",
+      "instagram": "oyounberlin"
+    }
+  },
+  "KINDL Centre for Contemporary Art": {
+    "lat": 52.477,
+    "lng": 13.4361,
+    "address": "Am Sudhaus 3, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://www.kindl-berlin.com/news",
+      "instagram": "kindlberlin"
+    }
+  },
+  "Wolf Kino": {
+    "lat": 52.4891,
+    "lng": 13.4304,
+    "address": "Weserstraße 59, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cinema",
+    "sources": {
+      "instagram": "wolfkinogang"
+    }
+  },
+  "Passage Kino": {
+    "lat": 52.4783,
+    "lng": 13.4384,
+    "address": "Karl-Marx-Straße 131, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cinema",
+    "sources": {
+      "website": "https://www.yorck.de/en/cinemas/passage"
+    }
+  },
+  "Kalle Halle": {
+    "lat": 52.4796,
+    "lng": 13.437,
+    "address": "Karl-Marx-Straße 101, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "venue",
+    "sources": {
+      "website": "https://kallehalle.com/",
+      "instagram": "kallehalle"
+    }
+  },
+  "Galerie im Saalbau": {
+    "lat": 52.4784,
+    "lng": 13.4382,
+    "address": "Karl-Marx-Straße 141, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://galerie-im-saalbau.de/"
+    }
+  },
+  "Galerie im Körnerpark": {
+    "lat": 52.476,
+    "lng": 13.4398,
+    "address": "Schierker Straße 8, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://www.koernerpark.de/"
+    }
+  },
+  "LiTE-HAUS Galerie + Projektraum": {
+    "lat": 52.474,
+    "lng": 13.4366,
+    "address": "Mareschstraße 4, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://www.lite-haus.net/",
+      "instagram": "litehausgalerie"
+    }
+  },
+  "Kunstverein Neukölln": {
+    "lat": 52.4819,
+    "lng": 13.4289,
+    "address": "Mainzer Straße 42, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://www.kunstverein-neukoelln.de/",
+      "instagram": "kunstverein_neukoelln"
+    }
+  },
+  "Backhaus Projects": {
+    "lat": 52.4886,
+    "lng": 13.4336,
+    "address": "Weserstraße 168, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "website": "https://www.backhausprojects.com/",
+      "instagram": "backhausprojects"
+    }
+  },
+  "Freiluftkino Hasenheide": {
+    "lat": 52.4858,
+    "lng": 13.4192,
+    "address": "Volkspark Hasenheide, 10967 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cinema",
+    "sources": {
+      "website": "https://freiluftkino-hasenheide.de/programm-tickets/aktuelles-programm/",
+      "instagram": "freiluftkino_hasenheide"
+    }
+  },
+  "Freiluftkino im Körnerpark": {
+    "lat": 52.4758,
+    "lng": 13.4402,
+    "address": "Schierker Straße 8, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cinema",
+    "sources": {
+      "website": "https://www.freiluftkino-neukoelln.de/"
+    }
+  },
+  "Estrel Showtheater": {
+    "lat": 52.4673,
+    "lng": 13.4588,
+    "address": "Sonnenallee 225, 12057 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "theater",
+    "sources": {
+      "website": "https://www.estrel.com/en/entertainment/current-shows",
+      "instagram": "estrelberlin"
+    }
+  },
+  "Schankwirtschaft Laidak": {
+    "lat": 52.4821,
+    "lng": 13.4262,
+    "address": "Boddinstraße 42-43, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "laidak_neukoelln"
+    }
+  },
+  "Sandmann": {
+    "lat": 52.4854,
+    "lng": 13.423,
+    "address": "Reuterstraße 7, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "website": "https://sandmann-berlin.de/events.html"
+    }
+  },
+  "Laika": {
+    "lat": 52.477,
+    "lng": 13.442,
+    "address": "Emser Straße 131, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "website": "https://laika-neukoelln.de/kultur",
+      "instagram": "laika_neukoelln"
+    }
+  },
+  "Café Fincan": {
+    "lat": 52.4762,
+    "lng": 13.44,
+    "address": "Altenbraker Straße 26, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cafe",
+    "sources": {
+      "website": "https://fincan.eu/",
+      "instagram": "cafe_fincan_berlin"
+    }
+  },
+  "Café Linus": {
+    "lat": 52.4754,
+    "lng": 13.4408,
+    "address": "Hertzbergstraße 32, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cafe",
+    "sources": {
+      "website": "https://cafelinus.de/konzerte.html",
+      "instagram": "cafelinus"
+    }
+  },
+  "Rotbart": {
+    "lat": 52.4747,
+    "lng": 13.4349,
+    "address": "Böhmische Straße 43, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "telegram": "rotbart_events",
+      "website": "https://t.me/s/rotbart_events",
+      "instagram": "rotbart_rixdorf"
+    }
+  },
+  "Geist im Glas": {
+    "lat": 52.4877,
+    "lng": 13.4259,
+    "address": "Lenaustraße 27, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "geistimglas"
+    }
+  },
+  "Jaja Naked Wine": {
+    "lat": 52.4882,
+    "lng": 13.423,
+    "address": "Weichselstraße 7, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "jaja.berlin"
+    }
+  },
+  "Peppi Guggenheim": {
+    "lat": 52.4882,
+    "lng": 13.423,
+    "address": "Weichselstraße 7, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "peppi.guggenheim"
+    }
+  },
+  "Museum Neukölln": {
+    "lat": 52.4545,
+    "lng": 13.4322,
+    "address": "Alt-Britz 81, 12359 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "museum",
+    "sources": {
+      "website": "https://schloss-gutshof-britz.de/museum-neukoelln"
+    }
+  },
+  "Alte Dorfschule Rudow": {
+    "lat": 52.42,
+    "lng": 13.478,
+    "address": "Alt-Rudow 60, 12355 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cultural",
+    "sources": {
+      "website": "https://dorfschule-rudow.de/"
+    }
+  },
+  "Young Arts Neukölln": {
+    "lat": 52.479,
+    "lng": 13.435,
+    "address": "Karl-Marx-Straße 131, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cultural",
+    "sources": {
+      "website": "https://www.young-arts-nk.de/"
+    }
+  },
+  "TiER": {
+    "lat": 52.4893,
+    "lng": 13.4293,
+    "address": "Weserstraße 42, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "herr_von_tier"
+    }
+  },
+  "Ä": {
+    "lat": 52.4895,
+    "lng": 13.429,
+    "address": "Weserstraße 40, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "ae_bar_berlin"
+    }
+  },
+  "Beuster Bar": {
+    "lat": 52.49,
+    "lng": 13.428,
+    "address": "Weserstraße 32, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "beusterbar"
+    }
+  },
+  "Vin Aqua Vin": {
+    "lat": 52.4876,
+    "lng": 13.438,
+    "address": "Weserstraße 204, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "vin_aqua_vin"
+    }
+  },
+  "Thelonious Bar": {
+    "lat": 52.4877,
+    "lng": 13.4378,
+    "address": "Weserstraße 202, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "theloniousbar"
+    }
+  },
+  "Wax On": {
+    "lat": 52.4875,
+    "lng": 13.4383,
+    "address": "Weserstraße 208, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "waxonberlin"
+    }
+  },
+  "Ratzeputz": {
+    "lat": 52.4883,
+    "lng": 13.4349,
+    "address": "Weserstraße 182, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "ratzeputzbar"
+    }
+  },
+  "Ankerklause": {
+    "lat": 52.4926,
+    "lng": 13.4234,
+    "address": "Kottbusser Damm 104, 10967 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "ankerklause"
+    }
+  },
+  "Tristeza": {
+    "lat": 52.4862,
+    "lng": 13.4273,
+    "address": "Pannierstraße 5, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "tristezakiezkneipe"
+    }
+  },
+  "Truffle Pig": {
+    "lat": 52.4869,
+    "lng": 13.4298,
+    "address": "Reuterstraße 47, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "trufflepigbar"
+    }
+  },
+  "Damensalon": {
+    "lat": 52.4872,
+    "lng": 13.4292,
+    "address": "Reuterstraße 39, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "damensalonbar"
+    }
+  },
+  "Loretta Bar": {
+    "lat": 52.487,
+    "lng": 13.4296,
+    "address": "Reuterstraße 45, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "loretta.bar"
+    }
+  },
+  "Vater Bar": {
+    "lat": 52.4875,
+    "lng": 13.4285,
+    "address": "Reuterstraße 24, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "vater.bar"
+    }
+  },
+  "Lager Lager": {
+    "lat": 52.4866,
+    "lng": 13.4283,
+    "address": "Pflügerstraße 68, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "lagerlagerberlin"
+    }
+  },
+  "Muted Horn": {
+    "lat": 52.4833,
+    "lng": 13.4023,
+    "address": "Flughafenstraße 49, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "themutedhorn"
+    }
+  },
+  "Trude Ruth & Goldammer": {
+    "lat": 52.4837,
+    "lng": 13.4016,
+    "address": "Flughafenstraße 38, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "trude_ruth_goldammer"
+    }
+  },
+  "Velvet Bar": {
+    "lat": 52.4821,
+    "lng": 13.435,
+    "address": "Ganghoferstraße 1, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "velvet.berlin"
+    }
+  },
+  "Le Balto": {
+    "lat": 52.4888,
+    "lng": 13.4302,
+    "address": "Hobrechtstraße 28, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "lebalto_berlin"
+    }
+  },
+  "Dschungel": {
+    "lat": 52.4887,
+    "lng": 13.4272,
+    "address": "Friedelstraße 12, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "dschungelbar"
+    }
+  },
+  "Frieda Schlamassel": {
+    "lat": 52.4884,
+    "lng": 13.4279,
+    "address": "Friedelstraße 31, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "friedaschlamassel"
+    }
+  },
+  "Sway Natural Wine Bar": {
+    "lat": 52.486,
+    "lng": 13.427,
+    "address": "Pannierstraße 29, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "bar____sway"
+    }
+  },
+  "BAU – Bar am Ufer": {
+    "lat": 52.4862,
+    "lng": 13.4399,
+    "address": "Kiehlufer 121, 12059 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "baramufer"
+    }
+  },
+  "Herr Lindemann": {
+    "lat": 52.4746,
+    "lng": 13.434,
+    "address": "Richardplatz 16, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "herrlindemannbar"
+    }
+  },
+  "Promenaden Eck": {
+    "lat": 52.4756,
+    "lng": 13.4216,
+    "address": "Schillerpromenade 11, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {
+      "instagram": "promenaden_eck"
+    }
+  },
+  "Mondhügel Bar": {
+    "lat": 52.4881,
+    "lng": 13.4249,
+    "address": "Bürknerstraße 6, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "mondhuegel"
+    }
+  },
+  "Bar Brutal 54": {
+    "lat": 52.4882,
+    "lng": 13.431,
+    "address": "Hobrechtstraße 54, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "barbrutal54"
+    }
+  },
+  "The Rad Natural Wine Bar": {
+    "lat": 52.4884,
+    "lng": 13.4281,
+    "address": "Friedelstraße 30, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "therad.berlin"
+    }
+  },
+  "Nathanja & Heinrich": {
+    "lat": 52.4879,
+    "lng": 13.4239,
+    "address": "Weichselstraße 44, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "nathanja.heinrich"
+    }
+  },
+  "Kunstbrücke am Wildenbruch": {
+    "lat": 52.485,
+    "lng": 13.421,
+    "address": "Wildenbruchstraße 25, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "gallery",
+    "sources": {
+      "instagram": "kunstbruecke"
+    }
+  },
+  "La BarBer Queer Tattoo Bar": {
+    "lat": 52.4857,
+    "lng": 13.428,
+    "address": "Pannierstraße 56, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "labarber.berlin"
+    }
+  },
+  "Ramones Museum Berlin (Bar 19:77)": {
+    "lat": 52.488,
+    "lng": 13.4362,
+    "address": "Weserstraße 159, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "ramonesmuseum"
+    }
+  },
+  "Theater im Keller Berlin": {
+    "lat": 52.4874,
+    "lng": 13.4388,
+    "address": "Weserstraße 211, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "theater",
+    "sources": {
+      "instagram": "theaterimkeller"
+    }
+  },
+  "Astra Stube": {
+    "lat": 52.4876,
+    "lng": 13.4244,
+    "address": "Weichselstraße 63, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {
+      "instagram": "astrastube"
+    }
+  },
+  "Café Wirtschaftswunder": {
+    "lat": 52.4779,
+    "lng": 13.431,
+    "address": "Leykestraße 6, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cafe",
+    "sources": {
+      "instagram": "wirtschaftswunder.berlin"
+    }
+  },
+  "Wesereck": {
+    "lat": 52.4871,
+    "lng": 13.4315,
+    "address": "Hobrechtstraße 71, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zum Krokodil": {
+    "lat": 52.4903,
+    "lng": 13.4275,
+    "address": "Weserstraße 19, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Dots": {
+    "lat": 52.4881,
+    "lng": 13.4358,
+    "address": "Weserstraße 191, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Zum Böhmischen Dorf": {
+    "lat": 52.4871,
+    "lng": 13.4261,
+    "address": "Sanderstraße 11, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Drei Flaschen Bar": {
+    "lat": 52.4744,
+    "lng": 13.4356,
+    "address": "Böhmische Straße 48, 12055 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Zosse": {
+    "lat": 52.4793,
+    "lng": 13.4316,
+    "address": "Richardstraße 37, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Alter Roter Löwe Rein": {
+    "lat": 52.4795,
+    "lng": 13.431,
+    "address": "Richardstraße 31, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Lobby 030": {
+    "lat": 52.4788,
+    "lng": 13.4323,
+    "address": "Richardstraße 76, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Rixdorfer Bierstuben": {
+    "lat": 52.4801,
+    "lng": 13.4342,
+    "address": "Erkstraße 14, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Liesl": {
+    "lat": 52.4776,
+    "lng": 13.429,
+    "address": "Nogatstraße 30, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Bäreneck": {
+    "lat": 52.484,
+    "lng": 13.4265,
+    "address": "Hermannstraße 37, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zweiners": {
+    "lat": 52.4821,
+    "lng": 13.424,
+    "address": "Hermannstraße 234, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Boddin-Eck": {
+    "lat": 52.4823,
+    "lng": 13.427,
+    "address": "Boddinstraße 1, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zur Quelle": {
+    "lat": 52.482,
+    "lng": 13.425,
+    "address": "Boddinstraße 53, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Kaktus reloaded": {
+    "lat": 52.483,
+    "lng": 13.4265,
+    "address": "Boddinstraße 24, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "jungbusch berlin": {
+    "lat": 52.49,
+    "lng": 13.427,
+    "address": "Weserstraße 16, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Valentin Stüberl": {
+    "lat": 52.487,
+    "lng": 13.435,
+    "address": "Sanderstraße 18, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Venue Café & Bistro": {
+    "lat": 52.4884,
+    "lng": 13.4345,
+    "address": "Weserstraße 172, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cafe",
+    "sources": {}
+  },
+  "Companion Tea and Coffee": {
+    "lat": 52.4885,
+    "lng": 13.4341,
+    "address": "Weserstraße 166, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cafe",
+    "sources": {}
+  },
+  "Stella": {
+    "lat": 52.4885,
+    "lng": 13.4341,
+    "address": "Weserstraße 166, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Lenau-Stuben": {
+    "lat": 52.488,
+    "lng": 13.426,
+    "address": "Lenaustraße 16, 12047 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Ilse Eck": {
+    "lat": 52.4775,
+    "lng": 13.438,
+    "address": "Ilsestraße 6, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Bechereck": {
+    "lat": 52.479,
+    "lng": 13.435,
+    "address": "Erkstraße 1, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Warthe-Eck": {
+    "lat": 52.481,
+    "lng": 13.443,
+    "address": "Warthestraße 18, 12051 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Kindl Stuben": {
+    "lat": 52.477,
+    "lng": 13.437,
+    "address": "Rollbergstraße 5, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Gießkanne": {
+    "lat": 52.48,
+    "lng": 13.43,
+    "address": "Donaustraße 100, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Rosel": {
+    "lat": 52.4798,
+    "lng": 13.4345,
+    "address": "Erkstraße 9, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Harzer Ecke Elsen": {
+    "lat": 52.482,
+    "lng": 13.444,
+    "address": "Harzer Straße 52, 12059 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Goldener Esel": {
+    "lat": 52.451,
+    "lng": 13.427,
+    "address": "Britzer Damm 80, 12347 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Simone's": {
+    "lat": 52.475,
+    "lng": 13.429,
+    "address": "Schillerpromenade 28, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zur Molle": {
+    "lat": 52.4789,
+    "lng": 13.4355,
+    "address": "Karl-Marx-Straße 180, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zur Mitte": {
+    "lat": 52.4806,
+    "lng": 13.4355,
+    "address": "Karl-Marx-Straße 83, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zur Pinte": {
+    "lat": 52.4765,
+    "lng": 13.438,
+    "address": "Karl-Marx-Straße 168, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Stammtisch": {
+    "lat": 52.4725,
+    "lng": 13.434,
+    "address": "Hermannstraße 200, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zur kleinen Kneipe": {
+    "lat": 52.472,
+    "lng": 13.435,
+    "address": "Hermannstraße 220, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zum Bierseidel": {
+    "lat": 52.47,
+    "lng": 13.437,
+    "address": "Hermannstraße 250, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zum Magendoktor": {
+    "lat": 52.4752,
+    "lng": 13.434,
+    "address": "Karl-Marx-Straße 153, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zum Umsteiger": {
+    "lat": 52.479,
+    "lng": 13.426,
+    "address": "Hermannstraße 22, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "ZweiMalVier": {
+    "lat": 52.4795,
+    "lng": 13.434,
+    "address": "Karl-Marx-Straße 72, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Bierbar Berlin": {
+    "lat": 52.482,
+    "lng": 13.4335,
+    "address": "Karl-Marx-Straße 56, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "bar",
+    "sources": {}
+  },
+  "Der Berliner": {
+    "lat": 52.481,
+    "lng": 13.434,
+    "address": "Karl-Marx-Straße 47, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Brinks": {
+    "lat": 52.476,
+    "lng": 13.443,
+    "address": "Sonnenallee 92, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Blauer Affe": {
+    "lat": 52.4745,
+    "lng": 13.4452,
+    "address": "Sonnenallee 112, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Nino's Runde Ecke": {
+    "lat": 52.473,
+    "lng": 13.443,
+    "address": "Sonnenallee 98, 12045 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Lahn-Eck": {
+    "lat": 52.4695,
+    "lng": 13.4498,
+    "address": "Sonnenallee 166, 12059 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Treffpunkt": {
+    "lat": 52.468,
+    "lng": 13.451,
+    "address": "Sonnenallee 174, 12059 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Stübchen am Hafen": {
+    "lat": 52.4845,
+    "lng": 13.409,
+    "address": "Columbiadamm 160, 12101 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Gaststätte Park Eck": {
+    "lat": 52.477,
+    "lng": 13.431,
+    "address": "Selchower Straße 16, 12049 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Kleinerts Kleine Klause": {
+    "lat": 52.476,
+    "lng": 13.4355,
+    "address": "Karl-Marx-Straße 150, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Körner Eck": {
+    "lat": 52.477,
+    "lng": 13.4395,
+    "address": "Jonasstraße 2, 12053 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Lange Nacht": {
+    "lat": 52.4745,
+    "lng": 13.437,
+    "address": "Karl-Marx-Straße 154, 12043 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Gemeinschaftshaus Gropiusstadt": {
+    "lat": 52.425,
+    "lng": 13.439,
+    "address": "Bat-Yam-Platz 1, 12353 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "cultural",
+    "sources": {}
+  },
+  "Bierbaum 1": {
+    "lat": 52.444,
+    "lng": 13.439,
+    "address": "Fritz-Erler-Allee 104, 12351 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Bergklause": {
+    "lat": 52.4555,
+    "lng": 13.415,
+    "address": "Buschkrugallee 40, 12359 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Britzer Stübchen": {
+    "lat": 52.45,
+    "lng": 13.426,
+    "address": "Britzer Damm 60, 12347 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Buckower Pinte": {
+    "lat": 52.43,
+    "lng": 13.452,
+    "address": "Buckower Damm 108, 12349 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Rudower Quelle": {
+    "lat": 52.421,
+    "lng": 13.476,
+    "address": "Alt-Rudow 32, 12355 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Teupitzer Klause": {
+    "lat": 52.4478,
+    "lng": 13.4543,
+    "address": "Teupitzer Straße 14, 12349 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Mahlower Klause": {
+    "lat": 52.435,
+    "lng": 13.443,
+    "address": "Marienfelder Chaussee 10, 12349 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Schnabel's Klause": {
+    "lat": 52.446,
+    "lng": 13.456,
+    "address": "Neuköllner Straße 292, 12357 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Oldies Bierhaus": {
+    "lat": 52.449,
+    "lng": 13.451,
+    "address": "Johannisthaler Chaussee 51, 12351 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Bierinsel": {
+    "lat": 52.4495,
+    "lng": 13.452,
+    "address": "Johannisthaler Chaussee 65, 12351 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Rudower Tönnchen": {
+    "lat": 52.423,
+    "lng": 13.48,
+    "address": "Alt-Rudow 50, 12355 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  },
+  "Zum Heinzelmann": {
+    "lat": 52.4485,
+    "lng": 13.454,
+    "address": "Gutschmidtstraße 56, 12349 Berlin",
+    "neighborhood": "Neukölln",
+    "venue_type": "kneipe",
+    "sources": {}
+  }
+}

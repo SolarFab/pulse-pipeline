@@ -10,6 +10,7 @@ import logging
 import re
 from datetime import datetime, timezone
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from dateutil import parser as dateparser
 from pydantic import BaseModel, field_validator, model_validator
@@ -19,9 +20,9 @@ logger = logging.getLogger(__name__)
 VALID_CATEGORIES = {
     "music", "nightlife", "food", "culture", "markets",
     "workshops", "meetups", "outdoors", "family",
-    # Legacy aliases (resolved below)
-    "entertainment", "wellness", "social", "market",
 }
+
+BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 
 class RawEvent(BaseModel):
@@ -69,7 +70,8 @@ class RawEvent(BaseModel):
         if v is None:
             return None
         cat = str(v).lower().strip()
-        # Map common aliases
+        # Map aliases and legacy category names onto the canonical 9-category
+        # taxonomy (must stay in sync with web/src/lib/types.ts)
         aliases = {
             "concert": "music",
             "konzert": "music",
@@ -86,16 +88,20 @@ class RawEvent(BaseModel):
             "ausstellung": "culture",
             "exhibition": "culture",
             "gallery": "culture",
-            "theater": "entertainment",
-            "theatre": "entertainment",
-            "comedy": "entertainment",
-            "film": "entertainment",
-            "kino": "entertainment",
-            "yoga": "wellness",
-            "sport": "wellness",
-            "fitness": "wellness",
-            "meetup": "social",
-            "networking": "social",
+            "theater": "culture",
+            "theatre": "culture",
+            "comedy": "nightlife",
+            "film": "culture",
+            "kino": "culture",
+            "entertainment": "culture",
+            "yoga": "outdoors",
+            "sport": "outdoors",
+            "fitness": "outdoors",
+            "wellness": "outdoors",
+            "meetup": "meetups",
+            "networking": "meetups",
+            "social": "meetups",
+            "market": "markets",
             "flohmarkt": "markets",
             "flea market": "markets",
             "markt": "markets",
@@ -126,18 +132,19 @@ def _parse_dt(value: Any) -> datetime | None:
             dt = dateparser.parse(s, dayfirst=True)
             if dt:
                 dt = dt + timedelta(days=1)
-                return dt.replace(tzinfo=timezone.utc) if not dt.tzinfo else dt.astimezone(timezone.utc)
+                if not dt.tzinfo:
+                    dt = dt.replace(tzinfo=BERLIN_TZ)
+                return dt.astimezone(timezone.utc)
         # Try ISO 8601 first (YYYY-MM-DD) — dayfirst must be False for ISO
         if re.match(r"\d{4}-\d{2}-\d{2}", s):
             dt = dateparser.parse(s, dayfirst=False)
         else:
             dt = dateparser.parse(s, dayfirst=True)
         if dt and not dt.tzinfo:
-            # Assume Berlin time (UTC+1/+2), store as UTC
-            # For simplicity, use UTC+1 (CET). Proper handling would use pytz/zoneinfo.
-            from datetime import timedelta
-            dt = dt - timedelta(hours=1)
-            dt = dt.replace(tzinfo=timezone.utc)
+            # Naive datetimes are Berlin wall-clock time. zoneinfo picks the
+            # correct CET/CEST offset per date — a hardcoded +01:00 made every
+            # summer midnight render as 01:00 in the app.
+            dt = dt.replace(tzinfo=BERLIN_TZ).astimezone(timezone.utc)
         return dt
     except Exception:
         logger.warning("Could not parse datetime: %r", value)

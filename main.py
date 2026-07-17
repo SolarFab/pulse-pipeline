@@ -48,6 +48,8 @@ def get_scrapers() -> dict:
     from scrapers.venues.froschkoenig import FroschkoenigScraper
     from scrapers.venues.huxleys import HuxleysScraper
     from scrapers.venues.themakery import TheMakeryScraper
+    from scrapers.venues.generic_website import GenericWebsiteScraper
+    from scrapers.venues.instagram_events import InstagramEventsScraper
 
     return {
         "kulturdaten": KulturdatenScraper,
@@ -72,6 +74,8 @@ def get_scrapers() -> dict:
         "froschkoenig": FroschkoenigScraper,
         "huxleys": HuxleysScraper,
         "themakery": TheMakeryScraper,
+        "venue_website": GenericWebsiteScraper,
+        "instagram": InstagramEventsScraper,
     }
 
 

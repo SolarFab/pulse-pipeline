@@ -22,6 +22,17 @@ def run_scraper(scraper_class, label: str):
         logger.error("✗ %s crashed: %s", label, e)
 
 
+def run_db_cleanup():
+    """Nightly maintenance: normalize taxonomy strays, deactivate past events."""
+    logger.info("▶ Running DB cleanup")
+    try:
+        from scripts.db_cleanup import run
+        run(dry_run=False)
+        logger.info("✓ DB cleanup done")
+    except Exception as e:
+        logger.error("✗ DB cleanup crashed: %s", e)
+
+
 def build_scheduler() -> BlockingScheduler:
     from scrapers.berlin_de import BerlinDeScraper
     from scrapers.eventbrite import EventbriteScraper
@@ -36,6 +47,15 @@ def build_scheduler() -> BlockingScheduler:
     from scrapers.venues.mauerpark import MauerparkScraper
     from scrapers.venues.nowkoelln import NowkoellnScraper
     from scrapers.venues.jazzclubs import JazzclubsScraper
+    from scrapers.venues.wochenmaerkte import WochenmaerkteScraper
+    from scrapers.luma import LumaScraper
+    from scrapers.planetarium import PlanetariumScraper
+    from scrapers.berlinmitkind import BerlinMitKindScraper
+    from scrapers.startbahn import StartbahnScraper
+    from scrapers.venues.feine_klingen import FeineKlingenScraper
+    from scrapers.venues.froschkoenig import FroschkoenigScraper
+    from scrapers.venues.huxleys import HuxleysScraper
+    from scrapers.bandsintown import BandsintownScraper
 
     scheduler = BlockingScheduler(timezone="Europe/Berlin")
 
@@ -44,6 +64,8 @@ def build_scheduler() -> BlockingScheduler:
         (KulturdatenScraper, "kulturdaten"),
         (EventbriteScraper, "eventbrite"),
         (MeetupScraper, "meetup"),
+        (LumaScraper, "luma"),
+        (BandsintownScraper, "bandsintown"),
     ]:
         scheduler.add_job(
             run_scraper,
@@ -58,6 +80,7 @@ def build_scheduler() -> BlockingScheduler:
     for cls, label in [
         (TipBerlinScraper, "tip_berlin"),
         (BerlinDeScraper, "berlin_de"),
+        (BerlinMitKindScraper, "berlinmitkind"),
     ]:
         scheduler.add_job(
             run_scraper,
@@ -93,6 +116,12 @@ def build_scheduler() -> BlockingScheduler:
         (NowkoellnScraper, "nowkoelln"),
         (MauerparkScraper, "mauerpark"),
         (JazzclubsScraper, "jazzity"),
+        (WochenmaerkteScraper, "wochenmaerkte"),
+        (PlanetariumScraper, "planetarium"),
+        (StartbahnScraper, "startbahn"),
+        (FeineKlingenScraper, "feine_klingen"),
+        (FroschkoenigScraper, "froschkoenig"),
+        (HuxleysScraper, "huxleys"),
     ]:
         scheduler.add_job(
             run_scraper,
@@ -101,5 +130,15 @@ def build_scheduler() -> BlockingScheduler:
             id=label,
             replace_existing=True,
         )
+
+    # ── Maintenance: nightly cleanup at 5:00 AM (after the 3 AM RA run,
+    # before the 6 AM API scrapes) ────────────────────────────────────────────
+    scheduler.add_job(
+        run_db_cleanup,
+        CronTrigger(hour=5, minute=0),
+        id="db_cleanup",
+        name="Maintenance:db_cleanup",
+        replace_existing=True,
+    )
 
     return scheduler

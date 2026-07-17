@@ -38,6 +38,100 @@ SUBCATEGORIES = {
     "family": ["kids-program", "family-event", "playground", "museum-for-kids"],
 }
 
+# Free-form subcategory values seen in the wild, mapped onto canonical tags.
+# The UI filter (web/src/lib/types.ts SUBCATEGORIES) only knows canonical
+# values — anything else is invisible to filtering, so it must never reach
+# the DB.
+SUBCATEGORY_SYNONYMS: dict[str, str] = {
+    "jazz": "jazz-blues",
+    "blues": "jazz-blues",
+    "soul": "jazz-blues",
+    "funk": "jazz-blues",
+    "techno": "electronic",
+    "house": "electronic",
+    "dj set": "club-night",
+    "dj-set": "club-night",
+    "rock": "rock-pop",
+    "pop": "rock-pop",
+    "indie": "rock-pop",
+    "punk": "rock-pop",
+    "metal": "rock-pop",
+    "hip hop": "hip-hop",
+    "hiphop": "hip-hop",
+    "rap": "hip-hop",
+    "klassik": "classical",
+    "concert": "live-concert",
+    "konzert": "live-concert",
+    "live performance": "live-concert",
+    "live music": "live-concert",
+    "acoustic": "live-concert",
+    "world": "world-folk",
+    "folk": "world-folk",
+    "salsa": "latin",
+    "after-work party": "party",
+    "afterparty": "party",
+    "bar party": "bar-event",
+    "bar happy hour": "bar-event",
+    "happy hour": "bar-event",
+    "stand-up": "comedy",
+    "standup": "comedy",
+    "kabarett": "comedy",
+    "art exhibition": "exhibition",
+    "ausstellung": "exhibition",
+    "museum": "exhibition",
+    "experimental theater": "theater",
+    "theatre": "theater",
+    "kino": "cinema",
+    "film": "cinema",
+    "movie": "cinema",
+    "lesung": "reading",
+    "lecture": "talk-panel",
+    "talk": "talk-panel",
+    "panel": "talk-panel",
+    "vortrag": "talk-panel",
+    "meetup": "community",
+    "networking dinner": "networking",
+    "street food": "food-market",
+    "streetfood": "food-market",
+    "wochenmarkt": "weekly-market",
+    "farmers market": "weekly-market",
+    "flea market": "flea-market",
+    "flohmarkt": "flea-market",
+    "trödelmarkt": "flea-market",
+    "vintage": "secondhand",
+    "workshop": "creative-workshop",
+    "kurs": "creative-workshop",
+    "dance": "dance-class",
+    "tanzkurs": "dance-class",
+    "yoga": "yoga-fitness",
+    "fitness": "yoga-fitness",
+    "sport": "sports",
+    "kids": "kids-program",
+    "kinder": "kids-program",
+    "kindertheater": "kids-program",
+    "family": "family-event",
+}
+
+# Canonical subcategory → its parent category (for resolving mismatched pairs)
+SUBCATEGORY_PARENT: dict[str, str] = {
+    sub: cat for cat, subs in SUBCATEGORIES.items() for sub in subs
+}
+
+
+def normalize_subcategory(category: str | None, sub: str | None) -> str | None:
+    """Map a free-form subcategory to a canonical tag valid for `category`.
+
+    Returns None when no canonical tag fits — an unfilterable value is worse
+    than an empty one.
+    """
+    if not sub:
+        return None
+    key = str(sub).lower().strip()
+    key = SUBCATEGORY_SYNONYMS.get(key, key)
+    if category and key in SUBCATEGORIES.get(category, []):
+        return key
+    return None
+
 SYSTEM_PROMPT = """\
 You are a Berlin event categorization assistant. Given event data, assign the best category, subcategory, and relevant English tags.
 
@@ -64,6 +158,7 @@ Subcategories per category:
 - family: kids-program, family-event, playground, museum-for-kids
 
 CATEGORIZATION RULES — follow these strictly:
+0. subcategory MUST be exactly one of the values listed above for the chosen category (verbatim, hyphenated), or null. Never invent new subcategory values.
 1. Categorize by the PRIMARY ACTIVITY the attendee goes for, not the venue type.
 2. Live music (bands, concerts, singer-songwriter) at any venue → "music", even if it's at a bar.
 3. DJ sets / techno / dance-focused events → "nightlife", even if there's live music too.
@@ -133,14 +228,13 @@ def _apply_result(event: dict[str, Any], result: dict[str, Any]) -> None:
     """Apply a single LLM result to an event dict (in-place)."""
     if result.get("category") in CATEGORIES:
         event["category"] = result["category"]
-        sub = result.get("subcategory")
-        valid_subs = SUBCATEGORIES.get(event["category"], [])
-        if sub and sub in valid_subs:
+        # Only canonical subcategories reach the DB — the UI filter can't see
+        # anything else. Synonyms are normalized, the rest is dropped.
+        sub = normalize_subcategory(event["category"], result.get("subcategory"))
+        if sub:
             event["subcategory"] = sub
-        elif sub and not event.get("subcategory"):
-            # LLM returned something but it's not in valid_subs — store it anyway
-            # rather than writing None
-            event["subcategory"] = sub
+        elif normalize_subcategory(event["category"], event.get("subcategory")) is None:
+            event["subcategory"] = None
 
     raw_tags = result.get("tags") or []
     en_tags = _parse_tags(raw_tags)

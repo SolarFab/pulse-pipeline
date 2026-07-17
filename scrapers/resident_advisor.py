@@ -7,6 +7,7 @@ Covers Berlin club nights, techno, electronic music.
 from __future__ import annotations
 
 import logging
+import os
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -55,12 +56,15 @@ class ResidentAdvisorScraper(BaseScraper):
     source_name = "resident_advisor"
 
     def scrape(self) -> list[dict[str, Any]]:
+        # 28-day window (RA_WINDOW_DAYS to override) — nightlife is the app's
+        # core content and 14 days kept coverage far below other sources
+        window_days = int(os.environ.get("RA_WINDOW_DAYS", "28"))
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        end_date = (datetime.now(timezone.utc) + timedelta(days=14)).strftime("%Y-%m-%d")
+        end_date = (datetime.now(timezone.utc) + timedelta(days=window_days)).strftime("%Y-%m-%d")
 
         events = []
         page = 1
-        max_pages = 5
+        max_pages = int(os.environ.get("RA_MAX_PAGES", "12"))
 
         while page <= max_pages:
             variables = {
