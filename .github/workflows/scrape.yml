@@ -34,5 +34,19 @@ jobs:
       - name: Install Playwright browsers
         run: playwright install --with-deps chromium
 
+      # Persist the generic scraper's content-hash cache between runs so
+      # unchanged venue pages skip LLM extraction
+      - name: Restore scrape cache
+        uses: actions/cache@v4
+        with:
+          path: data/scrape_cache.json
+          key: scrape-cache-${{ github.run_id }}
+          restore-keys: scrape-cache-
+
       - name: Run all scrapers
         run: python main.py --run-all
+
+      # Maintenance: normalize taxonomy strays, deactivate past events
+      - name: Run DB cleanup
+        if: always()
+        run: python scripts/db_cleanup.py
