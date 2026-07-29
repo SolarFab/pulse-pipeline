@@ -1,31 +1,39 @@
 """Swappable event embedder (preference-feed task 1.2).
 
-One canonical embed-text builder + provider backends selected by env config.
-Providers are called via raw REST (httpx) — no provider SDKs, so swapping models
-is config, not code (see AGENTS.md: model-agnostic).
+One canonical embed-text builder + an OpenAI-compatible embeddings client.
+Default gateway is OpenRouter — one key, many embedding models (OpenAI, Google,
+Qwen, Cohere …) — keeping every model call in Pulse behind one config-driven
+gateway (see AGENTS.md: model-agnostic). Direct OpenAI/Gemini remain available
+as alternate bases.
 
 Env:
-    EMBED_PROVIDER   openai | gemini            (default: openai)
-    EMBED_MODEL      provider model id          (defaults per provider)
-    EMBED_DIM        output dimension           (default: 768 — both providers support it)
-    OPENAI_API_KEY / GEMINI_API_KEY
+    EMBED_PROVIDER   openrouter | openai | gemini      (default: openrouter)
+    EMBED_MODEL      model id for the chosen provider
+                     (default: openai/text-embedding-3-small via openrouter)
+    EMBED_DIM        optional output dimension; omit to use the model's native size
+    OPENROUTER_API_KEY / OPENAI_API_KEY / GEMINI_API_KEY
 """
 
 from __future__ import annotations
 
 import hashlib
 import os
-from typing import Protocol
 
 import httpx
 
-_TIMEOUT = 30.0
+_TIMEOUT = 60.0
 _BATCH_SIZE = 100
 
-DEFAULT_DIM = 768
+DEFAULT_PROVIDER = "openrouter"
 DEFAULT_MODELS = {
+    "openrouter": "openai/text-embedding-3-small",
     "openai": "text-embedding-3-small",
     "gemini": "text-embedding-004",
+}
+KEY_ENV = {
+    "openrouter": "OPENROUTER_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "gemini": "GEMINI_API_KEY",
 }
 
 
@@ -50,32 +58,29 @@ def embed_text_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-# ── Providers ─────────────────────────────────────────────────────────────────
+# ── Client ────────────────────────────────────────────────────────────────────
 
-class Embedder(Protocol):
-    provider: str
-    model: str
-    dim: int
+class OpenAICompatEmbedder:
+    """Any /v1/embeddings endpoint speaking the OpenAI schema (OpenRouter, OpenAI)."""
 
-    def embed_batch(self, texts: list[str]) -> list[list[float]]: ...
-
-
-class OpenAIEmbedder:
-    provider = "openai"
-
-    def __init__(self, model: str = DEFAULT_MODELS["openai"], dim: int = DEFAULT_DIM):
+    def __init__(self, provider: str, base_url: str, model: str, dim: int | None):
+        self.provider = provider
         self.model = model
         self.dim = dim
-        self._key = os.environ.get("OPENAI_API_KEY", "")
+        self._url = base_url.rstrip("/") + "/embeddings"
+        self._key = os.environ.get(KEY_ENV[provider], "")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []
         for i in range(0, len(texts), _BATCH_SIZE):
             chunk = texts[i : i + _BATCH_SIZE]
+            payload: dict = {"model": self.model, "input": chunk}
+            if self.dim:  # only models that support shortening (e.g. text-embedding-3-*)
+                payload["dimensions"] = self.dim
             resp = httpx.post(
-                "https://api.openai.com/v1/embeddings",
+                self._url,
                 headers={"Authorization": f"Bearer {self._key}"},
-                json={"model": self.model, "input": chunk, "dimensions": self.dim},
+                json=payload,
                 timeout=_TIMEOUT,
             )
             resp.raise_for_status()
@@ -85,30 +90,30 @@ class OpenAIEmbedder:
 
 
 class GeminiEmbedder:
+    """Direct Google endpoint (fallback if not routing through OpenRouter)."""
+
     provider = "gemini"
 
-    def __init__(self, model: str = DEFAULT_MODELS["gemini"], dim: int = DEFAULT_DIM):
+    def __init__(self, model: str = DEFAULT_MODELS["gemini"], dim: int | None = None):
         self.model = model
         self.dim = dim
-        self._key = os.environ.get("GEMINI_API_KEY", "")
+        self._key = os.environ.get(KEY_ENV["gemini"], "")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         out: list[list[float]] = []
         for i in range(0, len(texts), _BATCH_SIZE):
             chunk = texts[i : i + _BATCH_SIZE]
+            req = [
+                {"model": f"models/{self.model}", "content": {"parts": [{"text": t}]}}
+                for t in chunk
+            ]
+            if self.dim:
+                for r in req:
+                    r["outputDimensionality"] = self.dim
             resp = httpx.post(
                 f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:batchEmbedContents",
                 params={"key": self._key},
-                json={
-                    "requests": [
-                        {
-                            "model": f"models/{self.model}",
-                            "content": {"parts": [{"text": t}]},
-                            "outputDimensionality": self.dim,
-                        }
-                        for t in chunk
-                    ]
-                },
+                json={"requests": req},
                 timeout=_TIMEOUT,
             )
             resp.raise_for_status()
@@ -116,19 +121,22 @@ class GeminiEmbedder:
         return out
 
 
-_PROVIDERS = {"openai": OpenAIEmbedder, "gemini": GeminiEmbedder}
-
-
-def get_embedder(provider: str | None = None) -> Embedder:
+def get_embedder(provider: str | None = None, model: str | None = None):
     """Build the configured embedder. Config only — never hardcode a provider at call sites."""
-    name = (provider or os.environ.get("EMBED_PROVIDER") or "openai").lower()
-    if name not in _PROVIDERS:
-        raise ValueError(f"unknown EMBED_PROVIDER {name!r}; expected one of {sorted(_PROVIDERS)}")
-    model = os.environ.get("EMBED_MODEL") or DEFAULT_MODELS[name]
-    dim = int(os.environ.get("EMBED_DIM") or DEFAULT_DIM)
-    return _PROVIDERS[name](model=model, dim=dim)
+    name = (provider or os.environ.get("EMBED_PROVIDER") or DEFAULT_PROVIDER).lower()
+    if name not in KEY_ENV:
+        raise ValueError(f"unknown EMBED_PROVIDER {name!r}; expected one of {sorted(KEY_ENV)}")
+    model = model or os.environ.get("EMBED_MODEL") or DEFAULT_MODELS[name]
+    dim_env = os.environ.get("EMBED_DIM")
+    dim = int(dim_env) if dim_env else None
+    if name == "gemini":
+        return GeminiEmbedder(model=model, dim=dim)
+    base = {
+        "openrouter": "https://openrouter.ai/api/v1",
+        "openai": "https://api.openai.com/v1",
+    }[name]
+    return OpenAICompatEmbedder(provider=name, base_url=base, model=model, dim=dim)
 
 
 def has_key(provider: str) -> bool:
-    env = {"openai": "OPENAI_API_KEY", "gemini": "GEMINI_API_KEY"}[provider]
-    return bool(os.environ.get(env))
+    return bool(os.environ.get(KEY_ENV[provider]))

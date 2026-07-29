@@ -3,7 +3,6 @@
 import pytest
 
 from pipeline.embedder import (
-    DEFAULT_DIM,
     build_embed_text,
     embed_text_hash,
     get_embedder,
@@ -39,13 +38,26 @@ def test_missing_fields_do_not_crash():
 
 
 def test_provider_selection_from_env(monkeypatch):
+    monkeypatch.delenv("EMBED_PROVIDER", raising=False)
+    monkeypatch.delenv("EMBED_DIM", raising=False)
+    emb = get_embedder()  # default: openrouter gateway, native model dim
+    assert emb.provider == "openrouter"
+    assert emb.model == "openai/text-embedding-3-small"
+    assert emb.dim is None
+
     monkeypatch.setenv("EMBED_PROVIDER", "gemini")
-    emb = get_embedder()
-    assert emb.provider == "gemini" and emb.dim == DEFAULT_DIM
+    assert get_embedder().provider == "gemini"
 
     monkeypatch.setenv("EMBED_PROVIDER", "openai")
-    monkeypatch.setenv("EMBED_DIM", "1536")
-    assert get_embedder().dim == 1536
+    monkeypatch.setenv("EMBED_DIM", "768")
+    emb = get_embedder()
+    assert emb.dim == 768 and emb.model == "text-embedding-3-small"
+
+
+def test_explicit_model_overrides_env(monkeypatch):
+    monkeypatch.delenv("EMBED_MODEL", raising=False)
+    emb = get_embedder("openrouter", model="qwen/qwen3-embedding-8b")
+    assert emb.model == "qwen/qwen3-embedding-8b"
 
 
 def test_unknown_provider_rejected(monkeypatch):

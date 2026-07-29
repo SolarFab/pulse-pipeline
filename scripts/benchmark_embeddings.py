@@ -6,10 +6,13 @@ sample of real events. Both candidates see the identical sample.
 Part B — mini golden set: German<->English queries; top-5 retrievals are PRINTED for
 human verification (cross-lingual quality is the risk proxy labels can't measure).
 
+All candidate models run through ONE gateway (OpenRouter) — identical conditions,
+one API key.
+
 Usage:
-    python scripts/benchmark_embeddings.py                # all providers with keys
+    python scripts/benchmark_embeddings.py                # default candidate models
     python scripts/benchmark_embeddings.py --sample 300
-    python scripts/benchmark_embeddings.py --providers openai
+    python scripts/benchmark_embeddings.py --models openai/text-embedding-3-small
 Writes docs/embedding-benchmark.md with the results table.
 """
 
@@ -27,7 +30,14 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 load_dotenv()
 
 from db.supabase import get_client  # noqa: E402
-from pipeline.embedder import DEFAULT_MODELS, build_embed_text, get_embedder, has_key  # noqa: E402
+from pipeline.embedder import build_embed_text, get_embedder, has_key  # noqa: E402
+
+# Candidate models, all via the OpenRouter gateway (one key, identical conditions).
+DEFAULT_CANDIDATES = [
+    "openai/text-embedding-3-small",   # industry default, good multilingual
+    "google/gemini-embedding-001",     # Google's current embedder
+    "qwen/qwen3-embedding-8b",         # top multilingual open model
+]
 
 # ── Part B: golden queries (DE<->EN). Correct answers are judged by a human. ──
 GOLDEN_QUERIES = [
@@ -89,39 +99,36 @@ def fetch_events(sample: int) -> list[dict]:
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--sample", type=int, default=300)
-    ap.add_argument("--providers", default=None, help="comma list; default: all with keys")
+    ap.add_argument("--models", default=None, help="comma list of gateway model ids")
     args = ap.parse_args()
 
-    providers = (
-        args.providers.split(",")
-        if args.providers
-        else [p for p in DEFAULT_MODELS if has_key(p)]
-    )
-    if not providers:
-        sys.exit("No provider API keys found (OPENAI_API_KEY / GEMINI_API_KEY). Nothing to do.")
+    if not has_key("openrouter"):
+        sys.exit("OPENROUTER_API_KEY not set — add it to .env. Nothing to do.")
+    models = args.models.split(",") if args.models else DEFAULT_CANDIDATES
 
     print(f"Fetching up to {args.sample} events…")
     events = fetch_events(args.sample)
     texts = [build_embed_text(e) for e in events]
     cats = [e.get("category") for e in events]
     subs = [e.get("subcategory") for e in events]
-    print(f"{len(events)} events with a category. Providers: {providers}\n")
+    print(f"{len(events)} events with a category. Candidates: {models}\n")
 
     rows = []
     query_sections = []
-    for name in providers:
-        emb = get_embedder(name)
+    for name in models:
+        emb = get_embedder("openrouter", model=name)
         t0 = time.time()
         vecs = emb.embed_batch(texts)
         dt = time.time() - t0
+        actual_dim = len(vecs[0]) if vecs else 0  # native size (EMBED_DIM unset)
         p_cat = knn_precision(vecs, cats)
         p_sub = knn_precision(vecs, subs)
-        rows.append((name, emb.model, emb.dim, p_cat, p_sub, dt, len(texts)))
-        print(f"{name:8} p@{K} category={p_cat:.3f}  subcategory={p_sub:.3f}  ({dt:.1f}s)")
+        rows.append((name, actual_dim, p_cat, p_sub, dt, len(texts)))
+        print(f"{name:35} dim={actual_dim:5} p@{K} cat={p_cat:.3f} sub={p_sub:.3f} ({dt:.1f}s)")
 
         # Part B — print retrievals for human judgment
         qvecs = emb.embed_batch(GOLDEN_QUERIES)
-        lines = [f"\n### {name} ({emb.model}, dim={emb.dim})"]
+        lines = [f"\n### {name} (dim={actual_dim})"]
         for q, qv in zip(GOLDEN_QUERIES, qvecs):
             sims = sorted(
                 ((cosine(qv, v), events[j]) for j, v in enumerate(vecs)),
@@ -134,15 +141,16 @@ def main() -> None:
 
     out = Path(__file__).resolve().parent.parent / "docs" / "embedding-benchmark.md"
     table = "\n".join(
-        f"| {n} | {m} | {d} | {pc:.3f} | {ps:.3f} | {dt:.1f}s / {cnt} events |"
-        for n, m, d, pc, ps, dt, cnt in rows
+        f"| {n} | {d} | {pc:.3f} | {ps:.3f} | {dt:.1f}s / {cnt} events |"
+        for n, d, pc, ps, dt, cnt in rows
     )
     out.write_text(
         "# Embedding benchmark\n\n"
         f"Sample: {len(events)} active events with category labels. "
         f"Metric: kNN precision@{K} (do an event's nearest neighbours share its label?).\n\n"
-        "| provider | model | dim | p@5 category | p@5 subcategory | time |\n"
-        "|---|---|---|---|---|---|\n" + table + "\n\n"
+        "All models via the OpenRouter gateway (identical conditions).\n\n"
+        "| model | dim | p@5 category | p@5 subcategory | time |\n"
+        "|---|---|---|---|---|\n" + table + "\n\n"
         "## Golden-query retrievals (verify by hand)\n"
         "Cross-lingual DE<->EN probes — a human judges whether the top-5 are correct.\n"
         + "\n".join(query_sections) + "\n"
