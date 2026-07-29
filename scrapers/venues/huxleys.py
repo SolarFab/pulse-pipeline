@@ -27,11 +27,29 @@ VENUE_LNG = 13.4215
 VENUE_NEIGHBORHOOD = "Neukölln"
 
 GERMAN_MONTHS = {
-    "januar": 1, "februar": 2, "märz": 3, "april": 4,
-    "mai": 5, "juni": 6, "juli": 7, "august": 8,
-    "september": 9, "oktober": 10, "november": 11, "dezember": 12,
-    "jan": 1, "feb": 2, "mär": 3, "apr": 4,
-    "jun": 6, "jul": 7, "aug": 8, "sep": 9, "okt": 10, "nov": 11, "dez": 12,
+    "januar": 1,
+    "februar": 2,
+    "märz": 3,
+    "april": 4,
+    "mai": 5,
+    "juni": 6,
+    "juli": 7,
+    "august": 8,
+    "september": 9,
+    "oktober": 10,
+    "november": 11,
+    "dezember": 12,
+    "jan": 1,
+    "feb": 2,
+    "mär": 3,
+    "apr": 4,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "okt": 10,
+    "nov": 11,
+    "dez": 12,
 }
 
 
@@ -121,8 +139,18 @@ class HuxleysScraper(BaseScraper):
         # Extract artist name — remove date/time parts from text
         artist = text
         # Remove patterns like "24März", "01 Apr.", "Beginn: 20:00", "Einlass: 19:00", "Ausverkauft"
-        artist = re.sub(r"\d{1,2}\s*(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\w*\.?", "", artist, flags=re.IGNORECASE)
-        artist = re.sub(r"\d{1,2}\s+(?:Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)\.?", "", artist, flags=re.IGNORECASE)
+        artist = re.sub(
+            r"\d{1,2}\s*(?:Januar|Februar|März|April|Mai|Juni|Juli|August|September|Oktober|November|Dezember)\w*\.?",
+            "",
+            artist,
+            flags=re.IGNORECASE,
+        )
+        artist = re.sub(
+            r"\d{1,2}\s+(?:Jan|Feb|Mär|Apr|Mai|Jun|Jul|Aug|Sep|Okt|Nov|Dez)\.?",
+            "",
+            artist,
+            flags=re.IGNORECASE,
+        )
         artist = re.sub(r"(?:Beginn|Einlass):\s*\d{1,2}:\d{2}", "", artist)
         artist = re.sub(r"Ausverkauft", "", artist, flags=re.IGNORECASE)
         artist = re.sub(r"\s*\|\s*", " ", artist)
@@ -211,15 +239,33 @@ class HuxleysScraper(BaseScraper):
         page_text = soup.get_text(" ", strip=True).lower()
         tags = []
         genre_keywords = {
-            "rock": "rock", "metal": "metal", "heavy metal": "heavy-metal",
-            "hard rock": "hard-rock", "punk": "punk", "pop": "pop",
-            "hip hop": "hip-hop", "hip-hop": "hip-hop", "rap": "rap",
-            "electronic": "electronic", "techno": "techno", "indie": "indie",
-            "jazz": "jazz", "blues": "blues", "soul": "soul", "funk": "funk",
-            "reggae": "reggae", "ska": "ska", "folk": "folk", "country": "country",
-            "classical": "classical", "singer-songwriter": "singer-songwriter",
-            "comedy": "comedy", "kabarett": "comedy", "stand-up": "comedy",
-            "schlager": "schlager", "deutsch": "german-language",
+            "rock": "rock",
+            "metal": "metal",
+            "heavy metal": "heavy-metal",
+            "hard rock": "hard-rock",
+            "punk": "punk",
+            "pop": "pop",
+            "hip hop": "hip-hop",
+            "hip-hop": "hip-hop",
+            "rap": "rap",
+            "electronic": "electronic",
+            "techno": "techno",
+            "indie": "indie",
+            "jazz": "jazz",
+            "blues": "blues",
+            "soul": "soul",
+            "funk": "funk",
+            "reggae": "reggae",
+            "ska": "ska",
+            "folk": "folk",
+            "country": "country",
+            "classical": "classical",
+            "singer-songwriter": "singer-songwriter",
+            "comedy": "comedy",
+            "kabarett": "comedy",
+            "stand-up": "comedy",
+            "schlager": "schlager",
+            "deutsch": "german-language",
         }
         for keyword, tag in genre_keywords.items():
             if keyword in page_text and tag not in tags:

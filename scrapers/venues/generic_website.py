@@ -41,14 +41,14 @@ EXTRACTION_PROMPT_TEMPLATE = (
     "For each event found, return:\n"
     '{"title": "Event title", "start_time": "ISO 8601 datetime (YYYY-MM-DDTHH:MM:SS) in Berlin time, '
     'or YYYY-MM-DD if no time", "end_time": "ISO 8601 or null", "description": "Short description '
-    '(max 300 chars) or null", "price": "e.g. \'€12\', \'Free\', \'€8-15\', or null", '
+    "(max 300 chars) or null\", \"price\": \"e.g. '€12', 'Free', '€8-15', or null\", "
     '"image_url": "absolute URL or null", "source_url": "event detail URL if available, or null"}\n\n'
     "Rules:\n"
     "- Extract ONLY future events (today or later). Current date: TODAY_PLACEHOLDER.\n"
-    "- Parse German dates: \"Fr. 18. April\", \"18.04.2026\", \"Freitag, 18. April 2026\" etc.\n"
-    "- Parse German times: \"Einlass 20:00, Beginn 21:00\" → start_time uses Beginn, \"Türen 22h\" → 22:00\n"
+    '- Parse German dates: "Fr. 18. April", "18.04.2026", "Freitag, 18. April 2026" etc.\n'
+    '- Parse German times: "Einlass 20:00, Beginn 21:00" → start_time uses Beginn, "Türen 22h" → 22:00\n'
     "- If only a date with no time is given, omit the time portion (just YYYY-MM-DD).\n"
-    "- Prices: \"Eintritt frei\" / \"kostenlos\" → \"Free\", \"VVK €12 / AK €15\" → \"€12-15\", \"ab 8€\" → \"from €8\"\n"
+    '- Prices: "Eintritt frei" / "kostenlos" → "Free", "VVK €12 / AK €15" → "€12-15", "ab 8€" → "from €8"\n'
     "- Image URLs must be absolute (start with http). Convert relative paths using the page's base URL.\n"
     "- Skip past events, recurring schedule descriptions, and non-event content (menus, about pages).\n"
     "- If the HTML contains NO events, return an empty array [].\n\n"
@@ -77,14 +77,16 @@ class GenericWebsiteScraper(BaseScraper):
         for name, config in all_venues.items():
             sources = config.get("sources", {})
             if "website" in sources:
-                venues.append({
-                    "name": name,
-                    "url": sources["website"],
-                    "lat": config.get("lat"),
-                    "lng": config.get("lng"),
-                    "address": config.get("address"),
-                    "neighborhood": config.get("neighborhood", "Neukölln"),
-                })
+                venues.append(
+                    {
+                        "name": name,
+                        "url": sources["website"],
+                        "lat": config.get("lat"),
+                        "lng": config.get("lng"),
+                        "address": config.get("address"),
+                        "neighborhood": config.get("neighborhood", "Neukölln"),
+                    }
+                )
         return venues
 
     def _get_client(self) -> anthropic.Anthropic:
@@ -108,7 +110,9 @@ class GenericWebsiteScraper(BaseScraper):
                 logger.warning("Failed to scrape %s (%s): %s", venue["name"], venue["url"], e)
 
         self._save_cache(cache)
-        logger.info("generic_website: %d total events from %d venues", len(all_events), len(self._venues))
+        logger.info(
+            "generic_website: %d total events from %d venues", len(all_events), len(self._venues)
+        )
         return all_events
 
     def _load_cache(self) -> dict[str, Any]:
@@ -142,7 +146,10 @@ class GenericWebsiteScraper(BaseScraper):
         if cached and cached.get("hash") == content_hash:
             logger.info("%s: page unchanged, skipping extraction", venue["name"])
             return []
-        cache[url] = {"hash": content_hash, "checked_at": datetime.now().isoformat(timespec="seconds")}
+        cache[url] = {
+            "hash": content_hash,
+            "checked_at": datetime.now().isoformat(timespec="seconds"),
+        }
 
         # Layer 1: schema.org JSON-LD — deterministic, free, no hallucination risk
         raw_events = self._extract_jsonld_events(html, url)
@@ -157,22 +164,24 @@ class GenericWebsiteScraper(BaseScraper):
         # Attach venue metadata
         events = []
         for raw in raw_events:
-            events.append({
-                "title": raw.get("title", "").strip(),
-                "venue_name": venue["name"],
-                "lat": venue.get("lat"),
-                "lng": venue.get("lng"),
-                "address": venue.get("address"),
-                "neighborhood": venue.get("neighborhood", "Neukölln"),
-                "start_time": raw.get("start_time"),
-                "end_time": raw.get("end_time"),
-                "description": raw.get("description"),
-                "price": raw.get("price"),
-                "image_url": raw.get("image_url"),
-                "source_url": raw.get("source_url") or url,
-                "source_id": f"{venue['name']}_{raw.get('start_time', '')}_{raw.get('title', '')[:30]}",
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": raw.get("title", "").strip(),
+                    "venue_name": venue["name"],
+                    "lat": venue.get("lat"),
+                    "lng": venue.get("lng"),
+                    "address": venue.get("address"),
+                    "neighborhood": venue.get("neighborhood", "Neukölln"),
+                    "start_time": raw.get("start_time"),
+                    "end_time": raw.get("end_time"),
+                    "description": raw.get("description"),
+                    "price": raw.get("price"),
+                    "image_url": raw.get("image_url"),
+                    "source_url": raw.get("source_url") or url,
+                    "source_id": f"{venue['name']}_{raw.get('start_time', '')}_{raw.get('title', '')[:30]}",
+                    "source": self.source_name,
+                }
+            )
 
         return events
 
@@ -217,15 +226,17 @@ class GenericWebsiteScraper(BaseScraper):
                 image = image[0] if image else None
             if isinstance(image, dict):
                 image = image.get("url")
-            events.append({
-                "title": str(title).strip(),
-                "start_time": start,
-                "end_time": node.get("endDate"),
-                "description": (node.get("description") or "")[:300] or None,
-                "price": f"€{price}" if price not in (None, "", "0", 0) else None,
-                "image_url": urljoin(page_url, image) if image else None,
-                "source_url": urljoin(page_url, node["url"]) if node.get("url") else None,
-            })
+            events.append(
+                {
+                    "title": str(title).strip(),
+                    "start_time": start,
+                    "end_time": node.get("endDate"),
+                    "description": (node.get("description") or "")[:300] or None,
+                    "price": f"€{price}" if price not in (None, "", "0", 0) else None,
+                    "image_url": urljoin(page_url, image) if image else None,
+                    "source_url": urljoin(page_url, node["url"]) if node.get("url") else None,
+                }
+            )
 
         for script in soup.find_all("script", type="application/ld+json"):
             try:
@@ -263,19 +274,19 @@ class GenericWebsiteScraper(BaseScraper):
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=4096,
-            system=[{
-                "type": "text",
-                "text": EXTRACTION_PROMPT_TEMPLATE.replace("TODAY_PLACEHOLDER", today),
-                "cache_control": {"type": "ephemeral"},
-            }],
-            messages=[{
-                "role": "user",
-                "content": (
-                    f"Venue: {venue['name']}\n"
-                    f"Page URL: {page_url}\n\n"
-                    f"HTML:\n{html}"
-                ),
-            }],
+            system=[
+                {
+                    "type": "text",
+                    "text": EXTRACTION_PROMPT_TEMPLATE.replace("TODAY_PLACEHOLDER", today),
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=[
+                {
+                    "role": "user",
+                    "content": (f"Venue: {venue['name']}\nPage URL: {page_url}\n\nHTML:\n{html}"),
+                }
+            ],
         )
 
         raw = message.content[0].text.strip()

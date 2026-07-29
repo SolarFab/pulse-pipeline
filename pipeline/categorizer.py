@@ -24,10 +24,29 @@ logger = logging.getLogger(__name__)
 # Collect new keyword mappings discovered by the LLM
 _new_keyword_mappings: list[dict[str, Any]] = []
 
-CATEGORIES = ["music", "nightlife", "culture", "food", "markets", "workshops", "meetups", "outdoors", "family"]
+CATEGORIES = [
+    "music",
+    "nightlife",
+    "culture",
+    "food",
+    "markets",
+    "workshops",
+    "meetups",
+    "outdoors",
+    "family",
+]
 
 SUBCATEGORIES = {
-    "music": ["jazz-blues", "electronic", "classical", "rock-pop", "hip-hop", "live-concert", "world-folk", "latin"],
+    "music": [
+        "jazz-blues",
+        "electronic",
+        "classical",
+        "rock-pop",
+        "hip-hop",
+        "live-concert",
+        "world-folk",
+        "latin",
+    ],
     "nightlife": ["club-night", "bar-event", "party", "comedy", "karaoke"],
     "culture": ["exhibition", "theater", "cinema", "reading", "gallery", "festival"],
     "food": ["brunch", "tasting", "pop-up", "dining-event", "food-market", "weekly-market"],
@@ -132,6 +151,7 @@ def normalize_subcategory(category: str | None, sub: str | None) -> str | None:
         return key
     return None
 
+
 SYSTEM_PROMPT = """\
 You are a Berlin event categorization assistant. Given event data, assign the best category, subcategory, and relevant English tags.
 
@@ -215,10 +235,12 @@ def _parse_tags(raw_tags: list) -> list[str]:
             if en_tag:
                 en_tags.append(en_tag)
                 if de_keywords:
-                    _new_keyword_mappings.append({
-                        "tag": en_tag,
-                        "de": de_keywords if isinstance(de_keywords, list) else [de_keywords],
-                    })
+                    _new_keyword_mappings.append(
+                        {
+                            "tag": en_tag,
+                            "de": de_keywords if isinstance(de_keywords, list) else [de_keywords],
+                        }
+                    )
         elif isinstance(tag_entry, str):
             en_tags.append(tag_entry)
     return en_tags
@@ -243,7 +265,9 @@ def _apply_result(event: dict[str, Any], result: dict[str, Any]) -> None:
 
 
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-def _categorize_batch_call(client: anthropic.Anthropic, events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def _categorize_batch_call(
+    client: anthropic.Anthropic, events: list[dict[str, Any]]
+) -> list[dict[str, Any]]:
     """
     Send a batch of events to Claude and return parsed results.
     Uses prompt caching for the system prompt.
@@ -254,11 +278,13 @@ def _categorize_batch_call(client: anthropic.Anthropic, events: list[dict[str, A
     message = client.messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=4096,
-        system=[{
-            "type": "text",
-            "text": SYSTEM_PROMPT,
-            "cache_control": {"type": "ephemeral"},
-        }],
+        system=[
+            {
+                "type": "text",
+                "text": SYSTEM_PROMPT,
+                "cache_control": {"type": "ephemeral"},
+            }
+        ],
         messages=[{"role": "user", "content": user_content}],
     )
 
@@ -284,12 +310,19 @@ def categorize_event(event: dict[str, Any]) -> dict[str, Any]:
     Categorize a single event via LLM. Kept for backwards compatibility.
     Prefer categorize_batch() for efficiency.
     """
-    if event.get("category") and event.get("subcategory") and event.get("tags") and event.get("quality_score") is not None:
+    if (
+        event.get("category")
+        and event.get("subcategory")
+        and event.get("tags")
+        and event.get("quality_score") is not None
+    ):
         return event
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
-        logger.warning("No ANTHROPIC_API_KEY — skipping categorization for '%s'", event.get("title"))
+        logger.warning(
+            "No ANTHROPIC_API_KEY — skipping categorization for '%s'", event.get("title")
+        )
         return event
 
     client = anthropic.Anthropic(api_key=api_key)
@@ -306,20 +339,21 @@ def categorize_event(event: dict[str, Any]) -> dict[str, Any]:
 def categorize_batch(events: list[dict[str, Any]], max_llm: int = 2500) -> list[dict[str, Any]]:
     """Categorize a list of events. Skips already-categorized ones."""
     needs_categorization = [
-        e for e in events
-        if not (e.get("category") and e.get("subcategory") and e.get("tags"))
+        e for e in events if not (e.get("category") and e.get("subcategory") and e.get("tags"))
     ]
     already_done = [
-        e for e in events
-        if e.get("category") and e.get("subcategory") and e.get("tags")
+        e for e in events if e.get("category") and e.get("subcategory") and e.get("tags")
     ]
 
-    logger.info("Categorizing %d events (%d already done)", len(needs_categorization), len(already_done))
+    logger.info(
+        "Categorizing %d events (%d already done)", len(needs_categorization), len(already_done)
+    )
 
     if len(needs_categorization) > max_llm:
         logger.info(
             "Too many to categorize (%d > %d). Run categorizer separately or increase max_llm.",
-            len(needs_categorization), max_llm,
+            len(needs_categorization),
+            max_llm,
         )
         return events
 
@@ -412,7 +446,9 @@ def save_new_keywords(mappings: list[dict[str, Any]]) -> None:
         json.dump(existing, f, indent=2, ensure_ascii=False, sort_keys=True)
 
     total_new = sum(len(v) for v in new_entries.values())
-    logger.info("Saved %d new keyword mappings (%d tags) to %s", total_new, len(new_entries), output_path)
+    logger.info(
+        "Saved %d new keyword mappings (%d tags) to %s", total_new, len(new_entries), output_path
+    )
 
 
 def merge_new_keywords_into_taxonomy() -> int:
@@ -442,6 +478,7 @@ def merge_new_keywords_into_taxonomy() -> int:
 
     # Clear the compiled patterns cache so new keywords take effect
     from pipeline.taxonomy import _COMPILED_TAG_PATTERNS
+
     _COMPILED_TAG_PATTERNS.clear()
 
     logger.info("Merged %d new keywords into TAG_KEYWORDS", added)

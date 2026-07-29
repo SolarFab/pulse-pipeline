@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -59,8 +59,8 @@ class ResidentAdvisorScraper(BaseScraper):
         # 28-day window (RA_WINDOW_DAYS to override) — nightlife is the app's
         # core content and 14 days kept coverage far below other sources
         window_days = int(os.environ.get("RA_WINDOW_DAYS", "28"))
-        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        end_date = (datetime.now(timezone.utc) + timedelta(days=window_days)).strftime("%Y-%m-%d")
+        today = datetime.now(UTC).strftime("%Y-%m-%d")
+        end_date = (datetime.now(UTC) + timedelta(days=window_days)).strftime("%Y-%m-%d")
 
         events = []
         page = 1
@@ -144,8 +144,10 @@ class ResidentAdvisorScraper(BaseScraper):
             # RA event ID → URL
             ra_id = event.get("id")
             content_url = event.get("contentUrl")
-            source_url = f"https://ra.co{content_url}" if content_url else (
-                f"https://ra.co/events/{ra_id}" if ra_id else None
+            source_url = (
+                f"https://ra.co{content_url}"
+                if content_url
+                else (f"https://ra.co/events/{ra_id}" if ra_id else None)
             )
 
             # Description from RA content + artist lineup

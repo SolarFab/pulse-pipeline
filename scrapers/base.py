@@ -87,15 +87,24 @@ class BaseScraper(ABC):
             # Check in batches (Supabase .in_() has limits)
             for i in range(0, len(fingerprints), 500):
                 batch_fps = fingerprints[i : i + 500]
-                result = client.table("events").select("fingerprint").in_(
-                    "fingerprint", batch_fps
-                ).not_.is_("category", "null").not_.is_("tags", "null").execute()
+                result = (
+                    client.table("events")
+                    .select("fingerprint")
+                    .in_("fingerprint", batch_fps)
+                    .not_.is_("category", "null")
+                    .not_.is_("tags", "null")
+                    .execute()
+                )
                 for row in result.data or []:
                     existing_fps.add(row["fingerprint"])
 
         new_events = [e for e in normalised if e.get("fingerprint") not in existing_fps]
         existing_events = [e for e in normalised if e.get("fingerprint") in existing_fps]
-        self.logger.info("New: %d, already categorized in DB: %d (skipping LLM)", len(new_events), len(existing_events))
+        self.logger.info(
+            "New: %d, already categorized in DB: %d (skipping LLM)",
+            len(new_events),
+            len(existing_events),
+        )
 
         # Geocode (fills in missing lat/lng)
         geocode_inline(new_events)

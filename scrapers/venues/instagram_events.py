@@ -48,20 +48,20 @@ EXTRACTION_PROMPT_TEMPLATE = (
     '{"title": "Event title or name", "start_time": "ISO 8601 datetime (YYYY-MM-DDTHH:MM:SS) '
     'in Berlin time, or YYYY-MM-DD if no time", "end_time": "ISO 8601 or null", '
     '"description": "Short description (max 300 chars) or null", '
-    '"price": "e.g. \'€12\', \'Free\', \'€8-15\', or null", '
+    "\"price\": \"e.g. '€12', 'Free', '€8-15', or null\", "
     '"image_url": "from post data, or null", "post_url": "Instagram post URL"}\n\n'
     "Rules:\n"
     "- Current date: TODAY_PLACEHOLDER\n"
     "- Current year: YEAR_PLACEHOLDER\n"
     "- ONLY extract posts that announce a specific event with a date. Skip:\n"
-    "  - General atmosphere/vibe posts (\"great night last weekend\")\n"
+    '  - General atmosphere/vibe posts ("great night last weekend")\n'
     "  - Menu updates, hiring posts, holiday greetings\n"
-    "  - Recurring schedule announcements without a specific date (\"every Thursday\")\n"
+    '  - Recurring schedule announcements without a specific date ("every Thursday")\n'
     "  - Past events (dates before today)\n"
-    "- Parse German dates and times: \"Fr. 18. April\", \"18.04.\", \"Freitag 21h\", \"Doors 22:00\"\n"
-    "- If a post says \"morgen\" or \"heute\", calculate from the post date, not today.\n"
+    '- Parse German dates and times: "Fr. 18. April", "18.04.", "Freitag 21h", "Doors 22:00"\n'
+    '- If a post says "morgen" or "heute", calculate from the post date, not today.\n'
     "- If year is missing, assume current year.\n"
-    "- \"Eintritt frei\" / \"free entry\" -> price: \"Free\"\n"
+    '- "Eintritt frei" / "free entry" -> price: "Free"\n'
     "- Return an empty array [] if NO posts contain event announcements.\n\n"
     "Return ONLY a JSON array. No explanation."
 )
@@ -93,14 +93,16 @@ class InstagramEventsScraper(BaseScraper):
             # Skip venues already covered by website or RA scrapers
             if "website" in sources or "ra" in sources:
                 continue
-            venues.append({
-                "name": name,
-                "instagram": sources["instagram"],
-                "lat": config.get("lat"),
-                "lng": config.get("lng"),
-                "address": config.get("address"),
-                "neighborhood": config.get("neighborhood", "Neukölln"),
-            })
+            venues.append(
+                {
+                    "name": name,
+                    "instagram": sources["instagram"],
+                    "lat": config.get("lat"),
+                    "lng": config.get("lng"),
+                    "address": config.get("address"),
+                    "neighborhood": config.get("neighborhood", "Neukölln"),
+                }
+            )
         return venues
 
     def _get_apify(self) -> ApifyClient:
@@ -139,7 +141,13 @@ class InstagramEventsScraper(BaseScraper):
             try:
                 events = self._extract_events_for_venue(posts, venue)
                 all_events.extend(events)
-                logger.info("@%s (%s): %d events from %d posts", handle, venue["name"], len(events), len(posts))
+                logger.info(
+                    "@%s (%s): %d events from %d posts",
+                    handle,
+                    venue["name"],
+                    len(events),
+                    len(posts),
+                )
             except Exception as e:
                 logger.warning("LLM extraction failed for @%s: %s", handle, e)
 
@@ -169,7 +177,9 @@ class InstagramEventsScraper(BaseScraper):
             timestamp = item.get("timestamp")
             if timestamp:
                 try:
-                    post_date = datetime.fromisoformat(timestamp.replace("Z", "+00:00")).replace(tzinfo=None)
+                    post_date = datetime.fromisoformat(timestamp.replace("Z", "+00:00")).replace(
+                        tzinfo=None
+                    )
                     if post_date < cutoff:
                         continue
                 except (ValueError, TypeError):
@@ -183,7 +193,8 @@ class InstagramEventsScraper(BaseScraper):
                 "caption": caption[:1000],
                 "date": (timestamp or "")[:10],
                 "image_url": item.get("displayUrl"),
-                "post_url": item.get("url") or f"https://www.instagram.com/p/{item.get('shortCode', '')}/",
+                "post_url": item.get("url")
+                or f"https://www.instagram.com/p/{item.get('shortCode', '')}/",
             }
 
             if owner not in posts_by_handle:
@@ -202,22 +213,25 @@ class InstagramEventsScraper(BaseScraper):
             title = raw.get("title", "").strip()
             if not title:
                 continue
-            events.append({
-                "title": title,
-                "venue_name": venue["name"],
-                "lat": venue.get("lat"),
-                "lng": venue.get("lng"),
-                "address": venue.get("address"),
-                "neighborhood": venue.get("neighborhood", "Neukölln"),
-                "start_time": raw.get("start_time"),
-                "end_time": raw.get("end_time"),
-                "description": raw.get("description"),
-                "price": raw.get("price"),
-                "image_url": raw.get("image_url"),
-                "source_url": raw.get("post_url") or f"https://www.instagram.com/{venue['instagram']}/",
-                "source_id": f"ig_{venue['instagram']}_{raw.get('start_time', '')}_{title[:20]}",
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": title,
+                    "venue_name": venue["name"],
+                    "lat": venue.get("lat"),
+                    "lng": venue.get("lng"),
+                    "address": venue.get("address"),
+                    "neighborhood": venue.get("neighborhood", "Neukölln"),
+                    "start_time": raw.get("start_time"),
+                    "end_time": raw.get("end_time"),
+                    "description": raw.get("description"),
+                    "price": raw.get("price"),
+                    "image_url": raw.get("image_url"),
+                    "source_url": raw.get("post_url")
+                    or f"https://www.instagram.com/{venue['instagram']}/",
+                    "source_id": f"ig_{venue['instagram']}_{raw.get('start_time', '')}_{title[:20]}",
+                    "source": self.source_name,
+                }
+            )
 
         return events
 
@@ -235,23 +249,29 @@ class InstagramEventsScraper(BaseScraper):
             posts_text += f"Image: {p['image_url']}\n"
             posts_text += f"Link: {p['post_url']}\n"
 
-        prompt = EXTRACTION_PROMPT_TEMPLATE.replace("TODAY_PLACEHOLDER", today).replace("YEAR_PLACEHOLDER", year)
+        prompt = EXTRACTION_PROMPT_TEMPLATE.replace("TODAY_PLACEHOLDER", today).replace(
+            "YEAR_PLACEHOLDER", year
+        )
 
         message = client.messages.create(
             model="claude-haiku-4-5-20251001",
             max_tokens=4096,
-            system=[{
-                "type": "text",
-                "text": prompt,
-                "cache_control": {"type": "ephemeral"},
-            }],
-            messages=[{
-                "role": "user",
-                "content": (
-                    f"Venue: {venue['name']} (@{venue['instagram']})\n\n"
-                    f"Recent Instagram posts:\n{posts_text}"
-                ),
-            }],
+            system=[
+                {
+                    "type": "text",
+                    "text": prompt,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=[
+                {
+                    "role": "user",
+                    "content": (
+                        f"Venue: {venue['name']} (@{venue['instagram']})\n\n"
+                        f"Recent Instagram posts:\n{posts_text}"
+                    ),
+                }
+            ],
         )
 
         raw = message.content[0].text.strip()

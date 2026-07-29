@@ -15,7 +15,7 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -77,7 +77,7 @@ class PlanetariumScraper(BaseScraper):
 
         # Expand each show into individual events per date
         events: list[dict[str, Any]] = []
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         for show in all_shows:
             event_times = show.get("event_times") or []
@@ -92,9 +92,7 @@ class PlanetariumScraper(BaseScraper):
         logger.info("Expanded to %d individual events", len(events))
         return events
 
-    def _parse_showtime(
-        self, show: dict, event_time: dict, now: datetime
-    ) -> dict[str, Any] | None:
+    def _parse_showtime(self, show: dict, event_time: dict, now: datetime) -> dict[str, Any] | None:
         try:
             title = (show.get("title_de") or show.get("title_en") or "").strip()
             if not title:
@@ -122,11 +120,13 @@ class PlanetariumScraper(BaseScraper):
             # Venue
             venue_name = show.get("location_name") or "Zeiss-Großplanetarium"
             address = ", ".join(
-                str(x) for x in [
+                str(x)
+                for x in [
                     show.get("street_address"),
                     show.get("postal_code"),
                     show.get("city", "Berlin"),
-                ] if x
+                ]
+                if x
             )
 
             # Coordinates (some venues return empty strings)

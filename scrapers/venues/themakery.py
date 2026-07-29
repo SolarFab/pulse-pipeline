@@ -37,9 +37,22 @@ CATEGORY_MAP = {
 }
 
 MONTH_MAP = {
-    "jan": 1, "feb": 2, "mär": 3, "mar": 3, "apr": 4,
-    "mai": 5, "may": 5, "jun": 6, "jul": 7, "aug": 8,
-    "sep": 9, "okt": 10, "oct": 10, "nov": 11, "dez": 12, "dec": 12,
+    "jan": 1,
+    "feb": 2,
+    "mär": 3,
+    "mar": 3,
+    "apr": 4,
+    "mai": 5,
+    "may": 5,
+    "jun": 6,
+    "jul": 7,
+    "aug": 8,
+    "sep": 9,
+    "okt": 10,
+    "oct": 10,
+    "nov": 11,
+    "dez": 12,
+    "dec": 12,
 }
 
 
@@ -57,9 +70,7 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
             return None
 
         # Title
-        name_match = re.search(
-            r'class="name[^"]*"[^>]*>\s*(.+?)\s*</p>', html, re.DOTALL
-        )
+        name_match = re.search(r'class="name[^"]*"[^>]*>\s*(.+?)\s*</p>', html, re.DOTALL)
         title = name_match.group(1).strip() if name_match else None
         if not title:
             return None
@@ -69,18 +80,21 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
         makery_cat = cat_match.group(1).strip() if cat_match else ""
 
         # Price
-        price_match = re.search(r'(\d+(?:,\d+)?)\s*€', html)
+        price_match = re.search(r"(\d+(?:,\d+)?)\s*€", html)
         price_str = price_match.group(0) if price_match else None
         price_cents = None
         if price_match:
             price_cents = int(float(price_match.group(1).replace(",", ".")) * 100)
 
         # Duration
-        duration_match = re.search(r'(\d+)\s*<span>\s*Min\.\s*</span>', html)
+        duration_match = re.search(r"(\d+)\s*<span>\s*Min\.\s*</span>", html)
         duration_min = int(duration_match.group(1)) if duration_match else None
 
         # Next date — "09. Apr." or "09. Apr.   + 571 verfügbare Termine" or "ausgebucht"
-        date_match = re.search(r'(\d{1,2})\.\s*(\w{3,4})\.?', html[html.rfind("text-12-16"):] if "text-12-16" in html else html)
+        date_match = re.search(
+            r"(\d{1,2})\.\s*(\w{3,4})\.?",
+            html[html.rfind("text-12-16") :] if "text-12-16" in html else html,
+        )
         start_time = None
         if date_match:
             day = int(date_match.group(1))
@@ -100,14 +114,15 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
         # Fallback: workshops are bookable anytime — use tomorrow 10:00
         if not start_time:
             from datetime import timedelta
-            dt = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0) + timedelta(days=1)
+
+            dt = datetime.now().replace(hour=10, minute=0, second=0, microsecond=0) + timedelta(
+                days=1
+            )
             start_time = dt.isoformat()
 
         # Neighborhood — appears after "Berlin" tag
         neighborhood = None
-        hood_matches = re.findall(
-            r'bg-lightgray[^>]*>\s*([^<]+?)\s*</div>', html
-        )
+        hood_matches = re.findall(r"bg-lightgray[^>]*>\s*([^<]+?)\s*</div>", html)
         for i, m in enumerate(hood_matches):
             if m.strip() == "Berlin" and i + 1 < len(hood_matches):
                 candidate = hood_matches[i + 1].strip()
@@ -116,7 +131,7 @@ def _parse_workshop_html(html: str) -> dict[str, Any] | None:
                     break
 
         # Language
-        lang_match = re.search(r'bg-lightgray[^>]*>\s*(Englisch|Deutsch)\s*</div>', html)
+        lang_match = re.search(r"bg-lightgray[^>]*>\s*(Englisch|Deutsch)\s*</div>", html)
         language = lang_match.group(1) if lang_match else None
 
         # Image
@@ -225,8 +240,9 @@ class TheMakeryScraper(BaseScraper):
 
     def _enrich_from_detail_pages(self, events: list[dict[str, Any]]) -> None:
         """Fetch detail pages to get descriptions and addresses."""
-        import httpx
         import time
+
+        import httpx
 
         enriched = 0
         for i, event in enumerate(events):
@@ -248,7 +264,7 @@ class TheMakeryScraper(BaseScraper):
 
                 # Address — look for street pattern in text
                 addr = re.search(
-                    r'(\w[\w\s.-]+(?:Str(?:aße|\.)|straße|weg|platz|allee|damm|ufer)\s*\d+[^,<]{0,30},\s*\d{5}\s*Berlin)',
+                    r"(\w[\w\s.-]+(?:Str(?:aße|\.)|straße|weg|platz|allee|damm|ufer)\s*\d+[^,<]{0,30},\s*\d{5}\s*Berlin)",
                     html,
                 )
                 if addr:

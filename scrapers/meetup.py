@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -93,7 +93,7 @@ class MeetupScraper(BaseScraper):
 
         events = []
         cursor = None
-        now_iso = datetime.now(timezone.utc).isoformat()
+        now_iso = datetime.now(UTC).isoformat()
 
         while True:
             variables = {
@@ -107,6 +107,7 @@ class MeetupScraper(BaseScraper):
 
             try:
                 import httpx
+
                 with httpx.Client(timeout=30) as client:
                     resp = client.post(
                         GRAPHQL_URL,

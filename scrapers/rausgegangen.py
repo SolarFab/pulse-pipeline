@@ -26,7 +26,7 @@ CATEGORY_PAGES = {
     f"{BASE_URL}/berlin/kategorie/party/": "nightlife",
     f"{BASE_URL}/berlin/kategorie/markt/": "markets",
     f"{BASE_URL}/berlin/kategorie/theater/": "culture",
-    f"{BASE_URL}/berlin/tipps-fuer-heute/": None,      # mixed, let categorizer decide
+    f"{BASE_URL}/berlin/tipps-fuer-heute/": None,  # mixed, let categorizer decide
     f"{BASE_URL}/berlin/tipps-fuers-wochenende/": None,
 }
 
@@ -78,7 +78,9 @@ class RausgegangeScraper(BaseScraper):
 
             new_urls = [u for u in event_urls if u not in seen_urls]
             seen_urls.update(new_urls)
-            logger.info("rausgegangen: %s → %d new event URLs", page_url.split("/")[-2], len(new_urls))
+            logger.info(
+                "rausgegangen: %s → %d new event URLs", page_url.split("/")[-2], len(new_urls)
+            )
 
             for url in new_urls[:50]:
                 event = self._scrape_event_page(url)
@@ -145,7 +147,11 @@ class RausgegangeScraper(BaseScraper):
                 location = data.get("location") or {}
                 venue_name = location.get("name", "").strip() or "Unknown"
                 address_obj = location.get("address") or {}
-                address = address_obj.get("streetAddress", "") or address_obj if isinstance(address_obj, str) else ""
+                address = (
+                    address_obj.get("streetAddress", "") or address_obj
+                    if isinstance(address_obj, str)
+                    else ""
+                )
                 geo = location.get("geo") or {}
                 lat = geo.get("latitude")
                 lng = geo.get("longitude")
@@ -165,7 +171,11 @@ class RausgegangeScraper(BaseScraper):
                         price = "Free" if float(p) == 0 else f"{currency}{p}"
 
                 image = data.get("image")
-                image_url = image if isinstance(image, str) else (image[0] if isinstance(image, list) and image else None)
+                image_url = (
+                    image
+                    if isinstance(image, str)
+                    else (image[0] if isinstance(image, list) and image else None)
+                )
 
                 # Category from URL slug
                 slug = source_url.rstrip("/").split("/")[-1]

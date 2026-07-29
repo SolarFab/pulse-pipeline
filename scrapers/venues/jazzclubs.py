@@ -22,37 +22,196 @@ BASE_URL = "https://jazzity.net"
 
 # Known venue coordinates (from jazzity's Google Maps embeds + manual lookup)
 VENUE_INFO: dict[str, dict[str, Any]] = {
-    "atrane": {"name": "A-Trane", "address": "Bleibtreustraße 1, 10625 Berlin", "lat": 52.5070, "lng": 13.3190, "neighborhood": "Charlottenburg"},
-    "bflat": {"name": "b-flat", "address": "Dircksenstraße 40, 10178 Berlin", "lat": 52.5228, "lng": 13.4094, "neighborhood": "Mitte"},
-    "zigzag": {"name": "Zig Zag Jazz Club", "address": "Hauptstraße 12, 10827 Berlin", "lat": 52.4858, "lng": 13.3544, "neighborhood": "Schöneberg"},
-    "quasimodo": {"name": "Quasimodo", "address": "Kantstraße 12a, 10623 Berlin", "lat": 52.5048, "lng": 13.3254, "neighborhood": "Charlottenburg"},
-    "yorck": {"name": "Yorckschlösschen", "address": "Yorckstraße 15, 10965 Berlin", "lat": 52.4930, "lng": 13.3810, "neighborhood": "Kreuzberg"},
-    "schlot": {"name": "Kunstfabrik Schlot", "address": "Invalidenstraße 117, 10115 Berlin", "lat": 52.5320, "lng": 13.3770, "neighborhood": "Mitte"},
-    "baden": {"name": "Badenscher Hof", "address": "Badensche Str. 29, 10715 Berlin", "lat": 52.4850, "lng": 13.3330, "neighborhood": "Wilmersdorf"},
-    "hatbar": {"name": "The Hat Bar", "address": "Lychener Str. 49, 10437 Berlin", "lat": 52.5430, "lng": 13.4150, "neighborhood": "Prenzlauer Berg"},
-    "zosch": {"name": "Zosch", "address": "Tucholskystraße 30, 10117 Berlin", "lat": 52.5260, "lng": 13.3938, "neighborhood": "Mitte"},
-    "donau": {"name": "Donau115", "address": "Donaustraße 115, 12043 Berlin", "lat": 52.4830, "lng": 13.4350, "neighborhood": "Neukölln"},
-    "sowieso": {"name": "Sowieso", "address": "Weisestraße 24, 12049 Berlin", "lat": 52.4770, "lng": 13.4240, "neighborhood": "Neukölln"},
-    "klunkerkranich": {"name": "Klunkerkranich", "address": "Karl-Marx-Str. 66, 12043 Berlin", "lat": 52.4812, "lng": 13.4345, "neighborhood": "Neukölln"},
-    "spinnrad": {"name": "Spinnrad", "address": "Wühlischstraße 34, 10245 Berlin", "lat": 52.5070, "lng": 13.4620, "neighborhood": "Friedrichshain"},
-    "cookiescream": {"name": "Cookies Cream", "address": "Behrenstraße 55, 10117 Berlin", "lat": 52.5160, "lng": 13.3890, "neighborhood": "Mitte"},
-    "bartausend": {"name": "Bar Tausend", "address": "Schiffbauerdamm 11, 10117 Berlin", "lat": 52.5210, "lng": 13.3860, "neighborhood": "Mitte"},
-    "tasso": {"name": "Cafe Tasso", "address": "Frankfurter Allee 11, 10247 Berlin", "lat": 52.5130, "lng": 13.4510, "neighborhood": "Friedrichshain"},
-    "panda": {"name": "PANDA platforma", "address": "Knaackstraße 97, 10435 Berlin", "lat": 52.5380, "lng": 13.4180, "neighborhood": "Prenzlauer Berg"},
-    "jtkarlshorst": {"name": "Jazz Treff Karlshorst", "address": "Treskowallee 112, 10318 Berlin", "lat": 52.4860, "lng": 13.5260, "neighborhood": "Karlshorst"},
-    "orania": {"name": "Orania Berlin", "address": "Oranienplatz 17, 10999 Berlin", "lat": 52.5020, "lng": 13.4180, "neighborhood": "Kreuzberg"},
-    "kuehlspot": {"name": "Kühlspot Social Club", "address": "Lehderstraße 74-79, 13086 Berlin", "lat": 52.5550, "lng": 13.4530, "neighborhood": "Weißensee"},
-    "barbobu": {"name": "Bar Bobu", "address": "Weserstraße 43, 12045 Berlin", "lat": 52.4870, "lng": 13.4370, "neighborhood": "Neukölln"},
-    "peppi": {"name": "Peppi Guggenheim", "address": "Karl-Marx-Allee 96, 10243 Berlin", "lat": 52.5170, "lng": 13.4390, "neighborhood": "Friedrichshain"},
-    "bierhausurban": {"name": "Bierhaus Urban", "address": "Graefestraße 29, 10967 Berlin", "lat": 52.4900, "lng": 13.4100, "neighborhood": "Kreuzberg"},
-    "dujardin": {"name": "Cafe Dujardin", "address": "Böckhstraße 37, 10967 Berlin", "lat": 52.4910, "lng": 13.4170, "neighborhood": "Kreuzberg"},
-    "jazzscheune": {"name": "Wittenauer Jazz-Scheune", "address": "Alt-Wittenau 70, 13437 Berlin", "lat": 52.5960, "lng": 13.3260, "neighborhood": "Wittenau"},
+    "atrane": {
+        "name": "A-Trane",
+        "address": "Bleibtreustraße 1, 10625 Berlin",
+        "lat": 52.5070,
+        "lng": 13.3190,
+        "neighborhood": "Charlottenburg",
+    },
+    "bflat": {
+        "name": "b-flat",
+        "address": "Dircksenstraße 40, 10178 Berlin",
+        "lat": 52.5228,
+        "lng": 13.4094,
+        "neighborhood": "Mitte",
+    },
+    "zigzag": {
+        "name": "Zig Zag Jazz Club",
+        "address": "Hauptstraße 12, 10827 Berlin",
+        "lat": 52.4858,
+        "lng": 13.3544,
+        "neighborhood": "Schöneberg",
+    },
+    "quasimodo": {
+        "name": "Quasimodo",
+        "address": "Kantstraße 12a, 10623 Berlin",
+        "lat": 52.5048,
+        "lng": 13.3254,
+        "neighborhood": "Charlottenburg",
+    },
+    "yorck": {
+        "name": "Yorckschlösschen",
+        "address": "Yorckstraße 15, 10965 Berlin",
+        "lat": 52.4930,
+        "lng": 13.3810,
+        "neighborhood": "Kreuzberg",
+    },
+    "schlot": {
+        "name": "Kunstfabrik Schlot",
+        "address": "Invalidenstraße 117, 10115 Berlin",
+        "lat": 52.5320,
+        "lng": 13.3770,
+        "neighborhood": "Mitte",
+    },
+    "baden": {
+        "name": "Badenscher Hof",
+        "address": "Badensche Str. 29, 10715 Berlin",
+        "lat": 52.4850,
+        "lng": 13.3330,
+        "neighborhood": "Wilmersdorf",
+    },
+    "hatbar": {
+        "name": "The Hat Bar",
+        "address": "Lychener Str. 49, 10437 Berlin",
+        "lat": 52.5430,
+        "lng": 13.4150,
+        "neighborhood": "Prenzlauer Berg",
+    },
+    "zosch": {
+        "name": "Zosch",
+        "address": "Tucholskystraße 30, 10117 Berlin",
+        "lat": 52.5260,
+        "lng": 13.3938,
+        "neighborhood": "Mitte",
+    },
+    "donau": {
+        "name": "Donau115",
+        "address": "Donaustraße 115, 12043 Berlin",
+        "lat": 52.4830,
+        "lng": 13.4350,
+        "neighborhood": "Neukölln",
+    },
+    "sowieso": {
+        "name": "Sowieso",
+        "address": "Weisestraße 24, 12049 Berlin",
+        "lat": 52.4770,
+        "lng": 13.4240,
+        "neighborhood": "Neukölln",
+    },
+    "klunkerkranich": {
+        "name": "Klunkerkranich",
+        "address": "Karl-Marx-Str. 66, 12043 Berlin",
+        "lat": 52.4812,
+        "lng": 13.4345,
+        "neighborhood": "Neukölln",
+    },
+    "spinnrad": {
+        "name": "Spinnrad",
+        "address": "Wühlischstraße 34, 10245 Berlin",
+        "lat": 52.5070,
+        "lng": 13.4620,
+        "neighborhood": "Friedrichshain",
+    },
+    "cookiescream": {
+        "name": "Cookies Cream",
+        "address": "Behrenstraße 55, 10117 Berlin",
+        "lat": 52.5160,
+        "lng": 13.3890,
+        "neighborhood": "Mitte",
+    },
+    "bartausend": {
+        "name": "Bar Tausend",
+        "address": "Schiffbauerdamm 11, 10117 Berlin",
+        "lat": 52.5210,
+        "lng": 13.3860,
+        "neighborhood": "Mitte",
+    },
+    "tasso": {
+        "name": "Cafe Tasso",
+        "address": "Frankfurter Allee 11, 10247 Berlin",
+        "lat": 52.5130,
+        "lng": 13.4510,
+        "neighborhood": "Friedrichshain",
+    },
+    "panda": {
+        "name": "PANDA platforma",
+        "address": "Knaackstraße 97, 10435 Berlin",
+        "lat": 52.5380,
+        "lng": 13.4180,
+        "neighborhood": "Prenzlauer Berg",
+    },
+    "jtkarlshorst": {
+        "name": "Jazz Treff Karlshorst",
+        "address": "Treskowallee 112, 10318 Berlin",
+        "lat": 52.4860,
+        "lng": 13.5260,
+        "neighborhood": "Karlshorst",
+    },
+    "orania": {
+        "name": "Orania Berlin",
+        "address": "Oranienplatz 17, 10999 Berlin",
+        "lat": 52.5020,
+        "lng": 13.4180,
+        "neighborhood": "Kreuzberg",
+    },
+    "kuehlspot": {
+        "name": "Kühlspot Social Club",
+        "address": "Lehderstraße 74-79, 13086 Berlin",
+        "lat": 52.5550,
+        "lng": 13.4530,
+        "neighborhood": "Weißensee",
+    },
+    "barbobu": {
+        "name": "Bar Bobu",
+        "address": "Weserstraße 43, 12045 Berlin",
+        "lat": 52.4870,
+        "lng": 13.4370,
+        "neighborhood": "Neukölln",
+    },
+    "peppi": {
+        "name": "Peppi Guggenheim",
+        "address": "Karl-Marx-Allee 96, 10243 Berlin",
+        "lat": 52.5170,
+        "lng": 13.4390,
+        "neighborhood": "Friedrichshain",
+    },
+    "bierhausurban": {
+        "name": "Bierhaus Urban",
+        "address": "Graefestraße 29, 10967 Berlin",
+        "lat": 52.4900,
+        "lng": 13.4100,
+        "neighborhood": "Kreuzberg",
+    },
+    "dujardin": {
+        "name": "Cafe Dujardin",
+        "address": "Böckhstraße 37, 10967 Berlin",
+        "lat": 52.4910,
+        "lng": 13.4170,
+        "neighborhood": "Kreuzberg",
+    },
+    "jazzscheune": {
+        "name": "Wittenauer Jazz-Scheune",
+        "address": "Alt-Wittenau 70, 13437 Berlin",
+        "lat": 52.5960,
+        "lng": 13.3260,
+        "neighborhood": "Wittenau",
+    },
 }
 
 MONTHS = {
-    "January": 1, "February": 2, "March": 3, "April": 4,
-    "May": 5, "June": 6, "July": 7, "August": 8,
-    "September": 9, "October": 10, "November": 11, "December": 12,
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
+    "May": 5,
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12,
 }
 
 
@@ -132,8 +291,13 @@ class JazzclubsScraper(BaseScraper):
             return None
 
         try:
-            dt = datetime(int(year_str), month_num, int(day_num),
-                         int(time_str.split(":")[0]), int(time_str.split(":")[1]))
+            dt = datetime(
+                int(year_str),
+                month_num,
+                int(day_num),
+                int(time_str.split(":")[0]),
+                int(time_str.split(":")[1]),
+            )
             start_time = dt.isoformat()
         except (ValueError, IndexError):
             return None
@@ -203,7 +367,9 @@ class JazzclubsScraper(BaseScraper):
             if m:
                 prog_id = m.group(1)
 
-        source_id = f"jazzity-{prog_id}" if prog_id else f"jazzity-{club_slug}-{dt.strftime('%Y%m%d-%H%M')}"
+        source_id = (
+            f"jazzity-{prog_id}" if prog_id else f"jazzity-{club_slug}-{dt.strftime('%Y%m%d-%H%M')}"
+        )
 
         return {
             "title": title,
@@ -247,8 +413,20 @@ class JazzclubsScraper(BaseScraper):
         time_str = m.group(3)
 
         # Map 3-letter month abbreviations
-        month_map = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6,
-                     "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
+        month_map = {
+            "Jan": 1,
+            "Feb": 2,
+            "Mar": 3,
+            "Apr": 4,
+            "May": 5,
+            "Jun": 6,
+            "Jul": 7,
+            "Aug": 8,
+            "Sep": 9,
+            "Oct": 10,
+            "Nov": 11,
+            "Dec": 12,
+        }
         month = month_map.get(month_abbr)
         if not month:
             return None
@@ -259,8 +437,9 @@ class JazzclubsScraper(BaseScraper):
             year += 1
 
         try:
-            dt = datetime(year, month, day,
-                         int(time_str.split(":")[0]), int(time_str.split(":")[1]))
+            dt = datetime(
+                year, month, day, int(time_str.split(":")[0]), int(time_str.split(":")[1])
+            )
         except ValueError:
             return None
 

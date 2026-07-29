@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import logging
 import re
-from datetime import datetime, timezone
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -175,8 +174,11 @@ class BandsintownScraper(BaseScraper):
             elif not sid:
                 unique.append(ev)
 
-        logger.info("bandsintown: scraped %d unique events across %d venues",
-                     len(unique), len(BERLIN_VENUES))
+        logger.info(
+            "bandsintown: scraped %d unique events across %d venues",
+            len(unique),
+            len(BERLIN_VENUES),
+        )
         return unique
 
     # ── Per-venue scraping ────────────────────────────────────────────────
@@ -235,9 +237,7 @@ class BandsintownScraper(BaseScraper):
                 results.append(parsed)
         return results
 
-    def _try_venue_page(
-        self, slug: str, venue: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def _try_venue_page(self, slug: str, venue: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Scrape the public Bandsintown venue page for upcoming events.
         Falls back to HTML parsing with regex for the JSON-LD or
@@ -287,10 +287,7 @@ class BandsintownScraper(BaseScraper):
 
             # Venue — prefer API data, fall back to our known info
             api_venue = item.get("venue") or {}
-            venue_name = (
-                api_venue.get("name", "").strip()
-                or venue_info["name"]
-            )
+            venue_name = api_venue.get("name", "").strip() or venue_info["name"]
             address = (
                 api_venue.get("street_address")
                 or api_venue.get("location", "")
@@ -314,10 +311,7 @@ class BandsintownScraper(BaseScraper):
             source_id = str(item.get("id", ""))
 
             # Image
-            image_url = (
-                item.get("artist", {}).get("image_url")
-                or item.get("image_url")
-            )
+            image_url = item.get("artist", {}).get("image_url") or item.get("image_url")
             # Bandsintown sometimes returns a placeholder — skip those
             if image_url and "default" in image_url and "s_" in image_url:
                 image_url = None
@@ -328,7 +322,11 @@ class BandsintownScraper(BaseScraper):
 
             # Subcategory from tags or genre hint
             tags = item.get("tags") or []
-            artist_tags = item.get("artist", {}).get("tags") or [] if isinstance(item.get("artist"), dict) else []
+            artist_tags = (
+                item.get("artist", {}).get("tags") or []
+                if isinstance(item.get("artist"), dict)
+                else []
+            )
             all_tags = tags + artist_tags
             subcategory = _infer_subcategory(all_tags, title, venue_info.get("genre_hint"))
 
@@ -356,9 +354,7 @@ class BandsintownScraper(BaseScraper):
             logger.debug("bandsintown event parse error: %s", e)
             return None
 
-    def _parse_venue_html(
-        self, html: str, venue_info: dict[str, Any]
-    ) -> list[dict[str, Any]]:
+    def _parse_venue_html(self, html: str, venue_info: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Extract events from Bandsintown venue HTML page.
         Looks for __NEXT_DATA__ JSON blob or falls back to
@@ -497,7 +493,6 @@ class BandsintownScraper(BaseScraper):
             status = offer.get("status", "").lower()
             if status == "free":
                 return "Free"
-            url = offer.get("url", "")
             # Bandsintown often just links out; no price in the API.
             # Check for a "type" field.
             offer_type = offer.get("type", "")
@@ -521,9 +516,7 @@ def _safe_float(val: Any) -> float | None:
         return None
 
 
-def _infer_subcategory(
-    tags: list[str], title: str, genre_hint: str | None
-) -> str:
+def _infer_subcategory(tags: list[str], title: str, genre_hint: str | None) -> str:
     """Guess a music subcategory from tags, title text, or venue hint."""
     combined = " ".join(tags).lower() + " " + title.lower()
     for keyword, genre in GENRE_KEYWORDS.items():

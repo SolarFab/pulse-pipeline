@@ -33,7 +33,6 @@ DESCRIPTION = (
 )
 
 
-
 class FroschkoenigScraper(BaseScraper):
     source_name = "froschkoenig"
 
@@ -98,27 +97,28 @@ class FroschkoenigScraper(BaseScraper):
                 event_title = f"Stummfilm & Piano: {film_name}"
                 desc = f"{film_name} — {DESCRIPTION}"
 
-            events.append({
-                "title": event_title,
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "start_time": f"{date_str}T{time_str}:00",
-                "end_time": None,
-                "description": desc,
-                "price": "Free",
-                "source_url": link or "https://froschkoenig-berlin.de/",
-                "source_id": f"froschkoenig-stummfilm-{date_str}",
-                "category": "culture",
-                "subcategory": "cinema",
-                "tags": ["silent-film", "live-piano", "neukölln", "free"],
-                "image_url": None,
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": event_title,
+                    "venue_name": VENUE_NAME,
+                    "address": VENUE_ADDRESS,
+                    "lat": VENUE_LAT,
+                    "lng": VENUE_LNG,
+                    "start_time": f"{date_str}T{time_str}:00",
+                    "end_time": None,
+                    "description": desc,
+                    "price": "Free",
+                    "source_url": link or "https://froschkoenig-berlin.de/",
+                    "source_id": f"froschkoenig-stummfilm-{date_str}",
+                    "category": "culture",
+                    "subcategory": "cinema",
+                    "tags": ["silent-film", "live-piano", "neukölln", "free"],
+                    "image_url": None,
+                    "source": self.source_name,
+                }
+            )
 
         return events
-
 
 
 def _strip_html(text: str) -> str:

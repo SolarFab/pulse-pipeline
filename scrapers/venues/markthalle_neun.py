@@ -11,7 +11,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, date, timedelta
+from datetime import date, datetime, timedelta
 from typing import Any
 
 from bs4 import BeautifulSoup
@@ -28,16 +28,23 @@ VENUE_LNG = 13.4315
 VENUE_NEIGHBORHOOD = "Kreuzberg"
 
 GERMAN_MONTHS = {
-    "januar": 1, "februar": 2, "märz": 3, "april": 4,
-    "mai": 5, "juni": 6, "juli": 7, "august": 8,
-    "september": 9, "oktober": 10, "november": 11, "dezember": 12,
+    "januar": 1,
+    "februar": 2,
+    "märz": 3,
+    "april": 4,
+    "mai": 5,
+    "juni": 6,
+    "juli": 7,
+    "august": 8,
+    "september": 9,
+    "oktober": 10,
+    "november": 11,
+    "dezember": 12,
 }
 
 # Pattern: "10. April" or "3. März 2026"
 DATE_PATTERN = re.compile(
-    r"(\d{1,2})\.\s*("
-    + "|".join(GERMAN_MONTHS.keys())
-    + r")(?:\s+(\d{4}))?",
+    r"(\d{1,2})\.\s*(" + "|".join(GERMAN_MONTHS.keys()) + r")(?:\s+(\d{4}))?",
     re.IGNORECASE,
 )
 
@@ -187,23 +194,25 @@ class MarkthalleScraper(BaseScraper):
             if end_hour is not None:
                 end_dt = datetime(d.year, d.month, d.day, end_hour, end_min)
 
-            events.append({
-                "title": title,
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "neighborhood": VENUE_NEIGHBORHOOD,
-                "start_time": start_dt.isoformat(),
-                "end_time": end_dt.isoformat() if end_dt else None,
-                "description": desc,
-                "image_url": image_url,
-                "source_url": url,
-                "source_id": f"{url.rstrip('/').split('/')[-1]}-{d.isoformat()}",
-                "category": self._infer_category(title, desc or ""),
-                "source_tags": [],
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": title,
+                    "venue_name": VENUE_NAME,
+                    "address": VENUE_ADDRESS,
+                    "lat": VENUE_LAT,
+                    "lng": VENUE_LNG,
+                    "neighborhood": VENUE_NEIGHBORHOOD,
+                    "start_time": start_dt.isoformat(),
+                    "end_time": end_dt.isoformat() if end_dt else None,
+                    "description": desc,
+                    "image_url": image_url,
+                    "source_url": url,
+                    "source_id": f"{url.rstrip('/').split('/')[-1]}-{d.isoformat()}",
+                    "category": self._infer_category(title, desc or ""),
+                    "source_tags": [],
+                    "source": self.source_name,
+                }
+            )
 
         return events
 
@@ -254,8 +263,10 @@ class MarkthalleScraper(BaseScraper):
                 price = None
 
             image = item.get("image")
-            image_url = image if isinstance(image, str) else (
-                image[0] if isinstance(image, list) and image else None
+            image_url = (
+                image
+                if isinstance(image, str)
+                else (image[0] if isinstance(image, list) and image else None)
             )
 
             return {
@@ -289,8 +300,10 @@ class MarkthalleScraper(BaseScraper):
             {
                 "title": "New Standard Jam Session",
                 "weekday": 1,  # Tuesday
-                "start_hour": 20, "start_min": 0,
-                "end_hour": 0, "end_min": 0,  # midnight (next day)
+                "start_hour": 20,
+                "start_min": 0,
+                "end_hour": 0,
+                "end_min": 0,  # midnight (next day)
                 "venue_name": "Bar Neun (Markthalle Neun)",
                 "description": (
                     "Every Tuesday @ Bar Neun (Markthalle Neun, Kreuzberg) 20:00–00:00. "
@@ -301,15 +314,25 @@ class MarkthalleScraper(BaseScraper):
                 ),
                 "category": "music",
                 "subcategory": "jazz",
-                "tags": ["jazz", "jam session", "live-music", "blues", "funk", "free entry", "kreuzberg"],
+                "tags": [
+                    "jazz",
+                    "jam session",
+                    "live-music",
+                    "blues",
+                    "funk",
+                    "free entry",
+                    "kreuzberg",
+                ],
                 "price": "Free",
                 "price_cents": 0,
             },
             {
                 "title": "Street Food Thursday",
                 "weekday": 3,  # Thursday
-                "start_hour": 17, "start_min": 0,
-                "end_hour": 22, "end_min": 0,
+                "start_hour": 17,
+                "start_min": 0,
+                "end_hour": 22,
+                "end_min": 0,
                 "venue_name": VENUE_NAME,
                 "description": (
                     "Berlin's original street food market. Every Thursday, "
@@ -330,30 +353,34 @@ class MarkthalleScraper(BaseScraper):
                 start_dt = datetime(d.year, d.month, d.day, r["start_hour"], r["start_min"])
                 if r["end_hour"] < r["start_hour"]:
                     next_day = d + timedelta(days=1)
-                    end_dt = datetime(next_day.year, next_day.month, next_day.day, r["end_hour"], r["end_min"])
+                    end_dt = datetime(
+                        next_day.year, next_day.month, next_day.day, r["end_hour"], r["end_min"]
+                    )
                 else:
                     end_dt = datetime(d.year, d.month, d.day, r["end_hour"], r["end_min"])
 
-                events.append({
-                    "title": r["title"],
-                    "venue_name": r["venue_name"],
-                    "address": VENUE_ADDRESS,
-                    "lat": VENUE_LAT,
-                    "lng": VENUE_LNG,
-                    "neighborhood": VENUE_NEIGHBORHOOD,
-                    "start_time": start_dt.isoformat(),
-                    "end_time": end_dt.isoformat(),
-                    "description": r["description"],
-                    "price": r["price"],
-                    "price_cents": r["price_cents"],
-                    "source_url": EVENTS_URL,
-                    "source_id": f"markthalle-{r['title'].lower().replace(' ', '-')}-{d.isoformat()}",
-                    "category": r["category"],
-                    "subcategory": r["subcategory"],
-                    "tags": r["tags"],
-                    "source_tags": [],
-                    "source": self.source_name,
-                })
+                events.append(
+                    {
+                        "title": r["title"],
+                        "venue_name": r["venue_name"],
+                        "address": VENUE_ADDRESS,
+                        "lat": VENUE_LAT,
+                        "lng": VENUE_LNG,
+                        "neighborhood": VENUE_NEIGHBORHOOD,
+                        "start_time": start_dt.isoformat(),
+                        "end_time": end_dt.isoformat(),
+                        "description": r["description"],
+                        "price": r["price"],
+                        "price_cents": r["price_cents"],
+                        "source_url": EVENTS_URL,
+                        "source_id": f"markthalle-{r['title'].lower().replace(' ', '-')}-{d.isoformat()}",
+                        "category": r["category"],
+                        "subcategory": r["subcategory"],
+                        "tags": r["tags"],
+                        "source_tags": [],
+                        "source": self.source_name,
+                    }
+                )
 
         return events
 
@@ -371,7 +398,19 @@ class MarkthalleScraper(BaseScraper):
         combined = (title + " " + description).lower()
         if any(w in combined for w in ("flohmarkt", "vintage", "secondhand", "designmarkt")):
             return "markets"
-        if any(w in combined for w in ("food", "essen", "street food", "kochen", "cooking", "dinner", "wochenmarkt", "bauernmarkt")):
+        if any(
+            w in combined
+            for w in (
+                "food",
+                "essen",
+                "street food",
+                "kochen",
+                "cooking",
+                "dinner",
+                "wochenmarkt",
+                "bauernmarkt",
+            )
+        ):
             return "food"
         if any(w in combined for w in ("konzert", "musik", "music", "jazz", "band")):
             return "music"

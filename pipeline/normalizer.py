@@ -8,18 +8,25 @@ from __future__ import annotations
 import hashlib
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
 from dateutil import parser as dateparser
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator
 
 logger = logging.getLogger(__name__)
 
 VALID_CATEGORIES = {
-    "music", "nightlife", "food", "culture", "markets",
-    "workshops", "meetups", "outdoors", "family",
+    "music",
+    "nightlife",
+    "food",
+    "culture",
+    "markets",
+    "workshops",
+    "meetups",
+    "outdoors",
+    "family",
 }
 
 BERLIN_TZ = ZoneInfo("Europe/Berlin")
@@ -27,6 +34,7 @@ BERLIN_TZ = ZoneInfo("Europe/Berlin")
 
 class RawEvent(BaseModel):
     """Loose input model — everything optional except title, venue, start_time, source."""
+
     title: str
     venue_name: str
     source: str
@@ -122,19 +130,20 @@ def _parse_dt(value: Any) -> datetime | None:
     if value is None:
         return None
     if isinstance(value, datetime):
-        return value.astimezone(timezone.utc) if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        return value.astimezone(UTC) if value.tzinfo else value.replace(tzinfo=UTC)
     try:
         # Handle ISO 8601 edge case: 24:00:00 means midnight start of next day
         s = str(value)
         if "T24:00:00" in s:
             from datetime import timedelta
+
             s = s.replace("T24:00:00", "T00:00:00")
             dt = dateparser.parse(s, dayfirst=True)
             if dt:
                 dt = dt + timedelta(days=1)
                 if not dt.tzinfo:
                     dt = dt.replace(tzinfo=BERLIN_TZ)
-                return dt.astimezone(timezone.utc)
+                return dt.astimezone(UTC)
         # Try ISO 8601 first (YYYY-MM-DD) — dayfirst must be False for ISO
         if re.match(r"\d{4}-\d{2}-\d{2}", s):
             dt = dateparser.parse(s, dayfirst=False)
@@ -144,7 +153,7 @@ def _parse_dt(value: Any) -> datetime | None:
             # Naive datetimes are Berlin wall-clock time. zoneinfo picks the
             # correct CET/CEST offset per date — a hardcoded +01:00 made every
             # summer midnight render as 01:00 in the app.
-            dt = dt.replace(tzinfo=BERLIN_TZ).astimezone(timezone.utc)
+            dt = dt.replace(tzinfo=BERLIN_TZ).astimezone(UTC)
         return dt
     except Exception:
         logger.warning("Could not parse datetime: %r", value)

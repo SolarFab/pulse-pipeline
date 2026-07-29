@@ -1,0 +1,15 @@
+.git/
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+web/
+node_modules/
+docs/
+tests/
+*.csv
+data/*.json
+.DS_Store
+.claude/

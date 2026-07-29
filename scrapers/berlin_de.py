@@ -22,8 +22,18 @@ BASE_URL = "https://www.berlin.de"
 
 # German month names for URL paths (lowercase, no umlauts)
 MONTHS_URL = [
-    "januar", "februar", "maerz", "april", "mai", "juni",
-    "juli", "august", "september", "oktober", "november", "dezember",
+    "januar",
+    "februar",
+    "maerz",
+    "april",
+    "mai",
+    "juni",
+    "juli",
+    "august",
+    "september",
+    "oktober",
+    "november",
+    "dezember",
 ]
 
 
@@ -231,10 +241,19 @@ class BerlinDeScraper(BaseScraper):
 
         # "13. März 2026" or "13. und 14. März 2026" — take the first date
         german_months = {
-            "januar": "01", "februar": "02", "märz": "03", "maerz": "03",
-            "april": "04", "mai": "05", "juni": "06",
-            "juli": "07", "august": "08", "september": "09",
-            "oktober": "10", "november": "11", "dezember": "12",
+            "januar": "01",
+            "februar": "02",
+            "märz": "03",
+            "maerz": "03",
+            "april": "04",
+            "mai": "05",
+            "juni": "06",
+            "juli": "07",
+            "august": "08",
+            "september": "09",
+            "oktober": "10",
+            "november": "11",
+            "dezember": "12",
         }
         pattern = r"(\d{1,2})\.\s*(" + "|".join(german_months.keys()) + r")(?:\s+(\d{4}))?"
         match = re.search(pattern, text, re.IGNORECASE)

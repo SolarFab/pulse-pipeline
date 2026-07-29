@@ -12,3 +12,4 @@ web/
 node_modules/
 .claude/
 .vercel
+.DS_Store

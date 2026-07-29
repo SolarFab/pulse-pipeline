@@ -80,7 +80,9 @@ class BerlinMitKindScraper(BaseScraper):
         filtered = [e for e in events if str(e.get("start_time", ""))[:10] >= today_str]
         logger.info(
             "berlinmitkind: %d future events total (%d RSS + %d blog, %d past filtered)",
-            len(filtered), len(rss_events), len(blog_events),
+            len(filtered),
+            len(rss_events),
+            len(blog_events),
             len(events) - len(filtered),
         )
 
@@ -108,16 +110,21 @@ class BerlinMitKindScraper(BaseScraper):
                 )
                 if match:
                     from html import unescape as html_unescape
+
                     desc = html_unescape(match.group(1)).strip()
                     if desc and len(desc) > 10:
                         event["description"] = desc[:500]
                         enriched += 1
             except Exception as e:
-                logger.debug("berlinmitkind: description fetch failed for %s: %s", event.get("source_url"), e)
+                logger.debug(
+                    "berlinmitkind: description fetch failed for %s: %s", event.get("source_url"), e
+                )
 
             _time.sleep(0.5)
 
-        logger.info("berlinmitkind: enriched %d / %d events with descriptions", enriched, len(need_desc))
+        logger.info(
+            "berlinmitkind: enriched %d / %d events with descriptions", enriched, len(need_desc)
+        )
 
     def _fetch_all_posts(self) -> list[dict]:
         posts: list[dict] = []
@@ -274,13 +281,18 @@ class BerlinMitKindScraper(BaseScraper):
 
         if not summaries:
             # No structured summary lines — try to parse from excerpt
-            event = self._parse_from_excerpt(post_title, excerpt_html, post_link, image_url, content_html)
+            event = self._parse_from_excerpt(
+                post_title, excerpt_html, post_link, image_url, content_html
+            )
             return [event] if event else []
 
         if len(summaries) == 1:
             # Single event post
             event = self._parse_summary_line(
-                summaries[0]["text"], post_title, post_link, image_url,
+                summaries[0]["text"],
+                post_title,
+                post_link,
+                image_url,
                 description=self._extract_description(content_html),
                 source_url=summaries[0].get("url"),
             )
@@ -294,7 +306,10 @@ class BerlinMitKindScraper(BaseScraper):
             # Try section description, fall back to excerpt
             desc = self._extract_section_description(content_html, summary, summaries, i)
             event = self._parse_summary_line(
-                summary["text"], title, post_link, image_url,
+                summary["text"],
+                title,
+                post_link,
+                image_url,
                 description=desc or excerpt_text,
                 source_url=summary.get("url"),
             )
@@ -323,10 +338,10 @@ class BerlinMitKindScraper(BaseScraper):
         )
 
         # Find all headings and their positions for context
-        heading_pattern = re.compile(
-            r"<h[23][^>]*>(.*?)</h[23]>", re.DOTALL | re.IGNORECASE
-        )
-        headings = [(m.start(), _strip_html(m.group(1)).strip()) for m in heading_pattern.finditer(html)]
+        heading_pattern = re.compile(r"<h[23][^>]*>(.*?)</h[23]>", re.DOTALL | re.IGNORECASE)
+        headings = [
+            (m.start(), _strip_html(m.group(1)).strip()) for m in heading_pattern.finditer(html)
+        ]
 
         # First try paragraph-wrapped bold blocks
         for match in bold_pattern.finditer(html):
@@ -372,8 +387,12 @@ class BerlinMitKindScraper(BaseScraper):
         return deduped
 
     def _parse_summary_line(
-        self, text: str, title: str, post_link: str,
-        image_url: str | None, description: str | None = None,
+        self,
+        text: str,
+        title: str,
+        post_link: str,
+        image_url: str | None,
+        description: str | None = None,
         source_url: str | None = None,
     ) -> dict[str, Any] | None:
         """Parse a bold summary line into an event dict.
@@ -447,10 +466,19 @@ class BerlinMitKindScraper(BaseScraper):
                 continue
             if any(w in part_clean.lower() for w in _FREE_WORDS):
                 continue
-            if any(w in part_clean.lower() for w in (
-                "ab ", "für alle", "teilnahme", "anmeldung", "eintritt",
-                "tickets", "kinder bis", "jahre",
-            )):
+            if any(
+                w in part_clean.lower()
+                for w in (
+                    "ab ",
+                    "für alle",
+                    "teilnahme",
+                    "anmeldung",
+                    "eintritt",
+                    "tickets",
+                    "kinder bis",
+                    "jahre",
+                )
+            ):
                 continue
             if re.search(r"\w+\.\w{2,3}$", part_clean):  # looks like a URL
                 continue
@@ -491,7 +519,11 @@ class BerlinMitKindScraper(BaseScraper):
         }
 
     def _extract_section_description(
-        self, html: str, summary: dict, all_summaries: list[dict], idx: int,
+        self,
+        html: str,
+        summary: dict,
+        all_summaries: list[dict],
+        idx: int,
     ) -> str | None:
         """Extract description text from the section above a summary line in a roundup post."""
         heading = summary.get("heading")
@@ -514,8 +546,12 @@ class BerlinMitKindScraper(BaseScraper):
         return " ".join(texts)[:500] if texts else None
 
     def _parse_from_excerpt(
-        self, title: str, excerpt_html: str, post_link: str,
-        image_url: str | None, content_html: str,
+        self,
+        title: str,
+        excerpt_html: str,
+        post_link: str,
+        image_url: str | None,
+        content_html: str,
     ) -> dict[str, Any] | None:
         """Fallback: parse event from excerpt when no bold summary found."""
         excerpt = _strip_html(excerpt_html).strip()

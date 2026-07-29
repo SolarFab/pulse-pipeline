@@ -75,8 +75,10 @@ class KlunkerkranichScraper(BaseScraper):
                 price = None
 
             image = item.get("image")
-            image_url = image if isinstance(image, str) else (
-                image[0] if isinstance(image, list) and image else None
+            image_url = (
+                image
+                if isinstance(image, str)
+                else (image[0] if isinstance(image, list) and image else None)
             )
 
             url = item.get("url") or EVENTS_URL
@@ -140,7 +142,10 @@ class KlunkerkranichScraper(BaseScraper):
                         eh = int(end_hour_str.split(":")[0])
                         if eh < sh:
                             from datetime import datetime, timedelta
-                            next_day = (datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
+
+                            next_day = (
+                                datetime.strptime(date_str, "%Y-%m-%d") + timedelta(days=1)
+                            ).strftime("%Y-%m-%d")
                             end_time = f"{next_day}T{end_hour_str}:00"
                         else:
                             end_time = f"{date_str}T{end_hour_str}:00"
@@ -148,24 +153,26 @@ class KlunkerkranichScraper(BaseScraper):
                 img_el = card.find("img")
                 image_url = img_el.get("src") if img_el else None
 
-                events.append({
-                    "title": title,
-                    "venue_name": VENUE_NAME,
-                    "address": VENUE_ADDRESS,
-                    "lat": VENUE_LAT,
-                    "lng": VENUE_LNG,
-                    "neighborhood": VENUE_NEIGHBORHOOD,
-                    "start_time": start_time,
-                    "end_time": end_time,
-                    "description": None,
-                    "image_url": image_url,
-                    "source_url": source_url,
-                    "source_id": source_url.rstrip("/").split("/")[-1],
-                    "category": self._infer_category(title, ""),
-                    "tags": ["rooftop", "neukölln"],
-                    "source_tags": [],
-                    "source": self.source_name,
-                })
+                events.append(
+                    {
+                        "title": title,
+                        "venue_name": VENUE_NAME,
+                        "address": VENUE_ADDRESS,
+                        "lat": VENUE_LAT,
+                        "lng": VENUE_LNG,
+                        "neighborhood": VENUE_NEIGHBORHOOD,
+                        "start_time": start_time,
+                        "end_time": end_time,
+                        "description": None,
+                        "image_url": image_url,
+                        "source_url": source_url,
+                        "source_id": source_url.rstrip("/").split("/")[-1],
+                        "category": self._infer_category(title, ""),
+                        "tags": ["rooftop", "neukölln"],
+                        "source_tags": [],
+                        "source": self.source_name,
+                    }
+                )
             except Exception:
                 continue
 
