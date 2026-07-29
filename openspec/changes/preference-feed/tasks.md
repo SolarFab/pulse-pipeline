@@ -6,7 +6,7 @@ or the **[db]** (Supabase migration).
 ## 1. Embeddings foundation
 
 - [ ] 1.1 [db] Supabase migration: enable `pgvector`; add `events.embedding vector(N)` + `events.embed_model text` + HNSW index
-- [ ] 1.2 [pipeline] Add a swappable embedder module (config-selected model) with a stable text builder (title + description + category + tags)
+- [x] 1.2 [pipeline] Add a swappable embedder module (config-selected model) with a stable text builder (title + description + category + tags)
 - [ ] 1.3 [pipeline] Embed each event on upsert; skip re-embed when embed-relevant text is unchanged
 - [ ] 1.4 [pipeline] One-off backfill script to embed all existing active events; verify no active event has a null embedding
 
