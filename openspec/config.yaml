@@ -1,0 +1,46 @@
+schema: spec-driven
+
+context: |
+  Product: Pulse — an event-discovery web app for Berlin. An interactive map of
+  concerts, markets, nightlife, kids events and pop-ups, plus an AI concierge you
+  ask in natural language. Internal/legacy name: NachtKarte.
+
+  Stack:
+  - Web app: Next.js 16 (App Router, TypeScript), deployed on Vercel. Located in web/.
+  - Data pipeline: Python (scrapers/ + pipeline/), ~12 source scrapers → normalizer
+    (Pydantic) → Claude Haiku categorizer → dedup (fingerprint) → upsert. Runs on a
+    GitHub Actions cron. Tooling: uv (locked), Ruff, pre-commit, pytest, Docker, Make.
+  - Database: Supabase Postgres + PostGIS (EU region). Tables incl. events, venues,
+    profiles, user_events (interested/going), interested_venues, event_interest_counts.
+  - LLM: currently Claude via the Anthropic SDK; moving to a model-agnostic gateway.
+
+  Direction / decisions already made (apply across specs):
+  - Add pgvector for semantic search + feed ranking (one dependency, two features).
+  - Concierge → tool-calling agent (native SDK / Vercel AI SDK, not LangChain);
+    LangGraph only for the Python "discovery scout" agent where a stateful graph fits.
+  - Model-agnostic: route via a gateway (Vercel AI SDK in web / LiteLLM in pipeline);
+    keep prompts in versioned files; embeddings swappable. Benchmark models with promptfoo.
+  - Observability + cost: Langfuse (traces, cost, latency); OpenRouter-style budget caps.
+  - Security (OWASP LLM Top 10): per-user tables MUST be read via the anon key + user JWT
+    so Supabase RLS applies (service_role bypasses RLS — server-only). Scraped event text
+    is untrusted → indirect-prompt-injection surface: delimit retrieved content, harden the
+    system prompt. Rate limiting backed by DB/Redis.
+  - Recommendation/learning is ranking (vector + SQL), NOT an agent. Person-level taste
+    data stays internal (GDPR); only aggregated signals are shareable.
+
+rules:
+  proposal:
+    - Include a "Non-goals" section.
+    - State which OWASP LLM risks and privacy/GDPR considerations apply.
+  tasks:
+    - Note whether each task touches the web app (TypeScript) or the Python pipeline.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
