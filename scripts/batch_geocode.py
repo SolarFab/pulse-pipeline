@@ -20,7 +20,7 @@ import logging
 import os
 import sys
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 from dotenv import load_dotenv
@@ -70,7 +70,7 @@ def geocode_venue(venue: str, address: str | None) -> tuple[float, float] | None
 
 def fetch_events_missing_coords() -> list[dict]:
     """Active future events with neither coords nor a venue link."""
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    cutoff = (datetime.now(UTC) - timedelta(days=1)).isoformat()
     rows: list[dict] = []
     offset = 0
     while True:

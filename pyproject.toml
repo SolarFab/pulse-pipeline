@@ -38,7 +38,15 @@ packages = ["scrapers", "pipeline", "db"]
 line-length = 100
 target-version = "py311"
 # Exploratory one-off analysis scripts are not part of the pipeline proper.
-extend-exclude = ["analyze_tags.py", "genre_analysis.py", "kulturdaten_analysis.py"]
+extend-exclude = [
+    "analyze_tags.py",
+    "genre_analysis.py",
+    "kulturdaten_analysis.py",
+    # one-off analysis/inspection scripts, not maintained code
+    "scripts/analyze_*.py",
+    "scripts/inspect_*.py",
+    "scripts/*_analysis.py",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "W", "UP"]  # errors, pyflakes, import-sort, warnings, pyupgrade
