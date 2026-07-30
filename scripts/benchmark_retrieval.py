@@ -300,22 +300,45 @@ def main() -> None:
  th { background:#8888881a }
  .hit { color:#16a34a } .miss { color:#dc2626 } .meta { color:#888; display:block; font-size:.9em }
  .legend { color:#888 }
+ th.key, td.key { background:#16a34a14; border-right:2px solid #16a34a55 }
+ .forgot { color:#ea580c; font-weight:600 } .foundby { color:#888; font-size:.85em; display:block }
 </style></head><body>
 <h1>What each retrieval config chose (top-5 per query)</h1>
-<p class="legend">✓ green = you judged it relevant · ✗ red = judged not relevant.
-Frozen corpus v1, qrels v1+delta.</p>"""]
+<p class="legend">First column = YOUR answer key (everything you marked relevant); orange ⚠ =
+no config's top-5 found it ("forgotten"). Config columns: ✓ green = in your answer key,
+✗ red = you judged it not relevant. Frozen corpus v1, qrels v1+delta.</p>"""]
     for g in queries:
         qid = g["id"]
         rel = rels.get(qid, set())
-        comp.append(f"<h2>{qid} <em>{html.escape(g['query'])}</em></h2><table><tr>")
-        comp.extend(f"<th>{c}</th>" for c in configs)
-        comp.append("</tr>")
         cols = {c: next(q for q in results[c]["per_query"] if q["query_id"] == qid)["top5"]
                 for c in configs}
-        for row in range(K):
+        comp.append(f"<h2>{qid} <em>{html.escape(g['query'])}</em></h2><table><tr>"
+                    f'<th class="key">your labels ({len(rel)})</th>')
+        comp.extend(f"<th>{c}</th>" for c in configs)
+        comp.append("</tr>")
+        rel_sorted = sorted(rel, key=lambda eid: by_id_all.get(eid, {}).get("start_time") or "")
+        for row in range(max(K, len(rel_sorted))):
             comp.append("<tr>")
+            # answer-key column
+            if row < len(rel_sorted):
+                eid = rel_sorted[row]
+                e = by_id_all.get(eid)
+                if e is None:
+                    comp.append('<td class="key">(event not in corpus)</td>')
+                else:
+                    finders = [c for c in configs if eid in cols[c]]
+                    note = (f'<span class="foundby">found by: {", ".join(finders)}</span>'
+                            if finders else '<span class="forgot">⚠ found by NO config</span>')
+                    comp.append(
+                        f'<td class="key">{html.escape(e["title"][:60])}'
+                        f'<span class="meta">{html.escape(e.get("category") or "")}/'
+                        f'{html.escape(e.get("subcategory") or "")} · '
+                        f'{html.escape((e.get("start_time") or "")[:10])}</span>{note}</td>')
+            else:
+                comp.append('<td class="key"></td>')
+            # config columns
             for c in configs:
-                eid = cols[c][row] if row < len(cols[c]) else None
+                eid = cols[c][row] if row < K and row < len(cols[c]) else None
                 if eid is None:
                     comp.append("<td></td>")
                     continue
