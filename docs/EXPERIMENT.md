@@ -48,3 +48,12 @@ incrementally (label only the new candidates) before scores are compared.
 Stacked changes can't be attributed; see the riester-kompass Experiment 2 finding that combined
 retrieval tricks performed worse than either alone. Also: classical metrics and judge metrics can
 disagree (HyDE effect) — both are always reported, decisions name which metric they optimized.
+
+## Labeling guideline (learned the hard way, v2)
+
+Retrieval-layer relevance = **semantic/type match only — ignore dates.** Temporal constraints
+("heute Abend", "am Sonntag") are hard SQL filters in production and are evaluated at the chat
+layer (Experiment 3), not against the ranker. qrels v1 partially applied date-aware judgment on
+the temporal queries (q01/q02/q03/q23/q25); those five were re-reviewed under this guideline →
+`qrels_v2_temporal.jsonl` supersedes v1(+delta) for exactly those queries. Guideline changes
+create a new qrels version; they never edit old label files.
