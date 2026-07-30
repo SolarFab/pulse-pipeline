@@ -108,6 +108,7 @@ def build() -> None:
     py = run_pytest()
     emb = md_section(ROOT / "docs" / "embedding-benchmark.md")
     qrels = md_section(ROOT / "docs" / "embedding-benchmark-qrels.md")
+    retrieval = md_section(ROOT / "docs" / "retrieval-benchmark.md")
     prompt = md_section(ROOT / "docs" / "prompt-benchmark.md")
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     ok = py["failed"] == 0
@@ -193,6 +194,9 @@ comes from a real run, nothing is hand-edited.</p>
 {section("L4 · Embedding benchmark — hand-labeled qrels", qrels,
          "Awaiting human labels: open docs/showcase/labeling-sheet.html, tick relevant events, "
          "export to eval/golden_set/qrels_v1.jsonl, run scripts/score_qrels.py.")}
+
+{section("L4 · Retrieval ladder — Experiment 2", retrieval,
+         "Not yet run: scripts/benchmark_retrieval.py (needs qrels_v1).")}
 
 {section("L4 · Prompt-technique benchmark", prompt,
          "Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat "

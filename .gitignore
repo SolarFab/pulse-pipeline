@@ -21,3 +21,4 @@ taxonomy_keywords.csv
 analyze_tags.py
 genre_analysis.py
 kulturdaten_analysis.py
+eval/cache/
