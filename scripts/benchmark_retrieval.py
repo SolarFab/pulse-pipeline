@@ -130,6 +130,19 @@ def chat(prompt: str) -> tuple[str, int]:
             (body.get("usage") or {}).get("total_tokens", 0))
 
 
+_EXP_CACHE_FILE = ROOT / "eval" / "cache" / "expansions_v1.json"
+_exp_cache: dict = json.loads(_EXP_CACHE_FILE.read_text()) if _EXP_CACHE_FILE.exists() else {}
+
+
+def _cached(key: str, fn):
+    """Pin LLM expansions per query: without this, MQ/HyDE scores wobble between runs."""
+    if key not in _exp_cache:
+        _exp_cache[key] = fn()
+        _EXP_CACHE_FILE.parent.mkdir(parents=True, exist_ok=True)
+        _EXP_CACHE_FILE.write_text(json.dumps(_exp_cache, indent=2))
+    return _exp_cache[key]
+
+
 def multi_query(q: str) -> tuple[list[str], int]:
     text, tok = chat(
         "Generate 3 alternative short search queries (mix German and English) for finding "
@@ -205,12 +218,12 @@ def main() -> None:
             elif config == "hybrid":
                 ranked = rrf([vec_rank(emb.embed_batch([qtext])[0]), bm25.rank(qtext, ids)])
             elif config == "mq":
-                variants, tok = multi_query(qtext)
+                variants, tok = _cached(f"mq:{qid}", lambda q=qtext: multi_query(q))
                 llm_tok += tok
                 ranked = rrf([vec_rank(v) for v in
                               (emb.embed_batch(variants))])
             elif config == "hyde":
-                doc, tok = hyde(qtext)
+                doc, tok = _cached(f"hyde:{qid}", lambda q=qtext: hyde(q))
                 llm_tok += tok
                 ranked = vec_rank(emb.embed_batch([doc])[0])
             else:
@@ -227,6 +240,7 @@ def main() -> None:
                 "precision": len(hits) / K,
                 "rr": rr,
                 "ndcg": ndcg_at_k(ranked, relevant, K),
+                "top5": top,   # the config's actual choices — rendered in the comparison sheet
                 "unlabeled_in_top": [e for e in top if e not in labeled_pool],
             })
             for e in top:
@@ -270,10 +284,61 @@ def main() -> None:
                   f"{r['unlabeled_in_top5']} |")
     (ROOT / "docs" / "retrieval-benchmark.md").write_text("\n".join(md) + "\n")
 
+    # human-readable comparison: per query, what each config actually chose (✓ = judged relevant)
+    by_id_all = {e["id"]: e for e in events}
+    comp = ["""<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pulse — Retrieval comparison (what each config chose)</title>
+<style>
+ :root { color-scheme: light dark; --line:#88888840 }
+ body { font:14px/1.45 system-ui,sans-serif; max-width:1200px; margin:2rem auto; padding:0 1rem }
+ h2 { border-bottom:1px solid var(--line); padding-bottom:.3rem; margin-top:2rem }
+ h2 em { font-weight:normal }
+ table { border-collapse:collapse; width:100%; table-layout:fixed }
+ th,td { border:1px solid var(--line); padding:.35rem .5rem; vertical-align:top; font-size:.85em;
+         overflow-wrap:break-word }
+ th { background:#8888881a }
+ .hit { color:#16a34a } .miss { color:#dc2626 } .meta { color:#888; display:block; font-size:.9em }
+ .legend { color:#888 }
+</style></head><body>
+<h1>What each retrieval config chose (top-5 per query)</h1>
+<p class="legend">✓ green = you judged it relevant · ✗ red = judged not relevant.
+Frozen corpus v1, qrels v1+delta.</p>"""]
+    for g in queries:
+        qid = g["id"]
+        rel = rels.get(qid, set())
+        comp.append(f"<h2>{qid} <em>{html.escape(g['query'])}</em></h2><table><tr>")
+        comp.extend(f"<th>{c}</th>" for c in configs)
+        comp.append("</tr>")
+        cols = {c: next(q for q in results[c]["per_query"] if q["query_id"] == qid)["top5"]
+                for c in configs}
+        for row in range(K):
+            comp.append("<tr>")
+            for c in configs:
+                eid = cols[c][row] if row < len(cols[c]) else None
+                if eid is None:
+                    comp.append("<td></td>")
+                    continue
+                e = by_id_all[eid]
+                mark, cls = ("✓", "hit") if eid in rel else ("✗", "miss")
+                comp.append(
+                    f'<td><span class="{cls}">{mark}</span> {html.escape(e["title"][:60])}'
+                    f'<span class="meta">{html.escape(e.get("category") or "")}/'
+                    f'{html.escape(e.get("subcategory") or "")} · '
+                    f'{html.escape((e.get("start_time") or "")[:10])}</span></td>')
+            comp.append("</tr>")
+        comp.append("</table>")
+    comp.append("</body></html>")
+    (ROOT / "docs" / "showcase" / "retrieval-comparison.html").write_text("".join(comp))
+    print("wrote docs/showcase/retrieval-comparison.html")
+
     # delta labeling sheet: only candidates the user has never judged
     if delta:
-        (ROOT / "eval" / "results" / "delta_pool_v1.json").write_text(
-            json.dumps({k: sorted(set(v)) for k, v in delta.items()}, indent=2))
+        dp = ROOT / "eval" / "results" / "delta_pool_v1.json"
+        prev_dp = json.loads(dp.read_text()) if dp.exists() else {}
+        for k, v in delta.items():  # MERGE — the pool accumulates everything ever shown
+            prev_dp[k] = sorted(set(prev_dp.get(k, [])) | set(v))
+        dp.write_text(json.dumps(prev_dp, indent=2))
         by_id = {e["id"]: e for e in events}
         qmap = {g["id"]: g for g in queries}
         sections = []

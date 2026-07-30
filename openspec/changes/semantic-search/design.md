@@ -93,10 +93,13 @@ token usage. Enough to eval retrieval quality later against the golden queries.
 ## Decision log
 
 - **2026-07-30 — Retrieval mode = vector-only (baseline).** Experiment 2 (retrieval ladder,
-  qrels v1 + delta round to fix pool bias): baseline R@5 0.650 / MRR 0.780 / nDCG@5 0.662 @
-  645ms beats hybrid BM25+RRF (0.463/0.703/0.505), Multi-Query (0.540/0.628/0.500 @ 2.3s),
-  HyDE (0.448/0.529/0.416 @ 2.6s) and BM25-only (0.374 @ 1ms). MQ/HyDE additionally bust the
-  ~2s chat-latency budget — HyDE's riester-kompass win does NOT replicate here (different
-  constraints, different verdict). `search_events` ships with pure pgvector cosine ranking
-  inside hard SQL filters; revisit only with evidence (e.g. venue-name misses in prod logs —
-  BM25 fusion would be the first candidate then).
+  qrels v1 + delta round to fix pool bias, LLM expansions cached for reproducibility):
+  baseline R@5 0.650 / MRR 0.780 / nDCG@5 0.662 @ 563ms beats Multi-Query
+  (0.551/0.615/0.506 @ 2.1s), hybrid BM25+RRF (0.437/0.703/0.491 @ 576ms), HyDE
+  (0.405/0.596/0.420 @ 2.6s) and BM25-only (0.374 @ 2ms). MQ/HyDE additionally bust the ~2s
+  chat-latency budget — HyDE's riester-kompass win does NOT replicate here (different
+  constraints, different verdict). Methodology note: uncached MQ/HyDE scores varied run-to-run
+  (HyDE R@5 0.28–0.45) — LLM-dependent retrieval configs MUST pin their expansions for
+  comparable evals. `search_events` ships with pure pgvector cosine ranking inside hard SQL
+  filters; revisit only with evidence (e.g. venue-name misses in prod logs — BM25 fusion is
+  the first candidate then). Per-query choices: docs/showcase/retrieval-comparison.html.

@@ -35,7 +35,7 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-30 16:55 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-30 17:26 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
@@ -227,11 +227,11 @@ comes from a real run, nothing is hand-edited.</p>
 <section><h2>L4 · Retrieval ladder — Experiment 2</h2><p>Latency = per-query wall time incl. any LLM expansion (chat hot path budget ~2s). `unlabeled@5` = top-5 results outside the labeled pool, scored irrelevant until the delta labeling round (pool bias, reported honestly).</p>
 <table>
 <tr><th>config</th><th>recall@5</th><th>precision@5</th><th>MRR</th><th>nDCG@5</th><th>ms/query</th><th>LLM tokens</th><th>unlabeled@5</th></tr>
-<tr><td>baseline</td><td>0.65</td><td>0.477</td><td>0.78</td><td>0.662</td><td>645</td><td>0</td><td>0</td></tr>
-<tr><td>bm25</td><td>0.374</td><td>0.246</td><td>0.488</td><td>0.336</td><td>1</td><td>0</td><td>0</td></tr>
-<tr><td>hybrid</td><td>0.463</td><td>0.338</td><td>0.703</td><td>0.505</td><td>662</td><td>0</td><td>0</td></tr>
-<tr><td>mq</td><td>0.54</td><td>0.354</td><td>0.628</td><td>0.5</td><td>2287</td><td>1042</td><td>0</td></tr>
-<tr><td>hyde</td><td>0.448</td><td>0.338</td><td>0.529</td><td>0.416</td><td>2636</td><td>1996</td><td>2</td></tr>
+<tr><td>baseline</td><td>0.65</td><td>0.477</td><td>0.78</td><td>0.662</td><td>563</td><td>0</td><td>0</td></tr>
+<tr><td>bm25</td><td>0.374</td><td>0.246</td><td>0.488</td><td>0.336</td><td>2</td><td>0</td><td>0</td></tr>
+<tr><td>hybrid</td><td>0.437</td><td>0.323</td><td>0.703</td><td>0.491</td><td>576</td><td>0</td><td>0</td></tr>
+<tr><td>mq</td><td>0.551</td><td>0.369</td><td>0.615</td><td>0.506</td><td>2080</td><td>1044</td><td>0</td></tr>
+<tr><td>hyde</td><td>0.405</td><td>0.323</td><td>0.596</td><td>0.42</td><td>2578</td><td>1997</td><td>1</td></tr>
 </table></section>
 
 <section><h2>L4 · Prompt-technique benchmark</h2><p class='pending'>Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat models over a golden dialog set — tool-arg accuracy, grounding, dialog-policy compliance.</p></section>
