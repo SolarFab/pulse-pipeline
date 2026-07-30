@@ -112,7 +112,11 @@ def main() -> None:
     for name in models:
         emb = get_embedder("openrouter", model=name)
         t0 = time.time()
-        vecs = emb.embed_batch(texts)
+        try:
+            vecs = emb.embed_batch(texts)
+        except Exception as exc:  # one bad model id must not kill the run
+            print(f"{name:35} SKIPPED: {type(exc).__name__}: {exc}")
+            continue
         dt = time.time() - t0
         actual_dim = len(vecs[0]) if vecs else 0  # native size (EMBED_DIM unset)
         p_cat = knn_precision(vecs, cats)

@@ -1,0 +1,22 @@
+{
+  "experiment": "1-embedding-model",
+  "golden_set": "v1",
+  "sample_events": 300,
+  "k": 5,
+  "runs": [
+    {
+      "model": "openai/text-embedding-3-small",
+      "dim": 1536,
+      "p_at_k_category": 0.6186666666666667,
+      "p_at_k_subcategory": 0.5334834834834835,
+      "seconds": 10.6
+    },
+    {
+      "model": "qwen/qwen3-embedding-8b",
+      "dim": 4096,
+      "p_at_k_category": 0.5606666666666664,
+      "p_at_k_subcategory": 0.505457227138643,
+      "seconds": 76.2
+    }
+  ]
+}

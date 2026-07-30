@@ -35,12 +35,12 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-30 10:01 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-30 10:17 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
   <div class="stat ok"><b>56/56</b>unit tests passing</div>
-  <div class="stat"><b>0.4s</b>suite runtime</div>
+  <div class="stat"><b>0.5s</b>suite runtime</div>
   <div class="stat"><b>7</b>test modules</div>
   <div class="stat"><b>4</b>test layers</div>
 </div>
@@ -49,7 +49,173 @@ comes from a real run, nothing is hand-edited.</p>
 
 <section><h2>L1 · Unit test results (live)</h2><details><summary><code>test_embedder.py</code><span class='count'>6/6</span></summary><div class='case passed'><span>test_embed_text_is_stable_and_ordered</span><span class='dot'>✓</span></div><div class='case passed'><span>test_hash_changes_when_embed_relevant_field_changes</span><span class='dot'>✓</span></div><div class='case passed'><span>test_missing_fields_do_not_crash</span><span class='dot'>✓</span></div><div class='case passed'><span>test_provider_selection_from_env</span><span class='dot'>✓</span></div><div class='case passed'><span>test_explicit_model_overrides_env</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_provider_rejected</span><span class='dot'>✓</span></div></details><details><summary><code>test_facets.py</code><span class='count'>6/6</span></summary><div class='case passed'><span>test_kid_friendly_food_market</span><span class='dot'>✓</span></div><div class='case passed'><span>test_open_air_cinema_is_outdoor</span><span class='dot'>✓</span></div><div class='case passed'><span>test_free_entry_german_and_price_cents</span><span class='dot'>✓</span></div><div class='case passed'><span>test_no_signal_stays_false</span><span class='dot'>✓</span></div><div class='case passed'><span>test_adults_only_vetoes_family</span><span class='dot'>✓</span></div><div class='case passed'><span>test_age_hint_counts_as_family</span><span class='dot'>✓</span></div></details><details><summary><code>test_golden_set.py</code><span class='count'>4/4</span></summary><div class='case passed'><span>test_golden_set_is_valid_jsonl_with_required_fields</span><span class='dot'>✓</span></div><div class='case passed'><span>test_ids_unique_and_stable_format</span><span class='dot'>✓</span></div><div class='case passed'><span>test_coverage_of_critical_categories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_embedding_subset_size</span><span class='dot'>✓</span></div></details><details><summary><code>test_jsonld_extraction.py</code><span class='count'>8/8</span></summary><div class='case passed'><span>test_extracts_event_from_graph</span><span class='dot'>✓</span></div><div class='case passed'><span>test_event_subtypes_are_recognized</span><span class='dot'>✓</span></div><div class='case passed'><span>test_past_events_are_dropped</span><span class='dot'>✓</span></div><div class='case passed'><span>test_incomplete_events_are_dropped</span><span class='dot'>✓</span></div><div class='case passed'><span>test_non_event_types_are_ignored</span><span class='dot'>✓</span></div><div class='case passed'><span>test_top_level_list_and_offer_list</span><span class='dot'>✓</span></div><div class='case passed'><span>test_zero_price_is_not_labeled</span><span class='dot'>✓</span></div><div class='case passed'><span>test_malformed_json_is_skipped_not_fatal</span><span class='dot'>✓</span></div></details><details><summary><code>test_normalizer.py</code><span class='count'>20/20</span></summary><div class='case passed'><span>test_summer_naive_time_is_cest</span><span class='dot'>✓</span></div><div class='case passed'><span>test_winter_naive_time_is_cet</span><span class='dot'>✓</span></div><div class='case passed'><span>test_summer_midnight_is_berlin_midnight</span><span class='dot'>✓</span></div><div class='case passed'><span>test_t24_rolls_to_next_day_in_berlin_time</span><span class='dot'>✓</span></div><div class='case passed'><span>test_aware_datetime_is_converted_not_reinterpreted</span><span class='dot'>✓</span></div><div class='case passed'><span>test_german_date_format_is_day_first</span><span class='dot'>✓</span></div><div class='case passed'><span>test_garbage_returns_none</span><span class='dot'>✓</span></div><div class='case passed'><span>test_canonical_passthrough</span><span class='dot'>✓</span></div><div class='case passed'><span>test_legacy_aliases_resolve</span><span class='dot'>✓</span></div><div class='case passed'><span>test_case_insensitive</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_becomes_none</span><span class='dot'>✓</span></div><div class='case passed'><span>test_stable_across_case_and_whitespace</span><span class='dot'>✓</span></div><div class='case passed'><span>test_venue_variants_do_not_split_events</span><span class='dot'>✓</span></div><div class='case passed'><span>test_different_dates_differ</span><span class='dot'>✓</span></div><div class='case passed'><span>test_free_variants</span><span class='dot'>✓</span></div><div class='case passed'><span>test_euro_amounts</span><span class='dot'>✓</span></div><div class='case passed'><span>test_no_price</span><span class='dot'>✓</span></div><div class='case passed'><span>test_valid_event_roundtrip</span><span class='dot'>✓</span></div><div class='case passed'><span>test_missing_start_time_is_rejected</span><span class='dot'>✓</span></div><div class='case passed'><span>test_end_before_start_is_dropped</span><span class='dot'>✓</span></div></details><details><summary><code>test_seed_taxonomy.py</code><span class='count'>3/3</span></summary><div class='case passed'><span>test_every_category_and_subcategory_has_labels</span><span class='dot'>✓</span></div><div class='case passed'><span>test_rows_cover_all_and_only_canonical_slugs</span><span class='dot'>✓</span></div><div class='case passed'><span>test_sports_wellness_inactive_until_realignment</span><span class='dot'>✓</span></div></details><details><summary><code>test_taxonomy.py</code><span class='count'>9/9</span></summary><div class='case passed'><span>test_categorizer_and_normalizer_agree_on_categories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_every_synonym_maps_to_a_canonical_subcategory</span><span class='dot'>✓</span></div><div class='case passed'><span>test_subcategory_parent_covers_all_subcategories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_canonical_passthrough</span><span class='dot'>✓</span></div><div class='case passed'><span>test_synonym_resolves</span><span class='dot'>✓</span></div><div class='case passed'><span>test_case_and_whitespace_insensitive</span><span class='dot'>✓</span></div><div class='case passed'><span>test_wrong_category_pair_is_rejected</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_value_is_rejected_not_stored</span><span class='dot'>✓</span></div><div class='case passed'><span>test_empty_input</span><span class='dot'>✓</span></div></details></section>
 
-<section><h2>L4 · Embedding model benchmark</h2><p class='pending'>Not yet run — waiting on the OpenRouter key. scripts/benchmark_embeddings.py fills this section.</p></section>
+<section><h2>L4 · Embedding model benchmark</h2><p>Sample: 300 active events with category labels. Metric: kNN precision@5 (do an event&#x27;s nearest neighbours share its label?).</p>
+<p>All models via the OpenRouter gateway (identical conditions).</p>
+<table>
+<tr><th>model</th><th>dim</th><th>p@5 category</th><th>p@5 subcategory</th><th>time</th></tr>
+<tr><td>openai/text-embedding-3-small</td><td>1536</td><td>0.619</td><td>0.533</td><td>10.6s / 300 events</td></tr>
+<tr><td>qwen/qwen3-embedding-8b</td><td>4096</td><td>0.561</td><td>0.505</td><td>76.2s / 300 events</td></tr>
+</table>
+<h3>Golden-query retrievals (verify by hand)</h3>
+<p>Cross-lingual DE&lt;-&gt;EN probes — a human judges whether the top-5 are correct.</p>
+<h4>openai/text-embedding-3-small (dim=1536)</h4>
+<p><strong>q01 [semantic_de] Jazzkonzert heute Abend</strong></p>
+<div class='li'>0.545 [culture/None] Jazzwoche Berlin</div>
+<div class='li'>0.481 [culture/None] DER TANZENDE SONNTAG</div>
+<div class='li'>0.460 [music/jazz-blues] Hat Bar Live Jam Sessions</div>
+<div class='li'>0.454 [music/jazz-blues] Christian Müller Quartett</div>
+<div class='li'>0.451 [meetups/None] Musikkurs für 2-5- jährige Kinder 15:45 bei ENNA: Heute gibt es Smooth</div>
+<p><strong>q02 [semantic_en] jazz concert tonight</strong></p>
+<div class='li'>0.506 [music/jazz-blues] Hat Bar Live Jam Sessions</div>
+<div class='li'>0.475 [culture/None] Jazzwoche Berlin</div>
+<div class='li'>0.433 [music/jazz-blues] Irish &amp; Folk Open Session</div>
+<div class='li'>0.409 [culture/None] DER TANZENDE SONNTAG</div>
+<div class='li'>0.389 [culture/None] Musical Concert: Ragas Meet Bollywood</div>
+<p><strong>q03 [cross_lingual] Flohmarkt am Sonntag</strong></p>
+<div class='li'>0.621 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<div class='li'>0.552 [markets/None] Flowmarkt Schöneberg</div>
+<div class='li'>0.515 [markets/craft-market] Berliner Staudenmarkt</div>
+<div class='li'>0.505 [food/weekly-market] Wochenmarkt Leopoldplatz</div>
+<div class='li'>0.463 [culture/None] DER TANZENDE SONNTAG</div>
+<p><strong>q04 [cross_lingual] vintage flea market</strong></p>
+<div class='li'>0.470 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<div class='li'>0.397 [markets/None] Flowmarkt Schöneberg</div>
+<div class='li'>0.351 [markets/craft-market] Berliner Staudenmarkt</div>
+<div class='li'>0.313 [food/weekly-market] Wochenmarkt Leopoldplatz</div>
+<div class='li'>0.279 [nightlife/None] Perfumed Sundays</div>
+<p><strong>q05 [semantic_de] Techno Party in Neukölln</strong></p>
+<div class='li'>0.614 [nightlife/None] Daytime Berlin Underground Party Tour</div>
+<div class='li'>0.605 [nightlife/None] Electric Monday@Kitkat</div>
+<div class='li'>0.549 [nightlife/None] Walk&#x27;n&#x27; Dance - Silent Disco Walking Tours</div>
+<div class='li'>0.533 [nightlife/None] Ecstatic Dance &amp; Cacao Journey + Tea &amp; Snacks</div>
+<div class='li'>0.516 [nightlife/None] Else x PuMp w Anja Schneider, Hilit Kolet, icykof, Radio Slave, Tal Fu</div>
+<p><strong>q06 [semantic_en] underground electronic music</strong></p>
+<div class='li'>0.452 [nightlife/None] Dark Monday</div>
+<div class='li'>0.441 [nightlife/None] Else x PuMp w Anja Schneider, Hilit Kolet, icykof, Radio Slave, Tal Fu</div>
+<div class='li'>0.433 [nightlife/None] Electric Monday@Kitkat</div>
+<div class='li'>0.427 [nightlife/None] Hypnogogia</div>
+<div class='li'>0.417 [nightlife/None] manic.monda mit Pablo Cornejo (Chile) !FREE ENTRY</div>
+<p><strong>q07 [vibe_no_keyword] etwas Chilliges nach der Arbeit</strong></p>
+<div class='li'>0.426 [culture/None] Fit mit Grit</div>
+<div class='li'>0.404 [culture/None] Fit mit Grit</div>
+<div class='li'>0.399 [nightlife/None] Gezapftes Bier 0,5l 3 € - täglich Kippzeit in der BESTE</div>
+<div class='li'>0.399 [nightlife/None] SPRITZ HOUR @ Lost my Voice Bar</div>
+<div class='li'>0.398 [family/kids-program] Mitmach-Nachmittag  mit Tante Milli Tausendgrün</div>
+<p><strong>q08 [family] etwas mit Kindern unternehmen</strong></p>
+<div class='li'>0.510 [family/kids-program] Mitmach-Nachmittag  mit Tante Milli Tausendgrün</div>
+<div class='li'>0.502 [family/None] Krabbelgruppen im Kindercafé des Stadtteilzentrums Kaulsdorf</div>
+<div class='li'>0.501 [family/kids-program] Krabbelgruppen im Kindercafé des Stadtteilzentrums Kaulsdorf</div>
+<div class='li'>0.495 [meetups/None] Musikkurs für 2-5- jährige Kinder 15:45 bei ENNA: Heute gibt es Smooth</div>
+<div class='li'>0.492 [family/family-event] Leseclub</div>
+<p><strong>q09 [family] fun activities for kids</strong></p>
+<div class='li'>0.418 [meetups/None] Musikkurs für 2-5- jährige Kinder 15:45 bei ENNA: Heute gibt es Smooth</div>
+<div class='li'>0.393 [family/family-event] Bastel-Montag</div>
+<div class='li'>0.388 [family/family-event] Drinnen oder draußen spielen</div>
+<div class='li'>0.385 [family/kids-program] Krabbelgruppen im Kindercafé des Stadtteilzentrums Kaulsdorf</div>
+<div class='li'>0.384 [family/family-event] Family &amp; Friends Gaming in der Bibliothek</div>
+<p><strong>q10 [semantic_de] Ausstellung zeitgenössische Kunst</strong></p>
+<div class='li'>0.585 [culture/None] Ausstellungseröffnung EN-TFAL-TET</div>
+<div class='li'>0.582 [culture/exhibition] Ausstellung „Das beste Kennenlernen“ von Jürgen Eisenacher</div>
+<div class='li'>0.579 [culture/exhibition] ZEITFELDER - TIMEFIELDS .................. Amer Akel - Pfelder - Simon</div>
+<div class='li'>0.575 [culture/exhibition] Der Kunstverein Tiergarten e. V. mit der Ausstellung “Critical Friends</div>
+<div class='li'>0.573 [culture/exhibition] Bedrohung / Zagrożenie / Menace ......... Gruppenausstellung</div>
+<p><strong>q11 [facet_combo] free open air cinema</strong></p>
+<div class='li'>0.402 [culture/None] Die Welt der Traumtiere</div>
+<div class='li'>0.370 [culture/theater] HOHEITSZEICHEN  Moving Image Sculpture #3</div>
+<div class='li'>0.351 [nightlife/None] Free full body holistic massage</div>
+<div class='li'>0.344 [culture/None] Final Girls Berlin</div>
+<div class='li'>0.340 [music/jazz-blues] Hat Bar Live Jam Sessions</div>
+<p><strong>q12 [semantic_de] Yoga im Park</strong></p>
+<div class='li'>0.506 [outdoors/None] Mama &amp; Baby Yoga - Postnatales Yoga mit/ohne Baby 0+ mit Cornelia</div>
+<div class='li'>0.455 [meetups/None] momaly walk x BINIBAMBA</div>
+<div class='li'>0.402 [culture/None] Fit im Alter</div>
+<div class='li'>0.402 [culture/None] Fit im Alter</div>
+<div class='li'>0.400 [nightlife/None] Ecstatic Dance &amp; Cacao Journey + Tea &amp; Snacks</div>
+<p><strong>q13 [semantic_en] learn something new workshop</strong></p>
+<div class='li'>0.487 [meetups/None] Meet the Machines</div>
+<div class='li'>0.433 [meetups/None] Smack My Pitch Up</div>
+<div class='li'>0.426 [meetups/None] CREATIVE SESSION at CIC</div>
+<div class='li'>0.403 [workshops/None] Kiez-Atelier im Studio Bildende Kunst</div>
+<div class='li'>0.399 [culture/None] Einblicke: Workshop zu &quot;Was ihr wollt&quot;</div>
+<h4>qwen/qwen3-embedding-8b (dim=4096)</h4>
+<p><strong>q01 [semantic_de] Jazzkonzert heute Abend</strong></p>
+<div class='li'>0.663 [music/jazz-blues] Hat Bar Live Jam Sessions</div>
+<div class='li'>0.624 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.598 [culture/None] SINOPOLIANA. IL LUOGO DEL DESTINO</div>
+<div class='li'>0.532 [music/None] Schüler:innenvorspiel Plus MFEII-Kurs</div>
+<div class='li'>0.528 [meetups/community] Doppelkopf mit Vorkenntnissen</div>
+<p><strong>q02 [semantic_en] jazz concert tonight</strong></p>
+<div class='li'>0.678 [music/jazz-blues] Hat Bar Live Jam Sessions</div>
+<div class='li'>0.601 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.590 [culture/None] SINOPOLIANA. IL LUOGO DEL DESTINO</div>
+<div class='li'>0.538 [nightlife/None] Perfumed Sundays</div>
+<div class='li'>0.532 [nightlife/None] Ecstatic Dance &amp; Cacao Journey + Tea &amp; Snacks</div>
+<p><strong>q03 [cross_lingual] Flohmarkt am Sonntag</strong></p>
+<div class='li'>0.732 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<div class='li'>0.636 [family/kids-program] Repaircafé</div>
+<div class='li'>0.596 [food/weekly-market] Wochenmarkt Leopoldplatz</div>
+<div class='li'>0.593 [markets/None] Flowmarkt Schöneberg</div>
+<div class='li'>0.562 [meetups/None] momaly walk x BINIBAMBA</div>
+<p><strong>q04 [cross_lingual] vintage flea market</strong></p>
+<div class='li'>0.688 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<div class='li'>0.585 [family/kids-program] Repaircafé</div>
+<div class='li'>0.564 [markets/None] Flowmarkt Schöneberg</div>
+<div class='li'>0.547 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.539 [food/weekly-market] Wochenmarkt Leopoldplatz</div>
+<p><strong>q05 [semantic_de] Techno Party in Neukölln</strong></p>
+<div class='li'>0.784 [nightlife/None] Daytime Berlin Underground Party Tour</div>
+<div class='li'>0.685 [nightlife/None] Ecstatic Dance &amp; Cacao Journey + Tea &amp; Snacks</div>
+<div class='li'>0.669 [nightlife/None] Else x PuMp w Anja Schneider, Hilit Kolet, icykof, Radio Slave, Tal Fu</div>
+<div class='li'>0.653 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.647 [nightlife/None] manic.monda mit Pablo Cornejo (Chile) !FREE ENTRY</div>
+<p><strong>q06 [semantic_en] underground electronic music</strong></p>
+<div class='li'>0.559 [nightlife/None] TRIG: FROM: TAKE YOUR FREE TICKETS</div>
+<div class='li'>0.556 [nightlife/None] Hypnogogia</div>
+<div class='li'>0.553 [nightlife/None] Daytime Berlin Underground Party Tour</div>
+<div class='li'>0.547 [nightlife/None] TRIG: FROM 23:00 - XXX</div>
+<div class='li'>0.538 [nightlife/None] Perfumed Sundays</div>
+<p><strong>q07 [vibe_no_keyword] etwas Chilliges nach der Arbeit</strong></p>
+<div class='li'>0.619 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.573 [family/kids-program] Repaircafé</div>
+<div class='li'>0.544 [meetups/community] Nähstübchen</div>
+<div class='li'>0.541 [meetups/None] momaly walk x BINIBAMBA</div>
+<div class='li'>0.512 [nightlife/None] Free full body holistic massage</div>
+<p><strong>q08 [family] etwas mit Kindern unternehmen</strong></p>
+<div class='li'>0.646 [family/kids-program] Repaircafé</div>
+<div class='li'>0.609 [family/family-event] Bastel-Montag</div>
+<div class='li'>0.596 [family/kids-program] Bastel-Montag</div>
+<div class='li'>0.588 [family/kids-program] Zauberwelt aus Schatten und Figuren</div>
+<div class='li'>0.587 [family/kids-program] DigiQuest</div>
+<p><strong>q09 [family] fun activities for kids</strong></p>
+<div class='li'>0.630 [family/kids-program] DigiQuest</div>
+<div class='li'>0.613 [family/kids-program] Zauberwelt aus Schatten und Figuren</div>
+<div class='li'>0.608 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.606 [family/kids-program] Bastel-Montag</div>
+<div class='li'>0.601 [family/kids-program] Repaircafé</div>
+<p><strong>q10 [semantic_de] Ausstellung zeitgenössische Kunst</strong></p>
+<div class='li'>0.552 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.533 [family/kids-program] Repaircafé</div>
+<div class='li'>0.514 [culture/None] faces of mind - Kunst zwischen Sichtbarem und Innerem. Die private Sam</div>
+<div class='li'>0.513 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<div class='li'>0.513 [culture/None] Berlin Business AI Meetup &amp; Professional Networking (Limited Spots)</div>
+<p><strong>q11 [facet_combo] free open air cinema</strong></p>
+<div class='li'>0.589 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.574 [family/kids-program] Bilderbuchkino mit den Drag Queens Kaey &amp; Vivienne Lovecraft</div>
+<div class='li'>0.569 [meetups/None] momaly walk x BINIBAMBA</div>
+<div class='li'>0.569 [family/kids-program] Repaircafé</div>
+<div class='li'>0.558 [markets/flea-market] Ikea Flohmarkt Südkreuz</div>
+<p><strong>q12 [semantic_de] Yoga im Park</strong></p>
+<div class='li'>0.587 [nightlife/None] Wet Chikens NEW Material Comedy Mic</div>
+<div class='li'>0.563 [meetups/None] momaly walk x BINIBAMBA</div>
+<div class='li'>0.551 [meetups/community] Nähstübchen</div>
+<div class='li'>0.543 [family/kids-program] Repaircafé</div>
+<div class='li'>0.534 [nightlife/None] Free full body holistic massage</div>
+<p><strong>q13 [semantic_en] learn something new workshop</strong></p>
+<div class='li'>0.667 [family/kids-program] Repaircafé</div>
+<div class='li'>0.629 [meetups/community] Fortbildung: Kita unterm Regenbogen – sexuelle &amp; geschlechtliche Vielf</div>
+<div class='li'>0.618 [culture/None] Berlin Visit - Scale Your Business with AI – For Business &amp; Startups</div>
+<div class='li'>0.617 [culture/None] Berlin Business AI Meetup &amp; Professional Networking (Limited Spots)</div>
+<div class='li'>0.607 [workshops/None] Umgangssprachliches Ukrainisch / Розмовний клуб для українців</div></section>
 
 <section><h2>L4 · Prompt-technique benchmark</h2><p class='pending'>Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat models over a golden dialog set — tool-arg accuracy, grounding, dialog-policy compliance.</p></section>
 
