@@ -35,12 +35,12 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-30 11:01 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-30 11:35 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
   <div class="stat ok"><b>56/56</b>unit tests passing</div>
-  <div class="stat"><b>0.3s</b>suite runtime</div>
+  <div class="stat"><b>0.5s</b>suite runtime</div>
   <div class="stat"><b>7</b>test modules</div>
   <div class="stat"><b>4</b>test layers</div>
 </div>
@@ -217,7 +217,12 @@ comes from a real run, nothing is hand-edited.</p>
 <div class='li'>0.601 [meetups/None] FeedForward - Berlin</div>
 <div class='li'>0.597 [culture/None] Upcycling-Workshop</div></section>
 
-<section><h2>L4 · Embedding benchmark — hand-labeled qrels</h2><p class='pending'>Awaiting human labels: open docs/showcase/labeling-sheet.html, tick relevant events, export to eval/golden_set/qrels_v1.jsonl, run scripts/score_qrels.py.</p></section>
+<section><h2>L4 · Embedding benchmark — hand-labeled qrels</h2><p>Human relevance labels over pooled candidates; K=5. Queries with no relevant event in pool: q05, q11, q12.</p>
+<table>
+<tr><th>model</th><th>recall@5</th><th>precision@5</th><th>MRR</th><th>nDCG@5</th><th>queries</th></tr>
+<tr><td>openai/text-embedding-3-small</td><td>0.776</td><td>0.477</td><td>0.78</td><td>0.716</td><td>13</td></tr>
+<tr><td>qwen/qwen3-embedding-8b</td><td>0.246</td><td>0.169</td><td>0.453</td><td>0.262</td><td>13</td></tr>
+</table></section>
 
 <section><h2>L4 · Prompt-technique benchmark</h2><p class='pending'>Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat models over a golden dialog set — tool-arg accuracy, grounding, dialog-policy compliance.</p></section>
 
