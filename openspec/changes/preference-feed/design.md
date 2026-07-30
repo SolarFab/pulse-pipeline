@@ -61,3 +61,11 @@ selling or exposing person-level taste data; the concierge semantic search (sepa
 - Exploration algorithm: pure random vs. diversity/MMR-based?
 - Real-time vs. nightly taste recompute threshold (how many signals before re-consolidation)?
 - Weight-tuning: manual vs. a small offline eval set with held-out likes?
+
+## Decision log
+
+- **2026-07-30 — Embedder = `openai/text-embedding-3-small` via OpenRouter, `vector(1536)`.**
+  Experiment 1 (docs/EXPERIMENT.md): hand-labeled qrels over the frozen corpus gave
+  R@5 0.776 / MRR 0.78 / nDCG@5 0.716 vs qwen3-embedding-8b at 0.246 / 0.453 / 0.262 —
+  decisive despite near-tied proxy metrics (which alone would have misjudged). Results:
+  `eval/results/qrels_scores_v1.json`, `docs/embedding-benchmark-qrels.md`.
