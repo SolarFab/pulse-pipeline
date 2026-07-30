@@ -105,3 +105,14 @@ token usage. Enough to eval retrieval quality later against the golden queries.
   SQL filters, judged at the chat layer). `search_events` ships with pure pgvector cosine
   ranking inside hard SQL filters; revisit only with evidence (venue-name misses → BM25
   fusion first). Per-query choices + answer key: docs/showcase/retrieval-comparison.html.
+
+- **2026-07-30 — System prompt = few-shot (worked examples); dialog policy = answer-first.**
+  Experiment 3 stage 1 (tool-call accuracy, 13 golden chat queries, deterministic asserts,
+  temp 0): few-shot 13/13 (haiku-4.5) / 12/13 (gpt-4o-mini) beats prod-v1 rules-only (10/9),
+  zero-shot (11/9) and clarify-first (5/4). Findings: (1) worked examples fix exactly the
+  hard cases — kiez→geo (q14) and relative-date resolution (q23) failed in every variant
+  without examples; (2) clarify-first collapsed by refusing to search even fully-specified
+  requests (free open-air cinema, rap, kids weekend) — over-clarification is a real failure
+  mode, answer-first confirmed by data; (3) rules-only prod-v1 was no better than zero-shot —
+  rules tell, examples teach. Cost: ~+600 prompt tokens/turn for +23pp accuracy on haiku
+  (~$0.0005/turn) — shipped. Stage 2 (grounded end-to-end + judge) pending on the winner.
