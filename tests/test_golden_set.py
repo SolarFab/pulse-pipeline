@@ -34,4 +34,4 @@ def test_coverage_of_critical_categories():
 
 def test_embedding_subset_size():
     items = [it for it in load() if "embedding" in it["applies_to"]]
-    assert len(items) == 13  # frozen; growing it means a new golden set version
+    assert len(items) == 16  # frozen; growing it means a new golden set version

@@ -49,7 +49,9 @@ def cosine(a: list[float], b: list[float]) -> float:
 def freeze_corpus() -> list[dict]:
     if CORPUS.exists():  # frozen means frozen — never refetch silently
         print(f"corpus already frozen ({CORPUS}), reusing")
-        return [json.loads(ln) for ln in CORPUS.read_text().splitlines() if ln.strip()]
+        # split("\n"), NOT splitlines(): descriptions may contain U+2028/U+2029,
+        # which splitlines() treats as line breaks — that would corrupt JSON lines
+        return [json.loads(ln) for ln in CORPUS.read_text().split("\n") if ln.strip()]
     from db.supabase import get_client
     now = datetime.now(UTC)
     resp = (

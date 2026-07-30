@@ -9,7 +9,7 @@ generated from those files, never typed by hand.
 
 | Variable | Pinned value |
 |---|---|
-| Golden set | `eval/golden_set/v1.jsonl` (22 items: 13 embedding/retrieval, 10 chat, overlapping) |
+| Golden set | `eval/golden_set/v1.jsonl` (25 items: 16 embedding/retrieval, 13 chat, overlapping) |
 | Event sample | 300 active events with category labels, ordered by start_time (deterministic) |
 | K | 5 (precision@K, top-K retrievals) |
 | Embedding gateway | OpenRouter (`/v1/embeddings`), native model dimensions |
