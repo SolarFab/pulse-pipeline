@@ -23,8 +23,25 @@ generated from those files, never typed by hand.
 |---|---|---|
 | 1 | Embedding model (text-embedding-3-small vs gemini-embedding-001 vs qwen3-embedding-8b) | ready, blocked on OPENROUTER_API_KEY |
 | 1b | Embed-text composition ablation (title / +description / +category / +tags; truncation length) | planned |
-| 2 | Retrieval mode on golden queries (filter-only vs semantic vs hybrid) | planned (needs pgvector live) |
+| 2 | Retrieval technique ladder (see below) | planned; needs qrels_v1 — runs offline on the frozen corpus |
 | 3 | Prompt technique × chat model grid (zero-shot / few-shot / +reasoning / policy variants) | planned (promptfoo; needs tool-calling chat) |
+
+## Experiment 2 — retrieval technique ladder
+
+One config per run, all scored against `qrels_v1` on the frozen corpus, all reporting quality
+(Recall@5, MRR, nDCG@5) **and** added query-time latency/cost — retrieval sits on the chat hot
+path (~2s budget), so the ship decision weighs both:
+
+| config | mechanism | query-time cost |
+|---|---|---|
+| baseline | vector-only (Experiment-1 winner) | ~0 |
+| + BM25/RRF | Postgres FTS (`german`) fused with vectors via Reciprocal Rank Fusion | ~0 (SQL) |
+| + Multi-Query | LLM expands the query into 3 variants, results unioned | +1 LLM call |
+| + HyDE | LLM writes a hypothetical event description; embed that instead of the query | +1 LLM call |
+| combos | only if a single technique wins on its own (stacking didn't compound in riester-kompass) | — |
+
+Pool-bias control: new configs surface unlabeled events; their top-K get pooled and labeled
+incrementally (label only the new candidates) before scores are compared.
 
 ## Why one-variable-at-a-time
 
