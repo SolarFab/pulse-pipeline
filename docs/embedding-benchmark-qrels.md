@@ -4,5 +4,5 @@ Human relevance labels over pooled candidates; K=5. Queries with no relevant eve
 
 | model | recall@5 | precision@5 | MRR | nDCG@5 | queries |
 |---|---|---|---|---|---|
-| openai/text-embedding-3-small | 0.776 | 0.477 | 0.78 | 0.716 | 13 |
-| qwen/qwen3-embedding-8b | 0.246 | 0.169 | 0.453 | 0.262 | 13 |
+| openai/text-embedding-3-small | 0.621 | 0.585 | 0.896 | 0.729 | 13 |
+| qwen/qwen3-embedding-8b | 0.248 | 0.262 | 0.646 | 0.337 | 13 |

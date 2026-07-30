@@ -174,8 +174,13 @@ def main() -> None:
     texts = [build_embed_text(e) for e in events]
     queries = [g for g in jsonl(GOLDEN) if "retrieval" in g["applies_to"]]
     rels: dict[str, set[str]] = {}
+    v2 = QRELS.with_name("qrels_v2.jsonl")
     delta_file = QRELS.with_name("qrels_v1_delta.jsonl")
-    qrel_files = [QRELS] + ([delta_file] if delta_file.exists() else [])
+    if v2.exists():  # canonical merged v2 (semantic-only guideline) supersedes v1+delta
+        qrel_files = [v2]
+        print("qrels: v2 (semantic-only guideline)")
+    else:
+        qrel_files = [QRELS] + ([delta_file] if delta_file.exists() else [])
     for f in qrel_files:
         for r in jsonl(f):
             rels.setdefault(r["query_id"], set()).add(r["event_id"])

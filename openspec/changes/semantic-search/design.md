@@ -92,14 +92,16 @@ token usage. Enough to eval retrieval quality later against the golden queries.
 
 ## Decision log
 
-- **2026-07-30 — Retrieval mode = vector-only (baseline).** Experiment 2 (retrieval ladder,
-  qrels v1 + delta round to fix pool bias, LLM expansions cached for reproducibility):
-  baseline R@5 0.650 / MRR 0.780 / nDCG@5 0.662 @ 563ms beats Multi-Query
-  (0.551/0.615/0.506 @ 2.1s), hybrid BM25+RRF (0.437/0.703/0.491 @ 576ms), HyDE
-  (0.405/0.596/0.420 @ 2.6s) and BM25-only (0.374 @ 2ms). MQ/HyDE additionally bust the ~2s
-  chat-latency budget — HyDE's riester-kompass win does NOT replicate here (different
-  constraints, different verdict). Methodology note: uncached MQ/HyDE scores varied run-to-run
-  (HyDE R@5 0.28–0.45) — LLM-dependent retrieval configs MUST pin their expansions for
-  comparable evals. `search_events` ships with pure pgvector cosine ranking inside hard SQL
-  filters; revisit only with evidence (e.g. venue-name misses in prod logs — BM25 fusion is
-  the first candidate then). Per-query choices: docs/showcase/retrieval-comparison.html.
+- **2026-07-30 — Retrieval mode = vector-only (baseline).** Experiment 2 (retrieval ladder on
+  qrels **v2** — semantic-only labeling guideline, pool bias fixed via delta round, LLM
+  expansions pinned): baseline R@5 0.621 / P@5 0.585 / **MRR 0.896** / nDCG@5 0.729 @ ~750ms
+  beats Multi-Query (0.531/0.653/0.540), hybrid BM25+RRF (0.458/0.755/0.542), HyDE
+  (0.370/0.596/0.428) and BM25-only (0.392/0.546/0.380 @ 2ms) on every metric. Latency for
+  MQ/HyDE measured uncached at 2.1–2.6s/query — busts the ~2s chat budget (cached-run
+  latencies exclude the LLM call and must not be quoted). HyDE's riester-kompass win does NOT
+  replicate here. Methodology notes: (1) uncached MQ/HyDE scores varied run-to-run (HyDE R@5
+  0.28–0.45) — LLM-dependent retrieval configs MUST pin their expansions; (2) qrels v1's
+  date-aware judgments on temporal queries were corrected to semantic-only in v2 (dates are
+  SQL filters, judged at the chat layer). `search_events` ships with pure pgvector cosine
+  ranking inside hard SQL filters; revisit only with evidence (venue-name misses → BM25
+  fusion first). Per-query choices + answer key: docs/showcase/retrieval-comparison.html.

@@ -65,7 +65,8 @@ selling or exposing person-level taste data; the concierge semantic search (sepa
 ## Decision log
 
 - **2026-07-30 — Embedder = `openai/text-embedding-3-small` via OpenRouter, `vector(1536)`.**
-  Experiment 1 (docs/EXPERIMENT.md): hand-labeled qrels over the frozen corpus gave
-  R@5 0.776 / MRR 0.78 / nDCG@5 0.716 vs qwen3-embedding-8b at 0.246 / 0.453 / 0.262 —
-  decisive despite near-tied proxy metrics (which alone would have misjudged). Results:
-  `eval/results/qrels_scores_v1.json`, `docs/embedding-benchmark-qrels.md`.
+  Experiment 1 (docs/EXPERIMENT.md): hand-labeled qrels over the frozen corpus. Final (qrels
+  v2, semantic-only guideline): R@5 0.621 / P@5 0.585 / MRR 0.896 / nDCG@5 0.729 vs
+  qwen3-embedding-8b at 0.248 / 0.262 / 0.646 / 0.337 — decisive despite near-tied proxy
+  metrics (which alone would have misjudged). Results: `eval/results/qrels_scores_v1.json`,
+  `docs/embedding-benchmark-qrels.md`.

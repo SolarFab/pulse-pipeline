@@ -18,7 +18,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 POOL = ROOT / "eval" / "results" / "pool_v1.json"
-QRELS = ROOT / "eval" / "golden_set" / "qrels_v1.jsonl"
+_V2 = ROOT / "eval" / "golden_set" / "qrels_v2.jsonl"
+QRELS = _V2 if _V2.exists() else ROOT / "eval" / "golden_set" / "qrels_v1.jsonl"
 K = 5
 
 
