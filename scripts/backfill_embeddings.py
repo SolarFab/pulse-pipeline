@@ -38,6 +38,7 @@ BATCH = 100
 ROOT = Path(__file__).resolve().parent.parent
 
 
+@retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=1, min=2, max=20))
 def fetch_page(client, now_iso: str, offset: int) -> list[dict]:
     return (
         client.table("events")
