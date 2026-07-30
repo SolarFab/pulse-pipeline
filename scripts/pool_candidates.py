@@ -18,6 +18,7 @@ from __future__ import annotations
 import html
 import json
 import sys
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -50,13 +51,21 @@ def freeze_corpus() -> list[dict]:
         print(f"corpus already frozen ({CORPUS}), reusing")
         return [json.loads(ln) for ln in CORPUS.read_text().splitlines() if ln.strip()]
     from db.supabase import get_client
+    now = datetime.now(UTC)
     resp = (
         get_client().table("events")
         .select("id,title,description,category,subcategory,tags,venue_name,start_time,neighborhood")
         .eq("is_active", True).not_.is_("description", "null")
-        .order("start_time", desc=False).limit(300).execute()
+        # mirror production retrieval: upcoming, default 14-day window
+        .gte("start_time", now.isoformat())
+        .lte("start_time", (now + timedelta(days=14)).isoformat())
+        .order("start_time", desc=False).limit(2000).execute()
     )
-    events = [e for e in resp.data if e.get("category")]
+    pool = [e for e in resp.data if e.get("category")]
+    # even subsample across the window (every Nth by start_time) — deterministic,
+    # spans all days so weekday-specific queries ("am Sonntag") have candidates
+    step = max(1, len(pool) // 300)
+    events = pool[::step][:300]
     CORPUS.parent.mkdir(parents=True, exist_ok=True)
     CORPUS.write_text("\n".join(json.dumps(e, ensure_ascii=False) for e in events) + "\n")
     print(f"froze corpus: {len(events)} events -> {CORPUS}")

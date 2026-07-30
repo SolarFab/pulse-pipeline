@@ -23,6 +23,7 @@ import json
 import math
 import sys
 import time
+from datetime import UTC, datetime
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -83,6 +84,7 @@ def fetch_events(sample: int) -> list[dict]:
         .select("id,title,description,category,subcategory,tags")
         .eq("is_active", True)
         .not_.is_("description", "null")
+        .gte("start_time", datetime.now(UTC).isoformat())  # upcoming only — mirror production retrieval
         .order("start_time", desc=False)
         .limit(sample)
         .execute()
