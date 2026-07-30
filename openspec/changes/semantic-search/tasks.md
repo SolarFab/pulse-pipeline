@@ -23,12 +23,20 @@ Depends on: `event-embeddings` (pgvector column + backfill) and the taxonomy tab
 - [ ] 3.3 [web] Failure paths: embedding down → filter-only; tool error → brief error string to model
 - [ ] 3.4 [web] Keep streaming UX identical for the existing chat UI
 
+## 3b. Dialog policy & personalization
+
+- [ ] 3b.1 [web] Draft the three policy variants (always-answer-broad / answer-then-offer-refinement / clarify-when-broad) as prompt snippets
+- [ ] 3b.2 [web] Profile context injection for signed-in users (onboarding categories, Kiez, family status; anon-key + JWT read of own profile); bias-not-exclude rule + explicit-ask-wins in the prompt
+- [ ] 3b.3 [web] Anonymous users: verify neutral prompt (no profile line)
+
 ## 4. Quality
 
 - [ ] 4.1 [web] Injection test: adversarial description in a fixture event does not alter behaviour
 - [ ] 4.2 [pipeline] Reuse the benchmark golden queries as a retrieval eval against `search_events` (are the right events in top-5?)
 - [ ] 4.3 [web] Verify end-to-end with the webapp-testing skill: "jazz tonight", "kostenlos am Sonntag draußen", "was geht im SchwuZ", empty-result case
 - [ ] 4.4 Log per turn: tools called, result counts, latency, tokens (basis for later evals)
+- [ ] 4.5 Prompt benchmark (promptfoo): golden dialog set (~20 cases incl. broad/ambiguous/explicit-ask/profile cases), deterministic tool-arg assertions + LLM-rubric grounding/policy checks, grid = prompt variants (zero-shot, few-shot, +reasoning, policy variants) × ≥2 chat models via OpenRouter; document results in docs/, ship the winner
+- [ ] 4.6 Wire the prompt benchmark as the regression gate for any future prompt/model change
 
 ## 5. Ship
 
