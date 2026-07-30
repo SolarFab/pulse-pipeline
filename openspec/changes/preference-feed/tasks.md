@@ -7,7 +7,7 @@ or the **[db]** (Supabase migration).
 
 - [x] 1.1 [db] Supabase migration: enable `pgvector`; add `events.embedding vector(N)` + `events.embed_model text` + HNSW index
 - [x] 1.2 [pipeline] Add a swappable embedder module (config-selected model) with a stable text builder (title + description + category + tags)
-- [ ] 1.3 [pipeline] Embed each event on upsert; skip re-embed when embed-relevant text is unchanged
+- [x] 1.3 [pipeline] Embed each event on upsert; skip re-embed when embed-relevant text is unchanged
 - [ ] 1.4 [pipeline] One-off backfill script to embed all existing active events; verify no active event has a null embedding
 
 ## 2. Taste model

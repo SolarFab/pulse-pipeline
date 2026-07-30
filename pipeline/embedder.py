@@ -67,16 +67,20 @@ class OpenAICompatEmbedder:
         self.provider = provider
         self.model = model
         self.dim = dim
+        self.total_tokens = 0      # accumulated across calls — cost/latency evaluation
+        self.total_seconds = 0.0
         self._url = base_url.rstrip("/") + "/embeddings"
         self._key = os.environ.get(KEY_ENV[provider], "")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
+        import time
         out: list[list[float]] = []
         for i in range(0, len(texts), _BATCH_SIZE):
             chunk = texts[i : i + _BATCH_SIZE]
             payload: dict = {"model": self.model, "input": chunk}
             if self.dim:  # only models that support shortening (e.g. text-embedding-3-*)
                 payload["dimensions"] = self.dim
+            t0 = time.time()
             resp = httpx.post(
                 self._url,
                 headers={"Authorization": f"Bearer {self._key}"},
@@ -84,7 +88,10 @@ class OpenAICompatEmbedder:
                 timeout=_TIMEOUT,
             )
             resp.raise_for_status()
-            data = sorted(resp.json()["data"], key=lambda d: d["index"])
+            body = resp.json()
+            self.total_seconds += time.time() - t0
+            self.total_tokens += (body.get("usage") or {}).get("total_tokens", 0)
+            data = sorted(body["data"], key=lambda d: d["index"])
             out.extend(d["embedding"] for d in data)
         return out
 

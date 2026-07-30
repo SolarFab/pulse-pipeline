@@ -15,6 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from db.supabase import get_client, upsert_events
 from pipeline.categorizer import categorize_batch
+from pipeline.embed_events import attach_embeddings
 from pipeline.facets import detect_facets
 from pipeline.geocoder import geocode_inline
 from pipeline.normalizer import normalize
@@ -117,6 +118,21 @@ class BaseScraper(ABC):
         # that predate the facet columns)
         for event in categorised:
             event.update(detect_facets(event))
+
+        # Embeddings: only new/changed embed text (hash-skip against stored hashes).
+        # Failure degrades — events upsert without embeddings and heal next run.
+        db_hashes: dict[str, str] = {}
+        fps = [e["fingerprint"] for e in categorised if e.get("fingerprint")]
+        if fps:
+            for i in range(0, len(fps), 200):
+                res = (get_client().table("events").select("fingerprint,embed_hash")
+                       .in_("fingerprint", fps[i : i + 200]).execute())
+                db_hashes.update({r["fingerprint"]: r["embed_hash"] for r in (res.data or [])
+                                  if r.get("embed_hash")})
+        emb_metrics = attach_embeddings(categorised, db_hashes)
+        self.logger.info("Embeddings: %(embedded)d new, %(skipped)d unchanged, "
+                         "%(failed)d failed — %(tokens)d tok / $%(usd).4f / %(seconds).1fs",
+                         emb_metrics)
 
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)
