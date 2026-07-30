@@ -19,6 +19,7 @@ Writes docs/embedding-benchmark.md with the results table.
 from __future__ import annotations
 
 import argparse
+import json
 import math
 import sys
 import time
@@ -39,21 +40,14 @@ DEFAULT_CANDIDATES = [
     "qwen/qwen3-embedding-8b",         # top multilingual open model
 ]
 
-# ── Part B: golden queries (DE<->EN). Correct answers are judged by a human. ──
-GOLDEN_QUERIES = [
-    "Jazzkonzert heute Abend",
-    "jazz concert tonight",
-    "Flohmarkt am Sonntag",
-    "vintage flea market",
-    "Techno Party in Neukölln",
-    "underground electronic music",
-    "etwas mit Kindern unternehmen",
-    "fun activities for kids",
-    "Ausstellung zeitgenössische Kunst",
-    "free open air cinema",
-    "Yoga im Park",
-    "learn something new workshop",
-]
+# ── Part B: golden queries come from the FROZEN golden set (see docs/EXPERIMENT.md) ──
+GOLDEN_SET = Path(__file__).resolve().parent.parent / "eval" / "golden_set" / "v1.jsonl"
+
+
+def load_golden_queries() -> list[dict]:
+    items = [json.loads(ln) for ln in GOLDEN_SET.read_text().splitlines() if ln.strip()]
+    return [it for it in items if "embedding" in it["applies_to"]]
+
 
 K = 5
 
@@ -127,9 +121,11 @@ def main() -> None:
         print(f"{name:35} dim={actual_dim:5} p@{K} cat={p_cat:.3f} sub={p_sub:.3f} ({dt:.1f}s)")
 
         # Part B — print retrievals for human judgment
-        qvecs = emb.embed_batch(GOLDEN_QUERIES)
+        golden = load_golden_queries()
+        qvecs = emb.embed_batch([g["query"] for g in golden])
         lines = [f"\n### {name} (dim={actual_dim})"]
-        for q, qv in zip(GOLDEN_QUERIES, qvecs):
+        for g, qv in zip(golden, qvecs):
+            q = f"{g['id']} [{g['category']}] {g['query']}"
             sims = sorted(
                 ((cosine(qv, v), events[j]) for j, v in enumerate(vecs)),
                 key=lambda s: -s[0],
@@ -155,7 +151,22 @@ def main() -> None:
         "Cross-lingual DE<->EN probes — a human judges whether the top-5 are correct.\n"
         + "\n".join(query_sections) + "\n"
     )
-    print(f"\nWrote {out}")
+    # Reproducible run record (docs/EXPERIMENT.md): full JSON next to the golden set version.
+    results_dir = Path(__file__).resolve().parent.parent / "eval" / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    stamp = time.strftime("%Y%m%d-%H%M%S")
+    (results_dir / f"embedding-{stamp}.json").write_text(json.dumps({
+        "experiment": "1-embedding-model",
+        "golden_set": "v1",
+        "sample_events": len(events),
+        "k": K,
+        "runs": [
+            {"model": n, "dim": d, "p_at_k_category": pc, "p_at_k_subcategory": ps,
+             "seconds": round(dt, 1)}
+            for n, d, pc, ps, dt, _ in rows
+        ],
+    }, indent=2))
+    print(f"\nWrote {out} and eval/results/embedding-{stamp}.json")
 
 
 if __name__ == "__main__":
