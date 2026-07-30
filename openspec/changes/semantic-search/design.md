@@ -18,17 +18,33 @@ agent only where it earns it). `maxSteps` bounds runaway loops; typical turn = 1
 
 ## Tool contracts (v1 — final shapes live in code, zod-validated)
 
+Every parameter is optional — the model composes exactly the constraints the question contains.
+Two kinds of parameters: **filters** constrain (strict SQL, never soft); **`query` ranks** (orders
+the allowed set, never excludes).
+
 ```ts
 search_events({
-  query?: string,            // free text, embedded server-side; omit for pure filter queries
-  category?: Category,       // enum GENERATED from the canonical taxonomy table
-  subcategory?: Subcategory, // enum generated likewise
-  date_from?: string, date_to?: string,   // ISO; model resolves "tonight" from system prompt
-  neighborhood?: string, venue?: string,  // venue: fuzzy ilike match
-  family_friendly?: boolean, outdoor?: boolean, free_entry?: boolean,
-  max_price_cents?: number,
+  query?: string,            // RANKS (the only non-filter): embedded server-side, cosine ordering
+  category?: Category,       // filter; enum GENERATED from the canonical taxonomy table
+  subcategory?: Subcategory, // filter; enum generated likewise
+  date_from?: string, date_to?: string,   // filter; ISO; model resolves "tonight" itself.
+                                          // default window: now -> +14 days
+  neighborhood?: string,     // filter; our column granularity ("Neukölln")
+  venue?: string,            // filter; fuzzy ilike
+  family_friendly?: boolean, // filters ONLY when true (require); omitted = don't care.
+  outdoor?: boolean,         //   never false-means-exclude: detection is conservative
+  free_entry?: boolean,      //   (false negatives), so exclusion would lie
+  max_price_cents?: number,  // filter; excludes events KNOWN to cost more; unknown price stays in
+  lat?: number, lng?: number,   // filter+rank; lat+lng together or not at all; source: model
+  radius_km?: number,           //   world knowledge or client user-location, NEVER scraped text.
+                                //   default 1.5, clamped 0.2–10
   limit?: number             // default 10, max 20
-}) -> [{ id, title, venue_name, start_time, category, subcategory, price, neighborhood }]
+}) -> [{ id, title, venue_name, start_time, category, subcategory, price, neighborhood,
+         distance_km? /* only when geo was given; similarity scores are NOT returned */ }]
+```
+
+Ordering priority (deterministic): `query` present → similarity; else geo present → distance;
+else → `start_time`. Filters always apply first; ranking orders within the allowed set.
 
 get_event_details({ event_id: string })
   -> { ...full row incl. description, source_url, lat/lng }

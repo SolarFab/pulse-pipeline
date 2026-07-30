@@ -11,9 +11,10 @@ Depends on: `event-embeddings` (pgvector column + backfill) and the taxonomy tab
 
 ## 2. Tools
 
-- [ ] 2.1 [web] `search_events` tool: zod schema (category/subcategory enums generated from the taxonomy table), compact result shape (no descriptions)
-- [ ] 2.2 [web] `get_event_details` tool: full row by id
-- [ ] 2.3 [web] Unit tests: arg validation, hard-constraint SQL (no paid event passes `free_entry`), compactness of results
+- [ ] 2.1 [web] `search_events` tool: zod schema (category/subcategory enums generated from the taxonomy table), all params optional, compact result shape (no descriptions)
+- [ ] 2.2 [web] Geo params: lat+lng-together validation, radius default/clamp, haversine filter + distance ordering, `distance_km` in results
+- [ ] 2.3 [web] `get_event_details` tool: full row by id
+- [ ] 2.4 [web] Unit tests: arg validation (incl. incomplete geo), hard-constraint SQL (no paid event passes `free_entry`), facet-true-only semantics, unknown-price inclusion, ordering priority (query > distance > start_time)
 
 ## 3. Chat loop
 

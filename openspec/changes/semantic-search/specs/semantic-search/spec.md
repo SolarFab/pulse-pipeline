@@ -31,7 +31,44 @@ ingest.
 
 #### Scenario: Filter-only query
 - **WHEN** the model calls `search_events` without `query`
-- **THEN** results are the filtered set ordered by start time
+- **THEN** results are the filtered set ordered by start time (or by distance when geo is given)
+
+### Requirement: All search parameters are optional and composable
+Every `search_events` parameter SHALL be optional; a call with no arguments SHALL return upcoming
+active events (default window now→+14 days) ordered by start time. Facet booleans SHALL filter
+only when `true` (omitted = no constraint; `false` is not an exclusion). `max_price_cents` SHALL
+exclude only events whose known price exceeds it — unknown-price events remain included.
+
+#### Scenario: No-constraint question
+- **WHEN** the user asks "was geht ab?" and the model calls the tool with no arguments
+- **THEN** upcoming events within the default window are returned, ordered by start time
+
+#### Scenario: Facet false is not exclusion
+- **WHEN** the model omits `family_friendly` (or passes nothing for it)
+- **THEN** both family-friendly and other events are returned; there is no way to exclude family-friendly events
+
+#### Scenario: Unknown price survives a price cap
+- **WHEN** `max_price_cents = 1000` and an event has no known price
+- **THEN** the event is included (only events known to cost more are excluded)
+
+### Requirement: Optional geo search
+`search_events` SHALL accept optional `lat`/`lng`/`radius_km`: `lat` and `lng` are valid only
+together, `radius_km` defaults to 1.5 and is clamped to 0.2–10. Geo SHALL filter to the radius
+and, when no `query` is present, order by distance; results SHALL include `distance_km` when geo
+was given. Coordinates SHALL originate only from the model's own knowledge or client-supplied
+user location — never from scraped content. Similarity scores SHALL NOT be returned to the model.
+
+#### Scenario: Kiez question resolved by geo
+- **WHEN** the user asks about Schillerkiez and the model passes its approximate coordinates with a 1 km radius
+- **THEN** only events within the radius are returned, with `distance_km`, ranked by the query embedding if one was given
+
+#### Scenario: Incomplete geo rejected
+- **WHEN** the model passes `lat` without `lng`
+- **THEN** validation fails with a brief error string to the model (no query is executed)
+
+#### Scenario: Geo without query orders by distance
+- **WHEN** geo parameters are given and `query` is absent
+- **THEN** results within the radius are ordered nearest-first
 
 #### Scenario: Embedding model mismatch is refused
 - **WHEN** the configured query-embedding model differs from the model recorded on stored event embeddings
