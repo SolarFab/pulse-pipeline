@@ -1,0 +1,345 @@
+{
+  "corpus": "v1",
+  "golden_set": "v1",
+  "pool_k": 10,
+  "rankings": {
+    "q01": {
+      "openai/text-embedding-3-small": [
+        "6658922f-172d-4d19-928a-ffe9fb4d2cb0",
+        "61a6e4cd-8374-4db3-a416-997d60ee2f66",
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "44124fd7-74bc-4db7-8b57-2663be21dd33",
+        "0c0170c4-54d9-45fb-bac2-7e2ad341b217",
+        "bf55643a-1234-4598-9e88-1a90001ffcce",
+        "47221525-4466-487e-bc0a-58c01b2bf0f9",
+        "ecc67975-6706-4dc0-bef2-581026c89e39",
+        "9ea87357-b3ff-47d5-9226-9ea9a67a5f81",
+        "c1e636a9-23aa-438a-9bd3-e2d73fd8d2d3"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "aefe174a-1476-4b65-bbad-8f8f4b3261c2",
+        "c1e636a9-23aa-438a-9bd3-e2d73fd8d2d3",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "63b0a10e-00ba-44ea-bd26-5dff8448a032",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "bf55643a-1234-4598-9e88-1a90001ffcce"
+      ]
+    },
+    "q02": {
+      "openai/text-embedding-3-small": [
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "6658922f-172d-4d19-928a-ffe9fb4d2cb0",
+        "427423db-6a6b-4305-92e5-a482512e4965",
+        "61a6e4cd-8374-4db3-a416-997d60ee2f66",
+        "3f27ae10-4531-47d8-b477-940c40616038",
+        "baac2c73-cb9b-48fa-8477-aaf1185c6f94",
+        "a90c287d-2853-4c8c-a06a-329870d24166",
+        "bf55643a-1234-4598-9e88-1a90001ffcce",
+        "47221525-4466-487e-bc0a-58c01b2bf0f9",
+        "ecc67975-6706-4dc0-bef2-581026c89e39"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "aefe174a-1476-4b65-bbad-8f8f4b3261c2",
+        "63b0a10e-00ba-44ea-bd26-5dff8448a032",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "6b1b4f02-e808-41c8-bd57-464464df9be1",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94",
+        "bf55643a-1234-4598-9e88-1a90001ffcce",
+        "47221525-4466-487e-bc0a-58c01b2bf0f9",
+        "ecc67975-6706-4dc0-bef2-581026c89e39"
+      ]
+    },
+    "q03": {
+      "openai/text-embedding-3-small": [
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "4cbf2dfc-fe9b-4a52-af0b-5d30def8bbb7",
+        "59edbcc2-6178-4baf-8602-662e224ecb99",
+        "2ec4da89-a4e4-4e28-a2a1-e56a32b6dd44",
+        "61a6e4cd-8374-4db3-a416-997d60ee2f66",
+        "fb212023-6e70-4f34-b5c5-d838cbed152c",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "295c9e65-7e7e-4066-900a-8f6c0290ad9f",
+        "0ceea3d7-83af-4a47-91cd-38818f0d4e48",
+        "62377018-59f9-40f6-b91c-84568dec9275"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "2ec4da89-a4e4-4e28-a2a1-e56a32b6dd44",
+        "4cbf2dfc-fe9b-4a52-af0b-5d30def8bbb7",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "59edbcc2-6178-4baf-8602-662e224ecb99",
+        "16524faa-d17f-4212-94f8-ce3bfd5ec8a7"
+      ]
+    },
+    "q04": {
+      "openai/text-embedding-3-small": [
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "4cbf2dfc-fe9b-4a52-af0b-5d30def8bbb7",
+        "59edbcc2-6178-4baf-8602-662e224ecb99",
+        "2ec4da89-a4e4-4e28-a2a1-e56a32b6dd44",
+        "63b0a10e-00ba-44ea-bd26-5dff8448a032",
+        "691de8c9-a8d7-4bb4-8ee3-fa3bc9d757f1",
+        "6889afa9-47fe-4e70-9415-cf4c5718f322",
+        "3b85f12d-7e8e-4e88-860a-249199f4d5ec",
+        "a6e482cb-d0c4-4b45-b8d6-aeca6348fcec",
+        "9bebe7c2-0293-465b-b6fa-bc6104e13730"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "4cbf2dfc-fe9b-4a52-af0b-5d30def8bbb7",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "2ec4da89-a4e4-4e28-a2a1-e56a32b6dd44",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "59edbcc2-6178-4baf-8602-662e224ecb99",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "3b85f12d-7e8e-4e88-860a-249199f4d5ec"
+      ]
+    },
+    "q05": {
+      "openai/text-embedding-3-small": [
+        "386632c7-afd9-4323-9cd3-93d4d1bab666",
+        "81f708e2-a10e-4f6b-9c87-354809a414d2",
+        "a46bed22-394c-4e0d-9acf-c49f35c89d0a",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "e7a9ed62-8baa-40cb-8a88-4ac05995c0d8",
+        "726ef6f3-7be0-4f42-a707-72fbde6adbc5",
+        "12757b54-3e4d-45aa-b954-1dbb79ac7ddb",
+        "02d2ed37-f0bc-45d4-9cd3-0afb05d46207",
+        "e0cf39df-1e0d-43bc-adda-65dcd006439f",
+        "713f8715-a8c1-4c97-b9f7-4263849c5550"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "386632c7-afd9-4323-9cd3-93d4d1bab666",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "e7a9ed62-8baa-40cb-8a88-4ac05995c0d8",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "e0cf39df-1e0d-43bc-adda-65dcd006439f",
+        "a46bed22-394c-4e0d-9acf-c49f35c89d0a",
+        "dd52af18-b0c1-44bf-952e-60c0f4f89c87",
+        "81f708e2-a10e-4f6b-9c87-354809a414d2",
+        "b258bd2e-50fa-4167-b881-1fc5dd9c73be",
+        "f04b0c99-2211-4509-9252-5313a65a5cdf"
+      ]
+    },
+    "q06": {
+      "openai/text-embedding-3-small": [
+        "02d2ed37-f0bc-45d4-9cd3-0afb05d46207",
+        "e7a9ed62-8baa-40cb-8a88-4ac05995c0d8",
+        "81f708e2-a10e-4f6b-9c87-354809a414d2",
+        "a3b395ee-49e4-4067-9952-b647c84732b8",
+        "e0cf39df-1e0d-43bc-adda-65dcd006439f",
+        "f2ee8f52-bae1-419a-a6cd-18755bdf2c8b",
+        "f04b0c99-2211-4509-9252-5313a65a5cdf",
+        "43b7e401-9838-4cac-a8fe-b82ad7d075e8",
+        "726ef6f3-7be0-4f42-a707-72fbde6adbc5",
+        "63b0a10e-00ba-44ea-bd26-5dff8448a032"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "f04b0c99-2211-4509-9252-5313a65a5cdf",
+        "a3b395ee-49e4-4067-9952-b647c84732b8",
+        "386632c7-afd9-4323-9cd3-93d4d1bab666",
+        "f2ee8f52-bae1-419a-a6cd-18755bdf2c8b",
+        "63b0a10e-00ba-44ea-bd26-5dff8448a032",
+        "81f708e2-a10e-4f6b-9c87-354809a414d2",
+        "e0cf39df-1e0d-43bc-adda-65dcd006439f",
+        "713f8715-a8c1-4c97-b9f7-4263849c5550",
+        "726ef6f3-7be0-4f42-a707-72fbde6adbc5",
+        "02d2ed37-f0bc-45d4-9cd3-0afb05d46207"
+      ]
+    },
+    "q07": {
+      "openai/text-embedding-3-small": [
+        "3f49755e-d3b8-4b37-959d-2c3b4a3062d3",
+        "f2f1ddbc-0d9c-43cf-9566-6c7684034661",
+        "d055b783-06dc-43c1-b98d-7d24c90ebc91",
+        "340525fa-983f-4dda-b067-0bcfb2b6dc54",
+        "dc3fae88-1462-4631-a41f-180264641128",
+        "1727102e-ce94-4a0a-97c3-e6fea1edc514",
+        "b672836d-13fb-441d-8aac-6fe5d494398e",
+        "a72cd4a5-56f8-411a-abbe-0833d60ce1fb",
+        "b258bd2e-50fa-4167-b881-1fc5dd9c73be",
+        "c042a1a2-b311-4196-bb8e-49421a212a9e"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94",
+        "7847d538-cc53-43dc-abb1-6765b2647a39",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "eaa68868-d8f0-40b2-98be-a8b62907329b",
+        "6b1b4f02-e808-41c8-bd57-464464df9be1"
+      ]
+    },
+    "q08": {
+      "openai/text-embedding-3-small": [
+        "dc3fae88-1462-4631-a41f-180264641128",
+        "a8efd79f-3f4f-41f8-bf44-487fd7d82017",
+        "f7701935-2218-4554-a843-ea2f7270bb48",
+        "0c0170c4-54d9-45fb-bac2-7e2ad341b217",
+        "29b24501-8a47-4e43-875c-6c0dbccc4205",
+        "16c40afa-3d97-41b2-9624-54e83ae4caf9",
+        "b19e0abf-a890-4075-8eb6-99571d9bbfe1",
+        "1ab28944-a628-48b9-b394-acbf83c2bcc6",
+        "6025456c-2426-4c28-8090-679161ba334e",
+        "68a65b0d-1911-4d00-975f-33ae5171c918"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "16524faa-d17f-4212-94f8-ce3bfd5ec8a7",
+        "1aa16fb2-ff83-4876-816e-2d332cc6f113",
+        "4019c1e2-073c-49b1-9c69-afb77673db6e",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "01566eec-99fe-4615-b784-87e53845a1cd",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "62377018-59f9-40f6-b91c-84568dec9275"
+      ]
+    },
+    "q09": {
+      "openai/text-embedding-3-small": [
+        "0c0170c4-54d9-45fb-bac2-7e2ad341b217",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "1727102e-ce94-4a0a-97c3-e6fea1edc514",
+        "f7701935-2218-4554-a843-ea2f7270bb48",
+        "e9850861-5b17-4337-831b-cecd59d2c5d7",
+        "85f499cb-10b2-4d19-9cbe-a20b28cbdcfb",
+        "dc3fae88-1462-4631-a41f-180264641128",
+        "16524faa-d17f-4212-94f8-ce3bfd5ec8a7",
+        "16c40afa-3d97-41b2-9624-54e83ae4caf9",
+        "eae8485b-1925-4361-827f-b834580157f8"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "4019c1e2-073c-49b1-9c69-afb77673db6e",
+        "1aa16fb2-ff83-4876-816e-2d332cc6f113",
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "16524faa-d17f-4212-94f8-ce3bfd5ec8a7",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "69302e56-b2a4-4506-a257-0f6733f249cf",
+        "aa708323-24a2-478b-9daa-1cfd2b664031"
+      ]
+    },
+    "q10": {
+      "openai/text-embedding-3-small": [
+        "b0f547b2-b142-4bb2-9534-18f2816ae846",
+        "1c11e5be-c193-4524-aaad-440c16f24755",
+        "4d3b33d2-5f31-4de6-94d0-7f665e32e5a7",
+        "afc25263-899d-45c8-acef-bdc85d7a8f1f",
+        "2d402602-e698-44e6-9093-97b6c04f0c7e",
+        "f8e8a850-e34c-4a17-a7d7-413730ef52bb",
+        "d3a81fa2-e9c9-47ab-a81a-2499c3d09962",
+        "abb27a85-d76e-4e32-9011-3d679c173143",
+        "d845274c-b470-4c84-a170-b72764373f58",
+        "a2126e5c-5131-4626-954e-adccabecb02a"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "b0f547b2-b142-4bb2-9534-18f2816ae846",
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "d3a81fa2-e9c9-47ab-a81a-2499c3d09962",
+        "dd52af18-b0c1-44bf-952e-60c0f4f89c87",
+        "2d402602-e698-44e6-9093-97b6c04f0c7e",
+        "abb27a85-d76e-4e32-9011-3d679c173143",
+        "6b1b4f02-e808-41c8-bd57-464464df9be1",
+        "aefe174a-1476-4b65-bbad-8f8f4b3261c2"
+      ]
+    },
+    "q11": {
+      "openai/text-embedding-3-small": [
+        "6208c209-88d5-4f43-9881-51ef3828cc99",
+        "2610c26f-0419-499e-a994-6a64ad0c68ee",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94",
+        "cc32c9d4-954d-4c67-8652-abefb8b60076",
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "e0cf39df-1e0d-43bc-adda-65dcd006439f",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "070ea75b-97a1-49dd-a4e5-916d5c220158",
+        "4b0bb4f9-f57f-4cd1-bbcc-69d2c73ef4b1"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "070ea75b-97a1-49dd-a4e5-916d5c220158",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "519d103d-5541-4019-ab0e-3e07dd4b2024",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "4b0bb4f9-f57f-4cd1-bbcc-69d2c73ef4b1",
+        "a76ac471-7e5c-482b-95d7-153fbb21967a",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94"
+      ]
+    },
+    "q12": {
+      "openai/text-embedding-3-small": [
+        "e1857c96-0668-4208-b3cc-38323bef6d13",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "aba2b6ca-6e91-4dff-a955-5e484ad819bf",
+        "59a537fa-d422-438f-844c-3bed6424b9af",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "1c70e927-dcde-44ca-8ce1-915ac857601a",
+        "8aab1b59-416f-4ba3-8cb7-afb8cac91657",
+        "26e2782d-b6bb-4026-b4ea-ade35cea9fef",
+        "2467c200-ee51-4c0c-b976-cf9dfea8309c",
+        "eae8485b-1925-4361-827f-b834580157f8"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "9677ad8f-239d-4065-8dc5-ff47834a2c57",
+        "62377018-59f9-40f6-b91c-84568dec9275",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "8ecb8d93-d929-4680-88c4-255422ed7a94",
+        "eae8485b-1925-4361-827f-b834580157f8",
+        "d2e0efcd-cd9b-4359-a8c6-cd82a1867e4b",
+        "eaa68868-d8f0-40b2-98be-a8b62907329b",
+        "32197921-a128-45d0-815a-265d5a0d67b8",
+        "6b1b4f02-e808-41c8-bd57-464464df9be1"
+      ]
+    },
+    "q13": {
+      "openai/text-embedding-3-small": [
+        "5ddd260e-f0cc-4cb4-8294-d47b092defe5",
+        "742c8698-4921-4c4a-a730-5c455f25999b",
+        "3e40dd36-4292-4b9f-917d-899858b63371",
+        "ef40f7ae-848c-402e-8a96-a3a94cbf7122",
+        "74349eeb-ec79-426f-b8eb-841f95e3fab0",
+        "735c981d-a4a4-4d43-8e7d-6a13e7ffe496",
+        "59443a0b-d2f4-4ba8-9570-b9287a211105",
+        "2a5fa5b1-b5cd-48ba-8083-d209ec67baaf",
+        "64222386-4f80-4392-b017-ca475410b5bf",
+        "c0cc1853-2a6a-402d-a50c-ce41d8993060"
+      ],
+      "qwen/qwen3-embedding-8b": [
+        "3c66f00b-f8bb-4680-ac35-00fccce66a02",
+        "01566eec-99fe-4615-b784-87e53845a1cd",
+        "800aadbd-4abb-408c-af1b-e6c4c3bb3f40",
+        "dd52af18-b0c1-44bf-952e-60c0f4f89c87",
+        "7847d538-cc53-43dc-abb1-6765b2647a39",
+        "557d728a-e5b8-4d63-a444-f2ee0a385da5",
+        "3a60da38-9087-45d2-b989-b6bce72b5965",
+        "626e7a1c-3cbe-4e55-8323-f2b8fa1e93cd",
+        "742c8698-4921-4c4a-a730-5c455f25999b",
+        "ff0acc21-77f7-43b3-acce-b2704355e76f"
+      ]
+    }
+  }
+}
