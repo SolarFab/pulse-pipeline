@@ -77,6 +77,7 @@ def main() -> None:
         return
 
     offset_guard = 0
+    consecutive_failures = 0
     while True:
         page = fetch_page(client, now_iso, 0)  # embedding turns non-null as we go; always page 0
         if not page:
@@ -87,6 +88,15 @@ def main() -> None:
             break
 
         m = attach_embeddings(page)  # no db_hashes needed: these rows have no embedding yet
+        if m["embedded"] == 0:  # whole batch failed (transient?) — back off, retry a few times
+            consecutive_failures += 1
+            if consecutive_failures >= 3:
+                print("! 3 consecutive failed batches — aborting (re-run to resume)")
+                break
+            print(f"  ~ batch failed, backing off ({consecutive_failures}/3)")
+            time.sleep(15)
+            continue
+        consecutive_failures = 0
         for k in ("embedded", "skipped", "failed", "tokens", "usd"):
             total[k] += m[k]
         total["embed_seconds"] += m["seconds"]
@@ -111,9 +121,7 @@ def main() -> None:
                 total["failed"] += 1
                 print(f"  ! update failed after retries for {e['id']}: {type(exc).__name__}")
         print(f"  +{m['embedded']} embedded (total {total['events']}, "
-              f"{total['tokens']:,} tok, ${total['usd']:.4f})")
-        if m["embedded"] == 0:  # nothing embeddable left in this page (all failed) — stop
-            break
+              f"{total['tokens']:,} tok, ${total['usd']:.4f})", flush=True)
 
     total["wall_seconds"] = round(time.time() - t_start, 1)
     total["usd"] = round(total["usd"], 6)

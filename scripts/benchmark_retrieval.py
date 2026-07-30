@@ -161,10 +161,20 @@ def main() -> None:
     texts = [build_embed_text(e) for e in events]
     queries = [g for g in jsonl(GOLDEN) if "retrieval" in g["applies_to"]]
     rels: dict[str, set[str]] = {}
-    for r in jsonl(QRELS):
-        rels.setdefault(r["query_id"], set()).add(r["event_id"])
+    delta_file = QRELS.with_name("qrels_v1_delta.jsonl")
+    qrel_files = [QRELS] + ([delta_file] if delta_file.exists() else [])
+    for f in qrel_files:
+        for r in jsonl(f):
+            rels.setdefault(r["query_id"], set()).add(r["event_id"])
     labeled_pool = {eid for q in json.load(POOL_V1.open())["rankings"].values()
                     for ranks in q.values() for eid in ranks}
+    if delta_file.exists():
+        # everything shown on the delta sheet has now been judged (ticked or not)
+        prev = json.loads((ROOT / "eval" / "results" / "delta_pool_v1.json").read_text()) \
+            if (ROOT / "eval" / "results" / "delta_pool_v1.json").exists() else None
+        if prev:
+            labeled_pool |= {e for v in prev.values() for e in v}
+        print(f"qrels: v1 + delta ({len(jsonl(delta_file))} extra relevant)")
 
     emb = get_embedder()  # openrouter / text-embedding-3-small (Experiment-1 winner)
     if CACHE.exists():
@@ -262,6 +272,8 @@ def main() -> None:
 
     # delta labeling sheet: only candidates the user has never judged
     if delta:
+        (ROOT / "eval" / "results" / "delta_pool_v1.json").write_text(
+            json.dumps({k: sorted(set(v)) for k, v in delta.items()}, indent=2))
         by_id = {e["id"]: e for e in events}
         qmap = {g["id"]: g for g in queries}
         sections = []

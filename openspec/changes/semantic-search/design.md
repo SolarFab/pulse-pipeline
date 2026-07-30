@@ -89,3 +89,14 @@ gateway as the pipeline (`EMBED_PROVIDER`/`EMBED_MODEL`). No provider names in r
 
 Log per turn: tools called, arg summary (no user PII beyond the query), result counts, latency,
 token usage. Enough to eval retrieval quality later against the golden queries.
+
+## Decision log
+
+- **2026-07-30 — Retrieval mode = vector-only (baseline).** Experiment 2 (retrieval ladder,
+  qrels v1 + delta round to fix pool bias): baseline R@5 0.650 / MRR 0.780 / nDCG@5 0.662 @
+  645ms beats hybrid BM25+RRF (0.463/0.703/0.505), Multi-Query (0.540/0.628/0.500 @ 2.3s),
+  HyDE (0.448/0.529/0.416 @ 2.6s) and BM25-only (0.374 @ 1ms). MQ/HyDE additionally bust the
+  ~2s chat-latency budget — HyDE's riester-kompass win does NOT replicate here (different
+  constraints, different verdict). `search_events` ships with pure pgvector cosine ranking
+  inside hard SQL filters; revisit only with evidence (e.g. venue-name misses in prod logs —
+  BM25 fusion would be the first candidate then).
