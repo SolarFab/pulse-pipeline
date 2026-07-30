@@ -15,6 +15,7 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from db.supabase import get_client, upsert_events
 from pipeline.categorizer import categorize_batch
+from pipeline.facets import detect_facets
 from pipeline.geocoder import geocode_inline
 from pipeline.normalizer import normalize
 
@@ -111,6 +112,11 @@ class BaseScraper(ABC):
 
         # Categorize only new events (Claude fills in missing category/tags)
         categorised = categorize_batch(new_events) + existing_events
+
+        # Facets for ALL events (cheap regex, idempotent — also heals rows
+        # that predate the facet columns)
+        for event in categorised:
+            event.update(detect_facets(event))
 
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)

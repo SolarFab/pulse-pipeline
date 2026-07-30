@@ -5,14 +5,14 @@ Sequenced so the live app renders correctly after every step. **[db]** = Supabas
 
 ## 1. Canonical source (additive — zero user impact)
 
-- [ ] 1.1 [db] Migration: `taxonomy(category_slug, subcategory_slug, label_de, label_en, sort_order, is_active)`; readable by anon (public reference data)
+- [x] 1.1 [db] Migration: `taxonomy(category_slug, subcategory_slug, label_de, label_en, sort_order, is_active)`; readable by anon (public reference data)
 - [x] 1.2 [pipeline] Idempotent seed script: `taxonomy.py` → `taxonomy` table (8 categories incl. `sports-wellness`, ~40 subcategories; `family` and legacy `outdoors` rows seeded `is_active = false`-ready but active until step 4)
-- [ ] 1.3 [pipeline] Document the tag freeze in `taxonomy.py` (tags = embed-text enrichment only)
+- [x] 1.3 [pipeline] Document the tag freeze in `taxonomy.py` (tags = embed-text enrichment only)
 
 ## 2. Facets (additive — zero user impact)
 
-- [ ] 2.1 [db] Migration: `events.family_friendly`, `events.outdoor`, `events.free_entry` BOOLEAN DEFAULT FALSE + `events.category_confidence` DECIMAL
-- [ ] 2.2 [pipeline] Categorizer: keyword-based facet detection (DE+EN signal lists per design) + confidence emission, in the existing categorization pass
+- [x] 2.1 [db] Migration: `events.family_friendly`, `events.outdoor`, `events.free_entry` BOOLEAN DEFAULT FALSE + `events.category_confidence` DECIMAL
+- [x] 2.2 [pipeline] Categorizer: keyword-based facet detection (DE+EN signal lists per design) + confidence emission, in the existing categorization pass
 - [ ] 2.3 [pipeline] Backfill script: facets + confidence for all existing active events
 - [x] 2.4 [pipeline] Unit tests: facet detection (kid-friendly market, open-air cinema, free-entry gig, no-signal event stays false)
 

@@ -39,6 +39,7 @@ line-length = 100
 target-version = "py311"
 # Exploratory one-off analysis scripts are not part of the pipeline proper.
 extend-exclude = [
+    ".agents",   # vendored agent skills (third-party examples)
     "analyze_tags.py",
     "genre_analysis.py",
     "kulturdaten_analysis.py",

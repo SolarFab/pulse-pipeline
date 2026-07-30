@@ -3,9 +3,8 @@
 Keyword-based, DE+EN, deliberately conservative: no signal → False (a facet toggle
 showing too little is fine; a wrong category-style guess is not). No LLM on this path.
 
-NOTE: not wired into the categorizer until migration 001 has added the columns
-(see db/migrations/001_taxonomy_and_facets.sql). Call detect_facets() from the
-categorization pass once the migration is applied.
+Wired into the scrape pass in scrapers/base.py; columns added by
+db/migrations/002_event_facets.sql (applied).
 """
 
 from __future__ import annotations

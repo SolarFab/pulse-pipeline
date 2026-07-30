@@ -804,6 +804,9 @@ SUBCATEGORY_KEYWORDS: dict[str, dict[str, list[str]]] = {
 }
 
 # ── Tag keyword extraction (German→English) ─────────────────────────────────
+# FROZEN (unify-taxonomy §1.3): tags are embed-text enrichment only. Do NOT add
+# new entries — semantic retrieval via event embeddings has taken over the job
+# this vocabulary used to do. No consumer may treat tags as a filtering taxonomy.
 # These extract TAGS (not subcategories) from descriptions.
 # Tags are always stored in English. Keywords can be German or English.
 # A tag can appear regardless of category — it's pure enrichment.
