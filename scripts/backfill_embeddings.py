@@ -27,6 +27,8 @@ from dotenv import load_dotenv
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 load_dotenv()
 
+from tenacity import retry, stop_after_attempt, wait_exponential  # noqa: E402
+
 from db.supabase import get_client  # noqa: E402
 from pipeline.embed_events import PRICE_PER_MTOK, attach_embeddings  # noqa: E402
 from pipeline.embedder import DEFAULT_MODELS, build_embed_text  # noqa: E402
@@ -88,15 +90,25 @@ def main() -> None:
             total[k] += m[k]
         total["embed_seconds"] += m["seconds"]
 
+        @retry(stop=stop_after_attempt(4), wait=wait_exponential(multiplier=1, min=1, max=15))
+        def _update(row_id: str, payload: dict) -> None:
+            # transient HTTP/2 stream resets from the REST gateway are common on
+            # long runs — retry with backoff instead of dying mid-backfill
+            client.table("events").update(payload).eq("id", row_id).execute()
+
         for e in page:
             if "embedding" not in e:
                 continue
             facets = detect_facets(e)
-            client.table("events").update({
-                "embedding": e["embedding"], "embed_model": e["embed_model"],
-                "embed_hash": e["embed_hash"], **facets,
-            }).eq("id", e["id"]).execute()
-            total["events"] += 1
+            try:
+                _update(e["id"], {
+                    "embedding": e["embedding"], "embed_model": e["embed_model"],
+                    "embed_hash": e["embed_hash"], **facets,
+                })
+                total["events"] += 1
+            except Exception as exc:
+                total["failed"] += 1
+                print(f"  ! update failed after retries for {e['id']}: {type(exc).__name__}")
         print(f"  +{m['embedded']} embedded (total {total['events']}, "
               f"{total['tokens']:,} tok, ${total['usd']:.4f})")
         if m["embedded"] == 0:  # nothing embeddable left in this page (all failed) — stop
