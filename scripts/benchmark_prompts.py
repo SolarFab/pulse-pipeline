@@ -28,13 +28,17 @@ load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 BERLIN = ZoneInfo("Europe/Berlin")
+# Restricted to the account's OpenRouter allowlist.
 MODELS = [
     "anthropic/claude-haiku-4.5",       # shipped default
     "openai/gpt-4o-mini",               # cheap closed baseline
-    "moonshotai/kimi-k2.6",             # open: Kimi K2.6
-    "qwen/qwen3-235b-a22b-2507",        # open: Qwen3 flagship instruct
-    "meta-llama/llama-3.3-70b-instruct",  # open: Llama 3.3
     "google/gemini-2.5-flash",          # Gemini fast tier
+    "deepseek/deepseek-v4-flash",       # open: DeepSeek cheap tier
+    "deepseek/deepseek-v4-pro",         # open: DeepSeek strong tier
+    "minimax/minimax-m2.7",             # open: MiniMax
+    "z-ai/glm-5.2",                     # open: Zhipu GLM
+    "google/gemma-4-31b-it",            # open: Gemma
+    "openai/gpt-4.1-nano",              # ultra-cheap closed anchor
 ]
 VARIANTS = ["zero-shot", "prod-v1", "few-shot", "clarify-first"]
 

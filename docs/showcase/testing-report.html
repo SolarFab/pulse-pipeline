@@ -35,12 +35,12 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-31 09:39 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-31 10:23 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
   <div class="stat ok"><b>60/60</b>unit tests passing</div>
-  <div class="stat"><b>0.6s</b>suite runtime</div>
+  <div class="stat"><b>0.5s</b>suite runtime</div>
   <div class="stat"><b>8</b>test modules</div>
   <div class="stat"><b>4</b>test layers</div>
 </div>
@@ -237,32 +237,80 @@ comes from a real run, nothing is hand-edited.</p>
 <section><h2>L4 · Prompt-technique benchmark</h2><p>First model action asserted deterministically per golden chat query: right tool, right args, dates resolved — or correctly NO tool (chitchat/ambiguous). No execution, no judge (that&#x27;s stage 2). Cost = measured USD per turn (OpenRouter usage accounting).</p>
 <table>
 <tr><th>variant × model</th><th>score</th><th>ms/turn</th><th>$/turn</th></tr>
-<tr><td>zero-shot × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2285</td><td>0.00169</td></tr>
-<tr><td>zero-shot × gpt-4o-mini</td><td>9/13 (69%)</td><td>1315</td><td>0.00006</td></tr>
-<tr><td>zero-shot × gemini-2.5-flash</td><td>7/13 (54%)</td><td>957</td><td>0.00016</td></tr>
-<tr><td>prod-v1 × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2234</td><td>0.00205</td></tr>
-<tr><td>prod-v1 × gpt-4o-mini</td><td>8/13 (62%)</td><td>1397</td><td>0.00012</td></tr>
-<tr><td>prod-v1 × gemini-2.5-flash</td><td>11/13 (85%)</td><td>866</td><td>0.00026</td></tr>
-<tr><td>few-shot × claude-haiku-4.5</td><td>12/13 (92%)</td><td>2472</td><td>0.00225</td></tr>
-<tr><td>few-shot × gpt-4o-mini</td><td>13/13 (100%)</td><td>1540</td><td>0.00015</td></tr>
-<tr><td>few-shot × gemini-2.5-flash</td><td>12/13 (92%)</td><td>913</td><td>0.00037</td></tr>
-<tr><td>clarify-first × claude-haiku-4.5</td><td>4/13 (31%)</td><td>2659</td><td>0.00192</td></tr>
-<tr><td>clarify-first × gpt-4o-mini</td><td>6/13 (46%)</td><td>1190</td><td>0.00011</td></tr>
-<tr><td>clarify-first × gemini-2.5-flash</td><td>6/13 (46%)</td><td>1015</td><td>0.00026</td></tr>
+<tr><td>zero-shot × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2149</td><td>0.00167</td></tr>
+<tr><td>zero-shot × gpt-4o-mini</td><td>10/13 (77%)</td><td>1211</td><td>0.00007</td></tr>
+<tr><td>zero-shot × gemini-2.5-flash</td><td>10/13 (77%)</td><td>743</td><td>0.00015</td></tr>
+<tr><td>zero-shot × deepseek-v4-flash</td><td>9/13 (69%)</td><td>6283</td><td>0.00009</td></tr>
+<tr><td>zero-shot × deepseek-v4-pro</td><td>10/13 (77%)</td><td>5425</td><td>0.00145</td></tr>
+<tr><td>zero-shot × minimax-m2.7</td><td>11/13 (85%)</td><td>4189</td><td>0.00033</td></tr>
+<tr><td>zero-shot × glm-5.2</td><td>10/13 (77%)</td><td>3539</td><td>0.00083</td></tr>
+<tr><td>zero-shot × gemma-4-31b-it</td><td>11/13 (85%)</td><td>1741</td><td>0.00006</td></tr>
+<tr><td>zero-shot × gpt-4.1-nano</td><td>11/13 (85%)</td><td>2168</td><td>0.00007</td></tr>
+<tr><td>prod-v1 × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2081</td><td>0.00206</td></tr>
+<tr><td>prod-v1 × gpt-4o-mini</td><td>9/13 (69%)</td><td>1153</td><td>0.00012</td></tr>
+<tr><td>prod-v1 × gemini-2.5-flash</td><td>12/13 (92%)</td><td>841</td><td>0.00027</td></tr>
+<tr><td>prod-v1 × deepseek-v4-flash</td><td>9/13 (69%)</td><td>6693</td><td>0.00008</td></tr>
+<tr><td>prod-v1 × deepseek-v4-pro</td><td>10/13 (77%)</td><td>13667</td><td>0.00214</td></tr>
+<tr><td>prod-v1 × minimax-m2.7</td><td>9/13 (69%)</td><td>5570</td><td>0.00037</td></tr>
+<tr><td>prod-v1 × glm-5.2</td><td>11/13 (85%)</td><td>3617</td><td>0.00088</td></tr>
+<tr><td>prod-v1 × gemma-4-31b-it</td><td>11/13 (85%)</td><td>1743</td><td>0.00009</td></tr>
+<tr><td>prod-v1 × gpt-4.1-nano</td><td>12/13 (92%)</td><td>2881</td><td>0.00013</td></tr>
+<tr><td>few-shot × claude-haiku-4.5</td><td>12/13 (92%)</td><td>2045</td><td>0.00224</td></tr>
+<tr><td>few-shot × gpt-4o-mini</td><td>12/13 (92%)</td><td>1431</td><td>0.00016</td></tr>
+<tr><td>few-shot × gemini-2.5-flash</td><td>8/13 (62%)</td><td>963</td><td>0.00038</td></tr>
+<tr><td>few-shot × deepseek-v4-flash</td><td>11/13 (85%)</td><td>6924</td><td>0.00011</td></tr>
+<tr><td>few-shot × deepseek-v4-pro</td><td>12/13 (92%)</td><td>8298</td><td>0.00150</td></tr>
+<tr><td>few-shot × minimax-m2.7</td><td>12/13 (92%)</td><td>6676</td><td>0.00042</td></tr>
+<tr><td>few-shot × glm-5.2</td><td>11/13 (85%)</td><td>3380</td><td>0.00088</td></tr>
+<tr><td>few-shot × gemma-4-31b-it</td><td>12/13 (92%)</td><td>1800</td><td>0.00012</td></tr>
+<tr><td>few-shot × gpt-4.1-nano</td><td>12/13 (92%)</td><td>2742</td><td>0.00015</td></tr>
+<tr><td>clarify-first × claude-haiku-4.5</td><td>4/13 (31%)</td><td>2441</td><td>0.00193</td></tr>
+<tr><td>clarify-first × gpt-4o-mini</td><td>6/13 (46%)</td><td>1082</td><td>0.00011</td></tr>
+<tr><td>clarify-first × gemini-2.5-flash</td><td>6/13 (46%)</td><td>998</td><td>0.00025</td></tr>
+<tr><td>clarify-first × deepseek-v4-flash</td><td>9/13 (69%)</td><td>5566</td><td>0.00008</td></tr>
+<tr><td>clarify-first × deepseek-v4-pro</td><td>9/13 (69%)</td><td>8239</td><td>0.00061</td></tr>
+<tr><td>clarify-first × minimax-m2.7</td><td>9/13 (69%)</td><td>7028</td><td>0.00045</td></tr>
+<tr><td>clarify-first × glm-5.2</td><td>9/13 (69%)</td><td>3455</td><td>0.00092</td></tr>
+<tr><td>clarify-first × gemma-4-31b-it</td><td>5/13 (38%)</td><td>2716</td><td>0.00010</td></tr>
+<tr><td>clarify-first × gpt-4.1-nano</td><td>4/13 (31%)</td><td>1408</td><td>0.00008</td></tr>
 </table>
-<p><strong>Scatter (accuracy vs measured $/turn):</strong> [showcase/prompt-scatter.html](showcase/prompt-scatter.html)</p>
 <h3>Failures</h3>
 <p><strong>zero-shot × claude-haiku-4.5</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
-<p><strong>zero-shot × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
-<p><strong>zero-shot × gemini-2.5-flash</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q16 (called search_events); q17 (searched first (answer-first policy)); q19 (attempted a search); q23 (date_from = tomorrow evening)</p>
+<p><strong>zero-shot × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q23 (live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × gemini-2.5-flash</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q19 (attempted a search)</p>
+<p><strong>zero-shot × deepseek-v4-flash</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × deepseek-v4-pro</strong>: q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × minimax-m2.7</strong>: q14 (called search_events); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × glm-5.2</strong>: q07 (semantic query set (vibe needs ranking)); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × gemma-4-31b-it</strong>: q14 (geo params, Neukölln or Schillerkiez query); q23 (date_from = tomorrow evening)</p>
+<p><strong>zero-shot × gpt-4.1-nano</strong>: q16 (date window covers Sunday); q23 (date_from = tomorrow evening)</p>
 <p><strong>prod-v1 × claude-haiku-4.5</strong>: q14 (geo params, Neukölln or Schillerkiez query); q16 (date window covers Sunday); q23 (date_from = tomorrow evening)</p>
-<p><strong>prod-v1 × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory); q25 (family_friendly=true)</p>
-<p><strong>prod-v1 × gemini-2.5-flash</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query)</p>
+<p><strong>prod-v1 × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
+<p><strong>prod-v1 × gemini-2.5-flash</strong>: q14 (geo params, Neukölln or Schillerkiez query)</p>
+<p><strong>prod-v1 × deepseek-v4-flash</strong>: q07 (semantic query set (vibe needs ranking)); q18 (no tool before clarifying, asked a clarifying question); q23 (date_from = tomorrow evening); q25 (family_friendly=true)</p>
+<p><strong>prod-v1 × deepseek-v4-pro</strong>: q07 (semantic query set (vibe needs ranking)); q18 (no tool before clarifying, asked a clarifying question); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>prod-v1 × minimax-m2.7</strong>: q07 (semantic query set (vibe needs ranking)); q11 (free_entry=true); q18 (no tool before clarifying, asked a clarifying question); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>prod-v1 × glm-5.2</strong>: q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
+<p><strong>prod-v1 × gemma-4-31b-it</strong>: q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question)</p>
+<p><strong>prod-v1 × gpt-4.1-nano</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
 <p><strong>few-shot × claude-haiku-4.5</strong>: q16 (date window covers Sunday)</p>
-<p><strong>few-shot × gemini-2.5-flash</strong>: q07 (called search_events)</p>
+<p><strong>few-shot × gpt-4o-mini</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
+<p><strong>few-shot × gemini-2.5-flash</strong>: q07 (called search_events); q17 (searched first (answer-first policy)); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p>
+<p><strong>few-shot × deepseek-v4-flash</strong>: q18 (no tool before clarifying, asked a clarifying question); q25 (family_friendly=true)</p>
+<p><strong>few-shot × deepseek-v4-pro</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
+<p><strong>few-shot × minimax-m2.7</strong>: q23 (live-music intent in query/subcategory)</p>
+<p><strong>few-shot × glm-5.2</strong>: q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
+<p><strong>few-shot × gemma-4-31b-it</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
+<p><strong>few-shot × gpt-4.1-nano</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
 <p><strong>clarify-first × claude-haiku-4.5</strong>: q07 (called search_events); q11 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p>
 <p><strong>clarify-first × gpt-4o-mini</strong>: q07 (called search_events); q11 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q25 (called search_events)</p>
-<p><strong>clarify-first × gemini-2.5-flash</strong>: q07 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q19 (attempted a search); q23 (called search_events); q24 (called search_events)</p></section>
+<p><strong>clarify-first × gemini-2.5-flash</strong>: q07 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q19 (attempted a search); q23 (called search_events); q24 (called search_events)</p>
+<p><strong>clarify-first × deepseek-v4-flash</strong>: q07 (called search_events); q17 (searched first (answer-first policy)); q23 (date_from = tomorrow evening, live-music intent in query/subcategory); q25 (family_friendly=true)</p>
+<p><strong>clarify-first × deepseek-v4-pro</strong>: q07 (called search_events); q17 (searched first (answer-first policy)); q23 (date_from = tomorrow evening); q25 (family_friendly=true)</p>
+<p><strong>clarify-first × minimax-m2.7</strong>: q07 (called search_events); q17 (searched first (answer-first policy)); q23 (live-music intent in query/subcategory); q25 (called search_events)</p>
+<p><strong>clarify-first × glm-5.2</strong>: q07 (called search_events); q17 (searched first (answer-first policy)); q23 (live-music intent in query/subcategory); q25 (date window covers the weekend)</p>
+<p><strong>clarify-first × gemma-4-31b-it</strong>: q07 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p>
+<p><strong>clarify-first × gpt-4.1-nano</strong>: q07 (called search_events); q11 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p></section>
 
 <footer>Pulse · spec-driven development (OpenSpec) · benchmarks are regression gates:
 re-run on every model or prompt change.</footer>

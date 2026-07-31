@@ -127,3 +127,14 @@ token usage. Enough to eval retrieval quality later against the golden queries.
   data_collection override. Run-to-run: haiku few-shot 13/13 -> 12/13 across runs at temp 0 —
   provider-side nondeterminism; scores carry ±1 case noise. Chart:
   docs/showcase/prompt-scatter.html (accuracy vs measured $/turn, Pareto frontier).
+
+- **2026-07-31 — Full 9-model grid: Gemma-4-31B owns the Pareto frontier; few-shot generalizes.**
+  36 cells. Top tier is a 6-way tie at 12/13 (92%) — few-shot on gpt-4o-mini/haiku/minimax-m2.7/
+  deepseek-v4-pro/gemma-4-31b, prod-v1 on gemini-flash/gpt-4.1-nano; no 13/13 this run
+  (±1-case provider nondeterminism, again). Frontier = gemma-4-31b zero-shot (85% @ $0.00006)
+  and few-shot (92% @ $0.00012, 1.8s) — an OPEN 31B model matches the best closed models at
+  1/20th of haiku's price. Latency splits the open field: gemma ~1.8s OK; minimax 4-7s and
+  deepseek 5-8s bust the chat budget regardless of price. few-shot is best-or-tied on all 9
+  models. CHAT_MODEL candidates for stage 2 (answer quality judge): gemini-2.5-flash
+  (92% @ 841ms — latency champion) and gemma-4-31b (value champion); haiku no longer justified
+  by this data alone. Chart: docs/showcase/prompt-scatter.html (color=model, shape=technique).
