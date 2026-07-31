@@ -9,7 +9,7 @@ from __future__ import annotations
 import json
 import logging
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -31,11 +31,41 @@ BERLIN_PAGE_URL = "https://lu.ma/berlin"
 # Categories we can infer from Luma tags/descriptions
 CATEGORY_KEYWORDS: dict[str, list[str]] = {
     "music": ["music", "concert", "dj", "live music", "band", "jazz", "electronic"],
-    "nightlife": ["party", "club night", "rave", "afterparty", "after-party", "comedy", "standup", "stand-up", "karaoke"],
-    "culture": ["art", "gallery", "exhibition", "museum", "film", "cinema", "theater", "theatre", "reading"],
+    "nightlife": [
+        "party",
+        "club night",
+        "rave",
+        "afterparty",
+        "after-party",
+        "comedy",
+        "standup",
+        "stand-up",
+        "karaoke",
+    ],
+    "culture": [
+        "art",
+        "gallery",
+        "exhibition",
+        "museum",
+        "film",
+        "cinema",
+        "theater",
+        "theatre",
+        "reading",
+    ],
     "meetups": ["meetup", "networking", "social", "community", "game", "quiz", "trivia"],
     "outdoors": ["yoga", "meditation", "wellness", "breathwork", "fitness", "run", "workout"],
-    "food": ["food", "cooking", "tasting", "supper club", "pop-up kitchen", "brunch", "dinner", "happy hour", "drinks"],
+    "food": [
+        "food",
+        "cooking",
+        "tasting",
+        "supper club",
+        "pop-up kitchen",
+        "brunch",
+        "dinner",
+        "happy hour",
+        "drinks",
+    ],
     "markets": ["flea market", "flohmarkt", "craft market", "market"],
     "workshops": ["workshop", "class", "course", "tutorial", "hack"],
 }
@@ -95,12 +125,15 @@ class LumaScraper(BaseScraper):
                 )
                 if match:
                     import html
+
                     desc = html.unescape(match.group(1)).strip()
                     if desc and len(desc) > 10:
                         event["description"] = desc[:500]
                         enriched += 1
             except Exception as e:
-                logger.debug("luma: description fetch failed for %s: %s", event.get("source_url"), e)
+                logger.debug(
+                    "luma: description fetch failed for %s: %s", event.get("source_url"), e
+                )
 
             if enriched % 20 == 0 and enriched > 0:
                 logger.info("luma: enriched %d / %d descriptions", enriched, len(need_desc))
@@ -244,11 +277,7 @@ class LumaScraper(BaseScraper):
             event = entry.get("event") or entry.get("data") or entry
             calendar = entry.get("calendar") or {}
 
-            title = (
-                event.get("name")
-                or event.get("title")
-                or ""
-            ).strip()
+            title = (event.get("name") or event.get("title") or "").strip()
             if not title:
                 return None
 
@@ -270,8 +299,11 @@ class LumaScraper(BaseScraper):
             if start_time:
                 try:
                     from dateutil import parser as dateparser
+
                     start_dt = dateparser.parse(start_time)
-                    if start_dt and start_dt.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc) - timedelta(hours=6):
+                    if start_dt and start_dt.replace(tzinfo=UTC) < datetime.now(UTC) - timedelta(
+                        hours=6
+                    ):
                         return None
                 except Exception:
                     pass
@@ -389,11 +421,13 @@ class LumaScraper(BaseScraper):
         tags: list[str],
     ) -> str:
         """Guess the best category from title, description, and tags."""
-        text = " ".join([
-            title.lower(),
-            (description or "").lower(),
-            " ".join(t.lower() for t in tags if isinstance(t, str)),
-        ])
+        text = " ".join(
+            [
+                title.lower(),
+                (description or "").lower(),
+                " ".join(t.lower() for t in tags if isinstance(t, str)),
+            ]
+        )
 
         # Score each category by keyword matches
         best_category = "meetups"  # default for Luma events

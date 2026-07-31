@@ -27,6 +27,7 @@ def run_db_cleanup():
     logger.info("▶ Running DB cleanup")
     try:
         from scripts.db_cleanup import run
+
         run(dry_run=False)
         logger.info("✓ DB cleanup done")
     except Exception as e:
@@ -34,28 +35,28 @@ def run_db_cleanup():
 
 
 def build_scheduler() -> BlockingScheduler:
+    from scrapers.bandsintown import BandsintownScraper
     from scrapers.berlin_de import BerlinDeScraper
+    from scrapers.berlinmitkind import BerlinMitKindScraper
     from scrapers.eventbrite import EventbriteScraper
     from scrapers.kulturdaten import KulturdatenScraper
+    from scrapers.luma import LumaScraper
     from scrapers.meetup import MeetupScraper
+    from scrapers.planetarium import PlanetariumScraper
     from scrapers.rausgegangen import RausgegangeScraper
     from scrapers.resident_advisor import ResidentAdvisorScraper
+    from scrapers.startbahn import StartbahnScraper
     from scrapers.tip_berlin import TipBerlinScraper
+    from scrapers.venues.feine_klingen import FeineKlingenScraper
+    from scrapers.venues.froschkoenig import FroschkoenigScraper
     from scrapers.venues.holzmarkt import HolzmarktScraper
+    from scrapers.venues.huxleys import HuxleysScraper
+    from scrapers.venues.jazzclubs import JazzclubsScraper
     from scrapers.venues.klunkerkranich import KlunkerkranichScraper
     from scrapers.venues.markthalle_neun import MarkthalleScraper
     from scrapers.venues.mauerpark import MauerparkScraper
     from scrapers.venues.nowkoelln import NowkoellnScraper
-    from scrapers.venues.jazzclubs import JazzclubsScraper
     from scrapers.venues.wochenmaerkte import WochenmaerkteScraper
-    from scrapers.luma import LumaScraper
-    from scrapers.planetarium import PlanetariumScraper
-    from scrapers.berlinmitkind import BerlinMitKindScraper
-    from scrapers.startbahn import StartbahnScraper
-    from scrapers.venues.feine_klingen import FeineKlingenScraper
-    from scrapers.venues.froschkoenig import FroschkoenigScraper
-    from scrapers.venues.huxleys import HuxleysScraper
-    from scrapers.bandsintown import BandsintownScraper
 
     scheduler = BlockingScheduler(timezone="Europe/Berlin")
 

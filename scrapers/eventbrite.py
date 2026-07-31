@@ -92,7 +92,9 @@ class EventbriteScraper(BaseScraper):
 
             venue = item.get("primary_venue") or {}
             address_obj = venue.get("address") or {}
-            venue_name = venue.get("name") or address_obj.get("localized_address_display") or "Unknown"
+            venue_name = (
+                venue.get("name") or address_obj.get("localized_address_display") or "Unknown"
+            )
             address = address_obj.get("localized_address_display")
             lat = address_obj.get("latitude")
             lng = address_obj.get("longitude")
@@ -100,8 +102,12 @@ class EventbriteScraper(BaseScraper):
             description = (item.get("summary") or "").strip() or None
 
             # Build ISO timestamps from date + time
-            start_time = self._build_timestamp(item.get("start_date"), item.get("start_time"), item.get("timezone"))
-            end_time = self._build_timestamp(item.get("end_date"), item.get("end_time"), item.get("timezone"))
+            start_time = self._build_timestamp(
+                item.get("start_date"), item.get("start_time"), item.get("timezone")
+            )
+            end_time = self._build_timestamp(
+                item.get("end_date"), item.get("end_time"), item.get("timezone")
+            )
 
             # Price
             ticket = item.get("ticket_availability") or {}
@@ -112,7 +118,9 @@ class EventbriteScraper(BaseScraper):
             image_url = image.get("url")
 
             # Tags for category hints
-            tags = [t.get("display_name") for t in (item.get("tags") or []) if t.get("display_name")]
+            tags = [
+                t.get("display_name") for t in (item.get("tags") or []) if t.get("display_name")
+            ]
             source_tags = tags.copy()  # preserve original Eventbrite tags
 
             return {
@@ -136,7 +144,9 @@ class EventbriteScraper(BaseScraper):
             logger.warning("Eventbrite parse error: %s", e)
             return None
 
-    def _build_timestamp(self, date_str: str | None, time_str: str | None, tz: str | None) -> str | None:
+    def _build_timestamp(
+        self, date_str: str | None, time_str: str | None, tz: str | None
+    ) -> str | None:
         if not date_str:
             return None
         if time_str:

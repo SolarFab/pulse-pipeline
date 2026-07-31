@@ -35,13 +35,34 @@ WEEKS_AHEAD = 4  # generate this many weeks of recurring events
 
 # Day name → weekday index (Monday=0)
 _DAY_PATTERNS: dict[str, int] = {
-    "monday": 0, "montag": 0, "montags": 0, "mondays": 0,
-    "tuesday": 1, "dienstag": 1, "dienstags": 1, "tuesdays": 1,
-    "wednesday": 2, "mittwoch": 2, "mittwochs": 2, "wednesdays": 2,
-    "thursday": 3, "donnerstag": 3, "donnerstags": 3, "thursdays": 3,
-    "friday": 4, "freitag": 4, "freitags": 4, "fridays": 4,
-    "saturday": 5, "samstag": 5, "samstags": 5, "saturdays": 5,
-    "sunday": 6, "sonntag": 6, "sonntags": 6, "sundays": 6,
+    "monday": 0,
+    "montag": 0,
+    "montags": 0,
+    "mondays": 0,
+    "tuesday": 1,
+    "dienstag": 1,
+    "dienstags": 1,
+    "tuesdays": 1,
+    "wednesday": 2,
+    "mittwoch": 2,
+    "mittwochs": 2,
+    "wednesdays": 2,
+    "thursday": 3,
+    "donnerstag": 3,
+    "donnerstags": 3,
+    "thursdays": 3,
+    "friday": 4,
+    "freitag": 4,
+    "freitags": 4,
+    "fridays": 4,
+    "saturday": 5,
+    "samstag": 5,
+    "samstags": 5,
+    "saturdays": 5,
+    "sunday": 6,
+    "sonntag": 6,
+    "sonntags": 6,
+    "sundays": 6,
 }
 
 
@@ -62,7 +83,8 @@ class StartbahnScraper(BaseScraper):
         filtered = [e for e in events if str(e.get("start_time", ""))[:10] >= today_str]
         logger.info(
             "startbahn: %d future events (%d past filtered out)",
-            len(filtered), len(events) - len(filtered),
+            len(filtered),
+            len(events) - len(filtered),
         )
         return filtered
 
@@ -132,14 +154,18 @@ class StartbahnScraper(BaseScraper):
 
         # Parse base date/time
         try:
-            start_dt = datetime.fromisoformat(start_str.replace("+00:00", "+00:00").replace("Z", "+00:00"))
+            start_dt = datetime.fromisoformat(
+                start_str.replace("+00:00", "+00:00").replace("Z", "+00:00")
+            )
         except ValueError:
             start_dt = None
 
         end_dt = None
         if end_str:
             try:
-                end_dt = datetime.fromisoformat(end_str.replace("+00:00", "+00:00").replace("Z", "+00:00"))
+                end_dt = datetime.fromisoformat(
+                    end_str.replace("+00:00", "+00:00").replace("Z", "+00:00")
+                )
             except ValueError:
                 pass
 
@@ -213,7 +239,10 @@ class StartbahnScraper(BaseScraper):
         return None
 
     def _generate_recurring(
-        self, base: dict, start_dt: datetime, end_dt: datetime | None,
+        self,
+        base: dict,
+        start_dt: datetime,
+        end_dt: datetime | None,
         weekday: int,
     ) -> list[dict[str, Any]]:
         """Generate WEEKS_AHEAD occurrences of a weekly recurring event."""
@@ -230,25 +259,35 @@ class StartbahnScraper(BaseScraper):
         for i in range(WEEKS_AHEAD):
             d = next_date + timedelta(weeks=i)
             occ_start = datetime(
-                d.year, d.month, d.day,
-                start_dt.hour, start_dt.minute, start_dt.second,
+                d.year,
+                d.month,
+                d.day,
+                start_dt.hour,
+                start_dt.minute,
+                start_dt.second,
             )
             occ_end = None
             if duration:
                 occ_end = occ_start + duration
 
-            events.append({
-                **base,
-                "start_time": occ_start.isoformat(),
-                "end_time": occ_end.isoformat() if occ_end else None,
-                "source_id": f"startbahn-{base['title'][:40]}-{d.isoformat()}",
-            })
+            events.append(
+                {
+                    **base,
+                    "start_time": occ_start.isoformat(),
+                    "end_time": occ_end.isoformat() if occ_end else None,
+                    "source_id": f"startbahn-{base['title'][:40]}-{d.isoformat()}",
+                }
+            )
 
         return events
 
     def _events_from_content(
-        self, title: str, link: str, excerpt: str,
-        image_url: str | None, content_text: str,
+        self,
+        title: str,
+        link: str,
+        excerpt: str,
+        image_url: str | None,
+        content_text: str,
     ) -> list[dict[str, Any]]:
         """Fallback: extract dates from content text."""
         date_matches = re.findall(r"(\d{1,2})\.(\d{1,2})\.(\d{4})", content_text)
@@ -261,23 +300,25 @@ class StartbahnScraper(BaseScraper):
 
         for day, month, year in date_matches:
             start_date = f"{year}-{month.zfill(2)}-{day.zfill(2)}"
-            events.append({
-                "title": title,
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "start_time": start_date,
-                "end_time": None,
-                "description": description,
-                "price": None,
-                "source_url": link,
-                "source_id": f"startbahn-{title[:40]}-{start_date}",
-                "category": category,
-                "tags": ["neukölln", "community"],
-                "image_url": image_url,
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": title,
+                    "venue_name": VENUE_NAME,
+                    "address": VENUE_ADDRESS,
+                    "lat": VENUE_LAT,
+                    "lng": VENUE_LNG,
+                    "start_time": start_date,
+                    "end_time": None,
+                    "description": description,
+                    "price": None,
+                    "source_url": link,
+                    "source_id": f"startbahn-{title[:40]}-{start_date}",
+                    "category": category,
+                    "tags": ["neukölln", "community"],
+                    "image_url": image_url,
+                    "source": self.source_name,
+                }
+            )
 
         return events
 
@@ -288,9 +329,14 @@ class StartbahnScraper(BaseScraper):
             return "outdoors"
         if any(w in combined for w in ("flohmarkt", "flea market", "familienflohmarkt")):
             return "markets"
-        if any(w in combined for w in ("konzert", "concert", "music", "tanz", "dance", "kunst", "art")):
+        if any(
+            w in combined for w in ("konzert", "concert", "music", "tanz", "dance", "kunst", "art")
+        ):
             return "culture"
-        if any(w in combined for w in ("kinder", "toddler", "family", "familie", "krabbel", "spielgruppe")):
+        if any(
+            w in combined
+            for w in ("kinder", "toddler", "family", "familie", "krabbel", "spielgruppe")
+        ):
             return "family"
         if any(w in combined for w in ("workshop", "kurs", "class")):
             return "workshops"

@@ -15,7 +15,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -45,7 +45,7 @@ supabase = create_client(os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVIC
 
 def fetch_targets() -> list[dict]:
     """Active future events with no subcategory."""
-    now = datetime.now(timezone.utc).isoformat()
+    now = datetime.now(UTC).isoformat()
     rows: list[dict] = []
     offset = 0
     while True:

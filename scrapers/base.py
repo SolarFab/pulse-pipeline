@@ -15,6 +15,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from db.supabase import get_client, upsert_events
 from pipeline.categorizer import categorize_batch
+from pipeline.embed_events import attach_embeddings
+from pipeline.facets import detect_facets
 from pipeline.geocoder import geocode_inline
 from pipeline.normalizer import normalize
 
@@ -87,21 +89,50 @@ class BaseScraper(ABC):
             # Check in batches (Supabase .in_() has limits)
             for i in range(0, len(fingerprints), 500):
                 batch_fps = fingerprints[i : i + 500]
-                result = client.table("events").select("fingerprint").in_(
-                    "fingerprint", batch_fps
-                ).not_.is_("category", "null").not_.is_("tags", "null").execute()
+                result = (
+                    client.table("events")
+                    .select("fingerprint")
+                    .in_("fingerprint", batch_fps)
+                    .not_.is_("category", "null")
+                    .not_.is_("tags", "null")
+                    .execute()
+                )
                 for row in result.data or []:
                     existing_fps.add(row["fingerprint"])
 
         new_events = [e for e in normalised if e.get("fingerprint") not in existing_fps]
         existing_events = [e for e in normalised if e.get("fingerprint") in existing_fps]
-        self.logger.info("New: %d, already categorized in DB: %d (skipping LLM)", len(new_events), len(existing_events))
+        self.logger.info(
+            "New: %d, already categorized in DB: %d (skipping LLM)",
+            len(new_events),
+            len(existing_events),
+        )
 
         # Geocode (fills in missing lat/lng)
         geocode_inline(new_events)
 
         # Categorize only new events (Claude fills in missing category/tags)
         categorised = categorize_batch(new_events) + existing_events
+
+        # Facets for ALL events (cheap regex, idempotent — also heals rows
+        # that predate the facet columns)
+        for event in categorised:
+            event.update(detect_facets(event))
+
+        # Embeddings: only new/changed embed text (hash-skip against stored hashes).
+        # Failure degrades — events upsert without embeddings and heal next run.
+        db_hashes: dict[str, str] = {}
+        fps = [e["fingerprint"] for e in categorised if e.get("fingerprint")]
+        if fps:
+            for i in range(0, len(fps), 200):
+                res = (get_client().table("events").select("fingerprint,embed_hash")
+                       .in_("fingerprint", fps[i : i + 200]).execute())
+                db_hashes.update({r["fingerprint"]: r["embed_hash"] for r in (res.data or [])
+                                  if r.get("embed_hash")})
+        emb_metrics = attach_embeddings(categorised, db_hashes)
+        self.logger.info("Embeddings: %(embedded)d new, %(skipped)d unchanged, "
+                         "%(failed)d failed — %(tokens)d tok / $%(usd).4f / %(seconds).1fs",
+                         emb_metrics)
 
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)

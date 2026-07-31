@@ -9,7 +9,7 @@ import logging
 import os
 import re
 import time
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import httpx
 from dotenv import load_dotenv
@@ -33,6 +33,7 @@ def _get_supabase():
         os.environ["SUPABASE_URL"],
         os.environ["SUPABASE_SERVICE_KEY"],
     )
+
 
 # Manual lookup for well-known venues that Nominatim can't resolve.
 # Checked and verified coordinates — add new venues as needed.
@@ -183,11 +184,24 @@ def geocode(query: str) -> tuple[float, float] | None:
 
 
 _SKIP_VENUE_PATTERNS = (
-    "berlinweit", "berlin-weit", "verschiedene", "diverse", "mehrere",
-    "viele events", "viele veranstaltung", "rund ", "immer ",
-    "keine anmeldung", "veranstaltungsinfos", "für familien",
-    "für alle", "termine", "uhrzeiten", "vorstellung",
-    "sportfeste in", "angebote",
+    "berlinweit",
+    "berlin-weit",
+    "verschiedene",
+    "diverse",
+    "mehrere",
+    "viele events",
+    "viele veranstaltung",
+    "rund ",
+    "immer ",
+    "keine anmeldung",
+    "veranstaltungsinfos",
+    "für familien",
+    "für alle",
+    "termine",
+    "uhrzeiten",
+    "vorstellung",
+    "sportfeste in",
+    "angebote",
 )
 
 
@@ -298,7 +312,10 @@ def geocode_inline(events: list[dict]) -> list[dict]:
 
     # Step 2+3: Hardcoded dict + Nominatim for remaining
     if len(still_need) > 500:
-        logger.info("Skipping Nominatim geocoding for %d events (too many). Run geocoder separately.", len(still_need))
+        logger.info(
+            "Skipping Nominatim geocoding for %d events (too many). Run geocoder separately.",
+            len(still_need),
+        )
         return events
 
     from_nominatim = 0
@@ -311,13 +328,15 @@ def geocode_inline(events: list[dict]) -> list[dict]:
             # Track for DB insert
             vname = event.get("venue_name")
             if vname and vname.lower().strip() not in db_venues:
-                new_venues.append({
-                    "name": vname,
-                    "lat": coords[0],
-                    "lng": coords[1],
-                    "address": event.get("address"),
-                    "neighborhood": event.get("neighborhood"),
-                })
+                new_venues.append(
+                    {
+                        "name": vname,
+                        "lat": coords[0],
+                        "lng": coords[1],
+                        "address": event.get("address"),
+                        "neighborhood": event.get("neighborhood"),
+                    }
+                )
                 db_venues[vname.lower().strip()] = {"lat": coords[0], "lng": coords[1]}
         # Nominatim rate limit
         time.sleep(2.0)
@@ -327,7 +346,9 @@ def geocode_inline(events: list[dict]) -> list[dict]:
         inserted = 0
         venue_id_map: dict[str, str] = {}
         for v in new_venues:
-            vid = upsert_venue(v["name"], v["lat"], v["lng"], v.get("address"), v.get("neighborhood"))
+            vid = upsert_venue(
+                v["name"], v["lat"], v["lng"], v.get("address"), v.get("neighborhood")
+            )
             if vid:
                 inserted += 1
                 venue_id_map[v["name"].lower().strip()] = vid
@@ -338,7 +359,12 @@ def geocode_inline(events: list[dict]) -> list[dict]:
                 event["venue_id"] = venue_id_map[vname]
         logger.info("Inserted %d new venues into DB", inserted)
 
-    logger.info("Inline geocoded %d from DB + %d from Nominatim / %d events", from_db, from_nominatim, len(events))
+    logger.info(
+        "Inline geocoded %d from DB + %d from Nominatim / %d events",
+        from_db,
+        from_nominatim,
+        len(events),
+    )
     return events
 
 
@@ -353,7 +379,7 @@ def run(limit: int = 500, dry_run: bool = False):
     """
     client = _get_supabase()
     # Only current/future events — past events don't need pins anymore.
-    since = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
+    since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
     data = (
         client.table("events")
         .select("id,venue_name,address,lat,lng")
@@ -403,7 +429,8 @@ def run(limit: int = 500, dry_run: bool = False):
     if len(still_need) > MAX_NOMINATIM_PER_RUN:
         logger.info(
             "Capping Nominatim geocoding to %d of %d remaining events",
-            MAX_NOMINATIM_PER_RUN, len(still_need),
+            MAX_NOMINATIM_PER_RUN,
+            len(still_need),
         )
         still_need = still_need[:MAX_NOMINATIM_PER_RUN]
 
@@ -414,15 +441,15 @@ def run(limit: int = 500, dry_run: bool = False):
             lat, lng = coords
             if not dry_run:
                 try:
-                    client.table("events").update(
-                        {"lat": lat, "lng": lng}
-                    ).eq("id", event["id"]).execute()
+                    client.table("events").update({"lat": lat, "lng": lng}).eq(
+                        "id", event["id"]
+                    ).execute()
                 except Exception as e:
                     logger.warning("DB update failed, reconnecting: %s", e)
                     client = _get_supabase()
-                    client.table("events").update(
-                        {"lat": lat, "lng": lng}
-                    ).eq("id", event["id"]).execute()
+                    client.table("events").update({"lat": lat, "lng": lng}).eq(
+                        "id", event["id"]
+                    ).execute()
             updated += 1
             logger.debug(
                 "Geocoded: %s → (%.4f, %.4f)",
@@ -432,7 +459,9 @@ def run(limit: int = 500, dry_run: bool = False):
             )
         else:
             failed += 1
-            logger.debug("Failed to geocode: %s / %s", event.get("venue_name"), event.get("address"))
+            logger.debug(
+                "Failed to geocode: %s / %s", event.get("venue_name"), event.get("address")
+            )
 
         # Nominatim rate limit: 1 req/sec
         time.sleep(2.0)

@@ -23,7 +23,7 @@ import sys
 import urllib.parse
 import urllib.request
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -133,7 +133,7 @@ def fix_subcategories(url: str, key: str, dry_run: bool) -> None:
 
 
 def deactivate_past_events(url: str, key: str, dry_run: bool) -> None:
-    cutoff = (datetime.now(timezone.utc) - timedelta(days=PAST_EVENT_GRACE_DAYS)).isoformat()
+    cutoff = (datetime.now(UTC) - timedelta(days=PAST_EVENT_GRACE_DAYS)).isoformat()
     # Ended events
     f1 = f"end_time=lt.{urllib.parse.quote(cutoff)}&is_active=eq.true"
     # No end_time and started before the cutoff

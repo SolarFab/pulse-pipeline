@@ -30,30 +30,40 @@ class MauerparkScraper(BaseScraper):
 
         for d in dates:
             # Summer hours: 9:00–18:00
-            events.append({
-                "title": "Mauerpark Flohmarkt",
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "neighborhood": VENUE_NEIGHBORHOOD,
-                "start_time": datetime(d.year, d.month, d.day, 9, 0).isoformat(),
-                "end_time": datetime(d.year, d.month, d.day, 18, 0).isoformat(),
-                "description": (
-                    "Berlin's most famous Sunday flea market in Mauerpark. "
-                    "Hundreds of stalls selling vintage clothes, records, antiques, and street food. "
-                    "Karaoke bears, street performers, and a legendary Berlin atmosphere."
-                ),
-                "price": "Free",
-                "price_cents": 0,
-                "source_url": SITE_URL,
-                "source_id": f"mauerpark-{d.isoformat()}",
-                "category": "market",
-                "subcategory": "flea market",
-                "tags": ["flea market", "vintage", "secondhand", "outdoor", "prenzlauer berg", "free entry", "family-friendly"],
-                "source_tags": [],
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": "Mauerpark Flohmarkt",
+                    "venue_name": VENUE_NAME,
+                    "address": VENUE_ADDRESS,
+                    "lat": VENUE_LAT,
+                    "lng": VENUE_LNG,
+                    "neighborhood": VENUE_NEIGHBORHOOD,
+                    "start_time": datetime(d.year, d.month, d.day, 9, 0).isoformat(),
+                    "end_time": datetime(d.year, d.month, d.day, 18, 0).isoformat(),
+                    "description": (
+                        "Berlin's most famous Sunday flea market in Mauerpark. "
+                        "Hundreds of stalls selling vintage clothes, records, antiques, and street food. "
+                        "Karaoke bears, street performers, and a legendary Berlin atmosphere."
+                    ),
+                    "price": "Free",
+                    "price_cents": 0,
+                    "source_url": SITE_URL,
+                    "source_id": f"mauerpark-{d.isoformat()}",
+                    "category": "market",
+                    "subcategory": "flea market",
+                    "tags": [
+                        "flea market",
+                        "vintage",
+                        "secondhand",
+                        "outdoor",
+                        "prenzlauer berg",
+                        "free entry",
+                        "family-friendly",
+                    ],
+                    "source_tags": [],
+                    "source": self.source_name,
+                }
+            )
 
         logger.info("mauerpark: generated %d dates", len(events))
         return events

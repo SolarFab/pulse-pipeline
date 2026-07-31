@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 from dotenv import load_dotenv
 from supabase import Client, create_client
@@ -146,15 +146,28 @@ def get_venues_by_names(names: list[str]) -> dict[str, dict[str, Any]]:
     return result
 
 
-def upsert_venue(name: str, lat: float, lng: float, address: str | None = None, neighborhood: str | None = None) -> str | None:
+def upsert_venue(
+    name: str, lat: float, lng: float, address: str | None = None, neighborhood: str | None = None
+) -> str | None:
     """Insert or get a venue. Returns venue id."""
     client = get_client()
     try:
-        data = client.table("venues").upsert(
-            {"name": name, "lat": lat, "lng": lng, "address": address, "neighborhood": neighborhood},
-            on_conflict="name,lat,lng",
-            ignore_duplicates=True,
-        ).execute().data
+        data = (
+            client.table("venues")
+            .upsert(
+                {
+                    "name": name,
+                    "lat": lat,
+                    "lng": lng,
+                    "address": address,
+                    "neighborhood": neighborhood,
+                },
+                on_conflict="name,lat,lng",
+                ignore_duplicates=True,
+            )
+            .execute()
+            .data
+        )
         if data:
             return data[0]["id"]
         # If ignore_duplicates returned nothing, fetch the existing one

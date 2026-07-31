@@ -4,7 +4,7 @@ Most cases here are translated from bugs that actually shipped (see
 PROGRESS.md "Known Bugs Already Fixed") — they exist so those bugs stay dead.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from pipeline.normalizer import (
     RawEvent,
@@ -16,7 +16,7 @@ from pipeline.normalizer import (
 
 
 def utc(y, mo, d, h=0, mi=0):
-    return datetime(y, mo, d, h, mi, tzinfo=timezone.utc)
+    return datetime(y, mo, d, h, mi, tzinfo=UTC)
 
 
 class TestParseDt:
@@ -56,13 +56,25 @@ class TestCategoryAliases:
 
     def make(self, category):
         return RawEvent(
-            title="t", venue_name="v", source="s",
-            start_time="2026-07-15", category=category,
+            title="t",
+            venue_name="v",
+            source="s",
+            start_time="2026-07-15",
+            category=category,
         ).category
 
     def test_canonical_passthrough(self):
-        for cat in ("music", "nightlife", "culture", "food", "markets",
-                    "workshops", "meetups", "outdoors", "family"):
+        for cat in (
+            "music",
+            "nightlife",
+            "culture",
+            "food",
+            "markets",
+            "workshops",
+            "meetups",
+            "outdoors",
+            "family",
+        ):
             assert self.make(cat) == cat
 
     def test_legacy_aliases_resolve(self):

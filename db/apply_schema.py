@@ -4,9 +4,9 @@ Apply the Supabase schema via the Management API.
 Run from the event-map directory:
     python db/apply_schema.py
 """
+
 import os
 import re
-import sys
 
 import httpx
 from dotenv import load_dotenv
@@ -27,7 +27,7 @@ statements = []
 for stmt in re.split(r";\s*\n", schema):
     stmt = stmt.strip()
     # Skip empty or comment-only blocks
-    lines = [l for l in stmt.splitlines() if l.strip() and not l.strip().startswith("--")]
+    lines = [ln for ln in stmt.splitlines() if ln.strip() and not ln.strip().startswith("--")]
     if lines:
         statements.append(stmt)
 
@@ -50,18 +50,18 @@ for i, stmt in enumerate(statements):
             timeout=30,
         )
         if resp.status_code in (200, 201, 204):
-            print(f"  ✓ [{i+1}/{len(statements)}] {label}")
+            print(f"  ✓ [{i + 1}/{len(statements)}] {label}")
         else:
             # Some statements (CREATE EXTENSION, CREATE INDEX IF NOT EXISTS) return errors
             # if already applied — that's fine
             body = resp.text[:200]
             if "already exists" in body or "duplicate" in body.lower():
-                print(f"  ~ [{i+1}/{len(statements)}] Already exists: {label}")
+                print(f"  ~ [{i + 1}/{len(statements)}] Already exists: {label}")
             else:
-                print(f"  ✗ [{i+1}/{len(statements)}] {resp.status_code}: {body}")
+                print(f"  ✗ [{i + 1}/{len(statements)}] {resp.status_code}: {body}")
                 errors.append((stmt, resp.text))
     except Exception as e:
-        print(f"  ✗ [{i+1}/{len(statements)}] Exception: {e}")
+        print(f"  ✗ [{i + 1}/{len(statements)}] Exception: {e}")
         errors.append((stmt, str(e)))
 
 if errors:

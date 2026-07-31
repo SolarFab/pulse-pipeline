@@ -18,13 +18,12 @@ from __future__ import annotations
 
 import logging
 import os as _os
-import time
 from typing import Any
 
-_MAX_PAGES = int(_os.environ.get("KULTURDATEN_MAX_PAGES", "0"))
-
-from scrapers.base import BaseScraper
 from pipeline.taxonomy import SOURCE_TAG_CATEGORY_MAP, classify_event
+from scrapers.base import BaseScraper
+
+_MAX_PAGES = int(_os.environ.get("KULTURDATEN_MAX_PAGES", "0"))
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +74,9 @@ class KulturdatenScraper(BaseScraper):
             if fetched >= total:
                 break
             if _MAX_PAGES and page >= _MAX_PAGES:
-                logger.info("kulturdaten: stopping at page %d (KULTURDATEN_MAX_PAGES=%d)", page, _MAX_PAGES)
+                logger.info(
+                    "kulturdaten: stopping at page %d (KULTURDATEN_MAX_PAGES=%d)", page, _MAX_PAGES
+                )
                 break
             page += 1
 
@@ -171,11 +172,19 @@ class KulturdatenScraper(BaseScraper):
                 loc_data = self._get_location(location_id)
                 if loc_data:
                     addr = loc_data.get("address", {})
-                    address = ", ".join(filter(None, [
-                        addr.get("streetAddress", ""),
-                        addr.get("postalCode", ""),
-                        addr.get("addressLocality", ""),
-                    ])) or None
+                    address = (
+                        ", ".join(
+                            filter(
+                                None,
+                                [
+                                    addr.get("streetAddress", ""),
+                                    addr.get("postalCode", ""),
+                                    addr.get("addressLocality", ""),
+                                ],
+                            )
+                        )
+                        or None
+                    )
                     neighborhood = loc_data.get("borough")
                     # Try to get venue website from location contact
                     contact = loc_data.get("contact", {})
@@ -185,14 +194,19 @@ class KulturdatenScraper(BaseScraper):
                         venue_website = f"https://{venue_website}"
 
             attraction_id = attraction_ref.get("referenceId")
-            description, tags, category, source_subcategory, source_url, source_tags = None, [], None, None, None, []
+            description, tags, category, source_subcategory, source_url, source_tags = (
+                None,
+                [],
+                None,
+                None,
+                None,
+                [],
+            )
             if attraction_id:
                 attr_data = self._get_attraction(attraction_id)
                 if attr_data:
                     desc_obj = attr_data.get("description", {})
-                    description = (
-                        desc_obj.get("de") or desc_obj.get("en") or ""
-                    ).strip() or None
+                    description = (desc_obj.get("de") or desc_obj.get("en") or "").strip() or None
 
                     raw_tags = attr_data.get("tags", [])
                     category, source_subcategory = self._map_tags(raw_tags)
@@ -236,7 +250,9 @@ class KulturdatenScraper(BaseScraper):
                 "end_time": end_time,
                 "description": description,
                 "price": price,
-                "source_url": source_url or venue_website or f"https://kulturdaten.berlin/events/{item['identifier']}",
+                "source_url": source_url
+                or venue_website
+                or f"https://kulturdaten.berlin/events/{item['identifier']}",
                 "source_id": item.get("identifier"),
                 "category": category,
                 "subcategory": subcategory,

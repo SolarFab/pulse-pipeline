@@ -70,13 +70,17 @@ class HolzmarktScraper(BaseScraper):
             if isinstance(offers, list):
                 offers = offers[0] if offers else {}
             price_val = offers.get("price")
-            price = "Free" if price_val is not None and float(price_val) == 0 else (
-                f"€{price_val}" if price_val else None
+            price = (
+                "Free"
+                if price_val is not None and float(price_val) == 0
+                else (f"€{price_val}" if price_val else None)
             )
 
             image = item.get("image")
-            image_url = image if isinstance(image, str) else (
-                image[0] if isinstance(image, list) and image else None
+            image_url = (
+                image
+                if isinstance(image, str)
+                else (image[0] if isinstance(image, list) and image else None)
             )
 
             # Sub-venue (Kater Blau, Pampa, etc.)
@@ -85,7 +89,9 @@ class HolzmarktScraper(BaseScraper):
 
             return {
                 "title": title,
-                "venue_name": f"{VENUE_NAME} — {sub_venue}".rstrip(" — ") if sub_venue else VENUE_NAME,
+                "venue_name": f"{VENUE_NAME} — {sub_venue}".rstrip(" — ")
+                if sub_venue
+                else VENUE_NAME,
                 "address": VENUE_ADDRESS,
                 "lat": VENUE_LAT,
                 "lng": VENUE_LNG,
@@ -108,10 +114,9 @@ class HolzmarktScraper(BaseScraper):
 
     def _parse_html(self, soup: BeautifulSoup) -> list[dict]:
         events = []
-        cards = (
-            soup.find_all("article", class_=re.compile(r"event|programm", re.I))
-            or soup.find_all("div", class_=re.compile(r"event-card|program-item", re.I))
-        )
+        cards = soup.find_all(
+            "article", class_=re.compile(r"event|programm", re.I)
+        ) or soup.find_all("div", class_=re.compile(r"event-card|program-item", re.I))
 
         for card in cards:
             try:
@@ -125,29 +130,33 @@ class HolzmarktScraper(BaseScraper):
 
                 link_el = card.find("a", href=True)
                 href = link_el["href"] if link_el else None
-                source_url = href if href and href.startswith("http") else (
-                    f"https://www.holzmarkt.com{href}" if href else EVENTS_URL
+                source_url = (
+                    href
+                    if href and href.startswith("http")
+                    else (f"https://www.holzmarkt.com{href}" if href else EVENTS_URL)
                 )
 
                 desc_el = card.find("p")
                 description = desc_el.get_text(strip=True)[:400] if desc_el else None
 
-                events.append({
-                    "title": title,
-                    "venue_name": VENUE_NAME,
-                    "address": VENUE_ADDRESS,
-                    "lat": VENUE_LAT,
-                    "lng": VENUE_LNG,
-                    "neighborhood": VENUE_NEIGHBORHOOD,
-                    "start_time": start_time,
-                    "description": description,
-                    "source_url": source_url,
-                    "source_id": source_url.rstrip("/").split("/")[-1] if source_url else None,
-                    "category": self._infer_category(title, description or ""),
-                    "tags": ["spree", "friedrichshain"],
-                    "source_tags": [],
-                    "source": self.source_name,
-                })
+                events.append(
+                    {
+                        "title": title,
+                        "venue_name": VENUE_NAME,
+                        "address": VENUE_ADDRESS,
+                        "lat": VENUE_LAT,
+                        "lng": VENUE_LNG,
+                        "neighborhood": VENUE_NEIGHBORHOOD,
+                        "start_time": start_time,
+                        "description": description,
+                        "source_url": source_url,
+                        "source_id": source_url.rstrip("/").split("/")[-1] if source_url else None,
+                        "category": self._infer_category(title, description or ""),
+                        "tags": ["spree", "friedrichshain"],
+                        "source_tags": [],
+                        "source": self.source_name,
+                    }
+                )
             except Exception:
                 continue
 

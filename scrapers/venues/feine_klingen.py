@@ -29,10 +29,19 @@ _STRIP_HTML = re.compile(r"<[^>]+>")
 
 # German month names → number
 _MONTHS = {
-    "januar": "01", "februar": "02", "märz": "03", "maerz": "03",
-    "april": "04", "mai": "05", "juni": "06", "juli": "07",
-    "august": "08", "september": "09", "oktober": "10",
-    "november": "11", "dezember": "12",
+    "januar": "01",
+    "februar": "02",
+    "märz": "03",
+    "maerz": "03",
+    "april": "04",
+    "mai": "05",
+    "juni": "06",
+    "juli": "07",
+    "august": "08",
+    "september": "09",
+    "oktober": "10",
+    "november": "11",
+    "dezember": "12",
 }
 
 
@@ -70,29 +79,10 @@ class FeineKlingenScraper(BaseScraper):
         """Parse product listing page for workshop events."""
         events = []
 
-        # Find product items — WooCommerce uses <li class="product ...">
-        # Extract title and price from each product block
-        product_pattern = re.compile(
-            r'<li[^>]*class="[^"]*product[^"]*"[^>]*>.*?'
-            r'<a[^>]+href="([^"]+)"[^>]*>.*?'
-            r'<h2[^>]*class="[^"]*woocommerce-loop-product__title[^"]*"[^>]*>(.*?)</h2>.*?'
-            r'(?:<span[^>]*class="[^"]*woocommerce-Price-amount[^"]*"[^>]*>.*?(\d[\d.,]*)\s*€.*?)?'
-            r'</li>',
-            re.DOTALL,
-        )
-
-        # Simpler approach: find all product links and titles
-        # WooCommerce product titles in <h2 class="woocommerce-loop-product__title">
-        title_pattern = re.compile(
-            r'<a[^>]+href="(https://www\.feine-klingen\.de/produkt/[^"]+)"[^>]*>\s*'
-            r'<img[^>]*>.*?'
-            r'<h2[^>]*>(.*?)</h2>',
-            re.DOTALL,
-        )
-
+        # Parse WooCommerce product blocks for workshop events (split-based approach below).
         price_pattern = re.compile(
             r'<span class="woocommerce-Price-amount amount">'
-            r'<bdi>([\d.,]+)\s*(?:&nbsp;)?<span[^>]*>(?:€|&euro;)</span></bdi></span>',
+            r"<bdi>([\d.,]+)\s*(?:&nbsp;)?<span[^>]*>(?:€|&euro;)</span></bdi></span>",
         )
 
         # Split HTML into product blocks
@@ -105,7 +95,8 @@ class FeineKlingenScraper(BaseScraper):
             )
             title_match = re.search(
                 r'<h2[^>]*class="[^"]*woocommerce-loop-product__title[^"]*"[^>]*>(.*?)</h2>',
-                block, re.DOTALL,
+                block,
+                re.DOTALL,
             )
 
             if not link_match or not title_match:
@@ -144,24 +135,26 @@ class FeineKlingenScraper(BaseScraper):
             # Determine workshop type for description
             description = self._get_description(title)
 
-            events.append({
-                "title": title,
-                "venue_name": VENUE_NAME,
-                "address": VENUE_ADDRESS,
-                "lat": VENUE_LAT,
-                "lng": VENUE_LNG,
-                "start_time": start_time,
-                "end_time": end_time,
-                "description": description,
-                "price": f"{price_str} (ausgebucht)" if sold_out and price_str else price_str,
-                "source_url": url,
-                "source_id": f"feineklingen-{title[:50]}-{start_time[:10]}",
-                "category": "workshops",
-                "subcategory": "craft",
-                "tags": ["blacksmithing", "craft", "neukölln"],
-                "image_url": image_url,
-                "source": self.source_name,
-            })
+            events.append(
+                {
+                    "title": title,
+                    "venue_name": VENUE_NAME,
+                    "address": VENUE_ADDRESS,
+                    "lat": VENUE_LAT,
+                    "lng": VENUE_LNG,
+                    "start_time": start_time,
+                    "end_time": end_time,
+                    "description": description,
+                    "price": f"{price_str} (ausgebucht)" if sold_out and price_str else price_str,
+                    "source_url": url,
+                    "source_id": f"feineklingen-{title[:50]}-{start_time[:10]}",
+                    "category": "workshops",
+                    "subcategory": "craft",
+                    "tags": ["blacksmithing", "craft", "neukölln"],
+                    "image_url": image_url,
+                    "source": self.source_name,
+                }
+            )
 
         return events
 

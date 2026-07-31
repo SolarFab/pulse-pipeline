@@ -1,0 +1,213 @@
+{
+  "experiment": "1-embedding-model-qrels",
+  "corpus": "v1",
+  "golden_set": "v1",
+  "k": 5,
+  "queries_without_relevant": [
+    "q05",
+    "q11",
+    "q12"
+  ],
+  "models": {
+    "openai/text-embedding-3-small": {
+      "queries_scored": 13,
+      "recall@5": 0.621,
+      "precision@5": 0.585,
+      "mrr": 0.896,
+      "ndcg@5": 0.729,
+      "per_query": [
+        {
+          "query_id": "q01",
+          "recall": 0.8333333333333334,
+          "precision": 1.0,
+          "rr": 1.0,
+          "ndcg": 1.0
+        },
+        {
+          "query_id": "q02",
+          "recall": 1.0,
+          "precision": 1.0,
+          "rr": 1.0,
+          "ndcg": 1.0
+        },
+        {
+          "query_id": "q03",
+          "recall": 0.8,
+          "precision": 0.8,
+          "rr": 1.0,
+          "ndcg": 0.8687949224876582
+        },
+        {
+          "query_id": "q04",
+          "recall": 1.0,
+          "precision": 0.6,
+          "rr": 1.0,
+          "ndcg": 0.8529278650606567
+        },
+        {
+          "query_id": "q06",
+          "recall": 0.5,
+          "precision": 0.6,
+          "rr": 1.0,
+          "ndcg": 0.6548086577531307
+        },
+        {
+          "query_id": "q07",
+          "recall": 0.6666666666666666,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.7653606369886217
+        },
+        {
+          "query_id": "q08",
+          "recall": 0.5,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.5855700749881525
+        },
+        {
+          "query_id": "q09",
+          "recall": 0.3,
+          "precision": 0.6,
+          "rr": 0.5,
+          "ndcg": 0.4912596920895758
+        },
+        {
+          "query_id": "q10",
+          "recall": 0.0,
+          "precision": 0.0,
+          "rr": 0.14285714285714285,
+          "ndcg": 0.0
+        },
+        {
+          "query_id": "q13",
+          "recall": 0.7142857142857143,
+          "precision": 1.0,
+          "rr": 1.0,
+          "ndcg": 1.0
+        },
+        {
+          "query_id": "q23",
+          "recall": 0.3333333333333333,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.5531464700081437
+        },
+        {
+          "query_id": "q24",
+          "recall": 1.0,
+          "precision": 0.2,
+          "rr": 1.0,
+          "ndcg": 1.0
+        },
+        {
+          "query_id": "q25",
+          "recall": 0.42857142857142855,
+          "precision": 0.6,
+          "rr": 1.0,
+          "ndcg": 0.6992148198508501
+        }
+      ]
+    },
+    "qwen/qwen3-embedding-8b": {
+      "queries_scored": 13,
+      "recall@5": 0.248,
+      "precision@5": 0.262,
+      "mrr": 0.646,
+      "ndcg@5": 0.337,
+      "per_query": [
+        {
+          "query_id": "q01",
+          "recall": 0.3333333333333333,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.48522855511632257
+        },
+        {
+          "query_id": "q02",
+          "recall": 0.4,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.4703652827859579
+        },
+        {
+          "query_id": "q03",
+          "recall": 0.8,
+          "precision": 0.8,
+          "rr": 0.5,
+          "ndcg": 0.6608397947263839
+        },
+        {
+          "query_id": "q04",
+          "recall": 0.6666666666666666,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.7653606369886217
+        },
+        {
+          "query_id": "q06",
+          "recall": 0.16666666666666666,
+          "precision": 0.2,
+          "rr": 1.0,
+          "ndcg": 0.3391602052736161
+        },
+        {
+          "query_id": "q07",
+          "recall": 0.0,
+          "precision": 0.0,
+          "rr": 0.1,
+          "ndcg": 0.0
+        },
+        {
+          "query_id": "q08",
+          "recall": 0.0,
+          "precision": 0.0,
+          "rr": 0.0,
+          "ndcg": 0.0
+        },
+        {
+          "query_id": "q09",
+          "recall": 0.1,
+          "precision": 0.2,
+          "rr": 0.5,
+          "ndcg": 0.21398626473452756
+        },
+        {
+          "query_id": "q10",
+          "recall": 0.0,
+          "precision": 0.0,
+          "rr": 0.16666666666666666,
+          "ndcg": 0.0
+        },
+        {
+          "query_id": "q13",
+          "recall": 0.14285714285714285,
+          "precision": 0.2,
+          "rr": 1.0,
+          "ndcg": 0.3391602052736161
+        },
+        {
+          "query_id": "q23",
+          "recall": 0.3333333333333333,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.5531464700081437
+        },
+        {
+          "query_id": "q24",
+          "recall": 0.0,
+          "precision": 0.0,
+          "rr": 0.125,
+          "ndcg": 0.0
+        },
+        {
+          "query_id": "q25",
+          "recall": 0.2857142857142857,
+          "precision": 0.4,
+          "rr": 1.0,
+          "ndcg": 0.5531464700081437
+        }
+      ]
+    }
+  }
+}

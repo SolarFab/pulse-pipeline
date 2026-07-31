@@ -10,6 +10,7 @@ env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
   SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
   ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+  OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}   # embed-at-ingest (skips gracefully if unset)
   EVENTBRITE_API_KEY: ${{ secrets.EVENTBRITE_API_KEY }}
   MEETUP_API_KEY: ${{ secrets.MEETUP_API_KEY }}
   LOG_LEVEL: INFO

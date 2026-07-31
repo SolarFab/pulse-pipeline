@@ -27,7 +27,28 @@ dev = [
     "pytest>=8.2.0",
     "pytest-asyncio>=0.23.0",
     "pytest-httpx>=0.30.0",
+    "ruff>=0.6.0",
+    "pre-commit>=3.7.0",
 ]
 
 [tool.hatch.build.targets.wheel]
 packages = ["scrapers", "pipeline", "db"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# Exploratory one-off analysis scripts are not part of the pipeline proper.
+extend-exclude = [
+    ".agents",   # vendored agent skills (third-party examples)
+    "analyze_tags.py",
+    "genre_analysis.py",
+    "kulturdaten_analysis.py",
+    # one-off analysis/inspection scripts, not maintained code
+    "scripts/analyze_*.py",
+    "scripts/inspect_*.py",
+    "scripts/*_analysis.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]  # errors, pyflakes, import-sort, warnings, pyupgrade
+ignore = ["E501"]                     # line length is handled by the formatter
