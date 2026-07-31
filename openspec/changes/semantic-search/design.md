@@ -116,3 +116,14 @@ token usage. Enough to eval retrieval quality later against the golden queries.
   mode, answer-first confirmed by data; (3) rules-only prod-v1 was no better than zero-shot —
   rules tell, examples teach. Cost: ~+600 prompt tokens/turn for +23pp accuracy on haiku
   (~$0.0005/turn) — shipped. Stage 2 (grounded end-to-end + judge) pending on the winner.
+
+- **2026-07-31 — Prompt grid extended to 3 models + cost axis; few-shot wins on EVERY model.**
+  few-shot: gpt-4o-mini 13/13 @ $0.00015/turn, gemini-2.5-flash 12/13 @ $0.00037 (fastest,
+  ~900ms), claude-haiku-4.5 12/13 @ $0.00225. Pareto frontier = 4o-mini (zero-shot cheap
+  corner, few-shot top). haiku is 15x the cost of 4o-mini at equal-or-lower tool accuracy —
+  4o-mini is the CHAT_MODEL candidate, but stage 2 (answer quality/grounding/tone, judge)
+  decides before switching. Kimi/Qwen/Llama blocked by the account's OpenRouter data policy
+  (no provider matching restrictions) — pending user decision on a benchmark-only
+  data_collection override. Run-to-run: haiku few-shot 13/13 -> 12/13 across runs at temp 0 —
+  provider-side nondeterminism; scores carry ±1 case noise. Chart:
+  docs/showcase/prompt-scatter.html (accuracy vs measured $/turn, Pareto frontier).

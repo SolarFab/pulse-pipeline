@@ -1,0 +1,1053 @@
+{
+  "experiment": "3-prompt-techniques-stage1",
+  "golden_set": "v1",
+  "kind": "tool-call accuracy (deterministic asserts, no execution)",
+  "models": [
+    "anthropic/claude-haiku-4.5",
+    "openai/gpt-4o-mini",
+    "google/gemini-2.5-flash"
+  ],
+  "variants": [
+    "zero-shot",
+    "prod-v1",
+    "few-shot",
+    "clarify-first"
+  ],
+  "results": {
+    "zero-shot \u00d7 claude-haiku-4.5": {
+      "variant": "zero-shot",
+      "model": "anthropic/claude-haiku-4.5",
+      "score": 0.769,
+      "passed": 10,
+      "of": 13,
+      "tokens": 13667,
+      "mean_ms": 2285,
+      "usd_total": 0.022003,
+      "usd_per_turn": 0.001693,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "date_from = tomorrow evening",
+            "live-music intent in query/subcategory"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "zero-shot \u00d7 gpt-4o-mini": {
+      "variant": "zero-shot",
+      "model": "openai/gpt-4o-mini",
+      "score": 0.692,
+      "passed": 9,
+      "of": 13,
+      "tokens": 3788,
+      "mean_ms": 1315,
+      "usd_total": 0.000817,
+      "usd_per_turn": 6.3e-05,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "semantic query set (vibe needs ranking)"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": false,
+          "fails": [
+            "no tool before clarifying",
+            "asked a clarifying question"
+          ]
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "live-music intent in query/subcategory"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "zero-shot \u00d7 gemini-2.5-flash": {
+      "variant": "zero-shot",
+      "model": "google/gemini-2.5-flash",
+      "score": 0.538,
+      "passed": 7,
+      "of": 13,
+      "tokens": 2835,
+      "mean_ms": 957,
+      "usd_total": 0.002087,
+      "usd_per_turn": 0.000161,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q17",
+          "pass": false,
+          "fails": [
+            "searched first (answer-first policy)"
+          ]
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": false,
+          "fails": [
+            "attempted a search"
+          ]
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "date_from = tomorrow evening"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "prod-v1 \u00d7 claude-haiku-4.5": {
+      "variant": "prod-v1",
+      "model": "anthropic/claude-haiku-4.5",
+      "score": 0.769,
+      "passed": 10,
+      "of": 13,
+      "tokens": 18538,
+      "mean_ms": 2234,
+      "usd_total": 0.026702,
+      "usd_per_turn": 0.002054,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": false,
+          "fails": [
+            "date window covers Sunday"
+          ]
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "date_from = tomorrow evening"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "prod-v1 \u00d7 gpt-4o-mini": {
+      "variant": "prod-v1",
+      "model": "openai/gpt-4o-mini",
+      "score": 0.615,
+      "passed": 8,
+      "of": 13,
+      "tokens": 8198,
+      "mean_ms": 1397,
+      "usd_total": 0.00152,
+      "usd_per_turn": 0.000117,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "semantic query set (vibe needs ranking)"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": false,
+          "fails": [
+            "no tool before clarifying",
+            "asked a clarifying question"
+          ]
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "live-music intent in query/subcategory"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": false,
+          "fails": [
+            "family_friendly=true"
+          ]
+        }
+      ]
+    },
+    "prod-v1 \u00d7 gemini-2.5-flash": {
+      "variant": "prod-v1",
+      "model": "google/gemini-2.5-flash",
+      "score": 0.846,
+      "passed": 11,
+      "of": 13,
+      "tokens": 7345,
+      "mean_ms": 866,
+      "usd_total": 0.003409,
+      "usd_per_turn": 0.000262,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "few-shot \u00d7 claude-haiku-4.5": {
+      "variant": "few-shot",
+      "model": "anthropic/claude-haiku-4.5",
+      "score": 0.923,
+      "passed": 12,
+      "of": 13,
+      "tokens": 21718,
+      "mean_ms": 2472,
+      "usd_total": 0.02929,
+      "usd_per_turn": 0.002253,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": false,
+          "fails": [
+            "date window covers Sunday"
+          ]
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "few-shot \u00d7 gpt-4o-mini": {
+      "variant": "few-shot",
+      "model": "openai/gpt-4o-mini",
+      "score": 1.0,
+      "passed": 13,
+      "of": 13,
+      "tokens": 11066,
+      "mean_ms": 1540,
+      "usd_total": 0.002019,
+      "usd_per_turn": 0.000155,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "few-shot \u00d7 gemini-2.5-flash": {
+      "variant": "few-shot",
+      "model": "google/gemini-2.5-flash",
+      "score": 0.923,
+      "passed": 12,
+      "of": 13,
+      "tokens": 10670,
+      "mean_ms": 913,
+      "usd_total": 0.004858,
+      "usd_per_turn": 0.000374,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    },
+    "clarify-first \u00d7 claude-haiku-4.5": {
+      "variant": "clarify-first",
+      "model": "anthropic/claude-haiku-4.5",
+      "score": 0.308,
+      "passed": 4,
+      "of": 13,
+      "tokens": 18167,
+      "mean_ms": 2659,
+      "usd_total": 0.024951,
+      "usd_per_turn": 0.001919,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q17",
+          "pass": false,
+          "fails": [
+            "searched first (answer-first policy)"
+          ]
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q25",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        }
+      ]
+    },
+    "clarify-first \u00d7 gpt-4o-mini": {
+      "variant": "clarify-first",
+      "model": "openai/gpt-4o-mini",
+      "score": 0.462,
+      "passed": 6,
+      "of": 13,
+      "tokens": 7944,
+      "mean_ms": 1190,
+      "usd_total": 0.001409,
+      "usd_per_turn": 0.000108,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "geo params, Neuk\u00f6lln or Schillerkiez query"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q17",
+          "pass": false,
+          "fails": [
+            "searched first (answer-first policy)"
+          ]
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q21",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q25",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        }
+      ]
+    },
+    "clarify-first \u00d7 gemini-2.5-flash": {
+      "variant": "clarify-first",
+      "model": "google/gemini-2.5-flash",
+      "score": 0.462,
+      "passed": 6,
+      "of": 13,
+      "tokens": 7242,
+      "mean_ms": 1015,
+      "usd_total": 0.003323,
+      "usd_per_turn": 0.000256,
+      "details": [
+        {
+          "qid": "q07",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q11",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q14",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q15",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q16",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q17",
+          "pass": false,
+          "fails": [
+            "searched first (answer-first policy)"
+          ]
+        },
+        {
+          "qid": "q18",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q19",
+          "pass": false,
+          "fails": [
+            "attempted a search"
+          ]
+        },
+        {
+          "qid": "q21",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q22",
+          "pass": true,
+          "fails": []
+        },
+        {
+          "qid": "q23",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q24",
+          "pass": false,
+          "fails": [
+            "called search_events"
+          ]
+        },
+        {
+          "qid": "q25",
+          "pass": true,
+          "fails": []
+        }
+      ]
+    }
+  }
+}

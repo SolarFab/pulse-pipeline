@@ -35,12 +35,12 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-30 20:28 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-31 09:39 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
   <div class="stat ok"><b>60/60</b>unit tests passing</div>
-  <div class="stat"><b>0.5s</b>suite runtime</div>
+  <div class="stat"><b>0.6s</b>suite runtime</div>
   <div class="stat"><b>8</b>test modules</div>
   <div class="stat"><b>4</b>test layers</div>
 </div>
@@ -234,26 +234,35 @@ comes from a real run, nothing is hand-edited.</p>
 <tr><td>hyde</td><td>0.37</td><td>0.415</td><td>0.596</td><td>0.428</td><td>702</td><td>1997</td><td>0</td></tr>
 </table></section>
 
-<section><h2>L4 · Prompt-technique benchmark</h2><p>First model action asserted deterministically per golden chat query: right tool, right args, dates resolved — or correctly NO tool (chitchat/ambiguous). No execution, no judge (that&#x27;s stage 2).</p>
+<section><h2>L4 · Prompt-technique benchmark</h2><p>First model action asserted deterministically per golden chat query: right tool, right args, dates resolved — or correctly NO tool (chitchat/ambiguous). No execution, no judge (that&#x27;s stage 2). Cost = measured USD per turn (OpenRouter usage accounting).</p>
 <table>
-<tr><th>variant × model</th><th>score</th><th>mean ms/turn</th><th>tokens</th></tr>
-<tr><td>zero-shot × claude-haiku-4.5</td><td>11/13 (85%)</td><td>2188</td><td>13557</td></tr>
-<tr><td>zero-shot × gpt-4o-mini</td><td>9/13 (69%)</td><td>1779</td><td>3904</td></tr>
-<tr><td>prod-v1 × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2300</td><td>18558</td></tr>
-<tr><td>prod-v1 × gpt-4o-mini</td><td>9/13 (69%)</td><td>1770</td><td>8235</td></tr>
-<tr><td>few-shot × claude-haiku-4.5</td><td>13/13 (100%)</td><td>2067</td><td>21626</td></tr>
-<tr><td>few-shot × gpt-4o-mini</td><td>12/13 (92%)</td><td>1686</td><td>11099</td></tr>
-<tr><td>clarify-first × claude-haiku-4.5</td><td>5/13 (38%)</td><td>2569</td><td>16843</td></tr>
-<tr><td>clarify-first × gpt-4o-mini</td><td>4/13 (31%)</td><td>1555</td><td>6729</td></tr>
+<tr><th>variant × model</th><th>score</th><th>ms/turn</th><th>$/turn</th></tr>
+<tr><td>zero-shot × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2285</td><td>0.00169</td></tr>
+<tr><td>zero-shot × gpt-4o-mini</td><td>9/13 (69%)</td><td>1315</td><td>0.00006</td></tr>
+<tr><td>zero-shot × gemini-2.5-flash</td><td>7/13 (54%)</td><td>957</td><td>0.00016</td></tr>
+<tr><td>prod-v1 × claude-haiku-4.5</td><td>10/13 (77%)</td><td>2234</td><td>0.00205</td></tr>
+<tr><td>prod-v1 × gpt-4o-mini</td><td>8/13 (62%)</td><td>1397</td><td>0.00012</td></tr>
+<tr><td>prod-v1 × gemini-2.5-flash</td><td>11/13 (85%)</td><td>866</td><td>0.00026</td></tr>
+<tr><td>few-shot × claude-haiku-4.5</td><td>12/13 (92%)</td><td>2472</td><td>0.00225</td></tr>
+<tr><td>few-shot × gpt-4o-mini</td><td>13/13 (100%)</td><td>1540</td><td>0.00015</td></tr>
+<tr><td>few-shot × gemini-2.5-flash</td><td>12/13 (92%)</td><td>913</td><td>0.00037</td></tr>
+<tr><td>clarify-first × claude-haiku-4.5</td><td>4/13 (31%)</td><td>2659</td><td>0.00192</td></tr>
+<tr><td>clarify-first × gpt-4o-mini</td><td>6/13 (46%)</td><td>1190</td><td>0.00011</td></tr>
+<tr><td>clarify-first × gemini-2.5-flash</td><td>6/13 (46%)</td><td>1015</td><td>0.00026</td></tr>
 </table>
+<p><strong>Scatter (accuracy vs measured $/turn):</strong> [showcase/prompt-scatter.html](showcase/prompt-scatter.html)</p>
 <h3>Failures</h3>
-<p><strong>zero-shot × claude-haiku-4.5</strong>: q14 (geo params, Neukölln or Schillerkiez query); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × claude-haiku-4.5</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q23 (date_from = tomorrow evening, live-music intent in query/subcategory)</p>
 <p><strong>zero-shot × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
+<p><strong>zero-shot × gemini-2.5-flash</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q16 (called search_events); q17 (searched first (answer-first policy)); q19 (attempted a search); q23 (date_from = tomorrow evening)</p>
 <p><strong>prod-v1 × claude-haiku-4.5</strong>: q14 (geo params, Neukölln or Schillerkiez query); q16 (date window covers Sunday); q23 (date_from = tomorrow evening)</p>
-<p><strong>prod-v1 × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory)</p>
-<p><strong>few-shot × gpt-4o-mini</strong>: q18 (no tool before clarifying, asked a clarifying question)</p>
-<p><strong>clarify-first × claude-haiku-4.5</strong>: q07 (called search_events); q11 (called search_events); q14 (called search_events); q16 (called search_events); q17 (call failed: ReadTimeout); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p>
-<p><strong>clarify-first × gpt-4o-mini</strong>: q07 (called search_events); q11 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q17 (searched first (answer-first policy)); q21 (called search_events); q22 (call failed: ReadTimeout); q23 (call failed: ConnectError); q24 (called search_events); q25 (called search_events)</p></section>
+<p><strong>prod-v1 × gpt-4o-mini</strong>: q07 (semantic query set (vibe needs ranking)); q14 (geo params, Neukölln or Schillerkiez query); q18 (no tool before clarifying, asked a clarifying question); q23 (live-music intent in query/subcategory); q25 (family_friendly=true)</p>
+<p><strong>prod-v1 × gemini-2.5-flash</strong>: q07 (called search_events); q14 (geo params, Neukölln or Schillerkiez query)</p>
+<p><strong>few-shot × claude-haiku-4.5</strong>: q16 (date window covers Sunday)</p>
+<p><strong>few-shot × gemini-2.5-flash</strong>: q07 (called search_events)</p>
+<p><strong>clarify-first × claude-haiku-4.5</strong>: q07 (called search_events); q11 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q24 (called search_events); q25 (called search_events)</p>
+<p><strong>clarify-first × gpt-4o-mini</strong>: q07 (called search_events); q11 (called search_events); q14 (geo params, Neukölln or Schillerkiez query); q17 (searched first (answer-first policy)); q21 (called search_events); q23 (called search_events); q25 (called search_events)</p>
+<p><strong>clarify-first × gemini-2.5-flash</strong>: q07 (called search_events); q14 (called search_events); q16 (called search_events); q17 (searched first (answer-first policy)); q19 (attempted a search); q23 (called search_events); q24 (called search_events)</p></section>
 
 <footer>Pulse · spec-driven development (OpenSpec) · benchmarks are regression gates:
 re-run on every model or prompt change.</footer>

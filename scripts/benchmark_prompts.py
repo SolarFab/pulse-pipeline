@@ -28,7 +28,14 @@ load_dotenv()
 
 ROOT = Path(__file__).resolve().parent.parent
 BERLIN = ZoneInfo("Europe/Berlin")
-MODELS = ["anthropic/claude-haiku-4.5", "openai/gpt-4o-mini"]
+MODELS = [
+    "anthropic/claude-haiku-4.5",       # shipped default
+    "openai/gpt-4o-mini",               # cheap closed baseline
+    "moonshotai/kimi-k2.6",             # open: Kimi K2.6
+    "qwen/qwen3-235b-a22b-2507",        # open: Qwen3 flagship instruct
+    "meta-llama/llama-3.3-70b-instruct",  # open: Llama 3.3
+    "google/gemini-2.5-flash",          # Gemini fast tier
+]
 VARIANTS = ["zero-shot", "prod-v1", "few-shot", "clarify-first"]
 
 # Tool schema: mirror of web/src/lib/ai/tools.ts (OpenAI function format).
@@ -217,20 +224,23 @@ CHECKS = {"q07": check_q07, "q11": check_q11, "q14": check_q14, "q15": check_q15
           "q25": check_q25}
 
 
-def chat_call(model: str, system: str, user: str) -> tuple[dict, int, float]:
+def chat_call(model: str, system: str, user: str) -> tuple[dict, int, float, float]:
     t0 = time.time()
     resp = httpx.post(
         "https://openrouter.ai/api/v1/chat/completions",
         headers={"Authorization": f"Bearer {os.environ['OPENROUTER_API_KEY']}"},
         json={"model": model, "temperature": 0, "tools": TOOLS,
+              "usage": {"include": True},  # measured USD cost per call, not price-sheet math
               "messages": [{"role": "system", "content": system},
                            {"role": "user", "content": user}]},
-        timeout=60,
+        timeout=90,
     )
     resp.raise_for_status()
     body = resp.json()
     ms = (time.time() - t0) * 1000
-    tokens = (body.get("usage") or {}).get("total_tokens", 0)
+    usage = body.get("usage") or {}
+    tokens = usage.get("total_tokens", 0)
+    usd = float(usage.get("cost") or 0.0)
     msg = body["choices"][0]["message"]
     tc = (msg.get("tool_calls") or [None])[0]
     action = {
@@ -238,7 +248,20 @@ def chat_call(model: str, system: str, user: str) -> tuple[dict, int, float]:
         "args": json.loads(tc["function"]["arguments"]) if tc else {},
         "text": msg.get("content") or "",
     }
-    return action, tokens, ms
+    return action, tokens, ms, usd
+
+
+def model_available(model: str) -> bool:
+    """One cheap probe; a wrong model id must skip the model, not zero its scores."""
+    try:
+        chat_call(model, "Reply with OK.", "ping")
+        return True
+    except Exception as exc:
+        detail = ""
+        if hasattr(exc, "response") and exc.response is not None:
+            detail = f" {exc.response.status_code}: {exc.response.text[:120]}"
+        print(f"SKIP {model}: {type(exc).__name__}{detail}", flush=True)
+        return False
 
 
 def main() -> None:
@@ -247,48 +270,58 @@ def main() -> None:
     cases = [g for g in golden if g["id"] in CHECKS]
     now_str = now_berlin().strftime("%A, %d. %B %Y, %H:%M")
 
+    models = [m for m in MODELS if model_available(m)]
+    print(f"models available: {models}", flush=True)
+
     results: dict[str, dict] = {}
     for variant in VARIANTS:
         prompt = (ROOT / "eval" / "prompts" / f"{variant}.txt").read_text().replace("{NOW}", now_str)
-        for model in MODELS:
+        for model in models:
             key = f"{variant} × {model.split('/')[-1]}"
-            passed, details, tok_total, ms_total = 0, [], 0, 0.0
+            passed, details, tok_total, ms_total, usd_total = 0, [], 0, 0.0, 0.0
             for g in cases:
                 system = prompt
                 if g["id"] == "q21":
                     system += "\nUSER PROFILE: prefers electronic music, Kiez: Friedrichshain."
                 try:
-                    action, tokens, ms = chat_call(model, system, g["query"])
+                    action, tokens, ms, usd = chat_call(model, system, g["query"])
                     fails = CHECKS[g["id"]](action)
                 except Exception as exc:
                     fails = [f"call failed: {type(exc).__name__}"]
-                    tokens, ms = 0, 0.0
+                    tokens, ms, usd = 0, 0.0, 0.0
                 tok_total += tokens
                 ms_total += ms
+                usd_total += usd
                 passed += not fails
                 details.append({"qid": g["id"], "pass": not fails, "fails": fails})
             results[key] = {
+                "variant": variant, "model": model,
                 "score": round(passed / len(cases), 3),
                 "passed": passed, "of": len(cases),
                 "tokens": tok_total, "mean_ms": round(ms_total / len(cases)),
+                "usd_total": round(usd_total, 6),
+                "usd_per_turn": round(usd_total / len(cases), 6),
                 "details": details,
             }
-            print(f"{key:45} {passed}/{len(cases)}  ({results[key]['score']:.0%})  "
-                  f"{results[key]['mean_ms']}ms/turn  {tok_total} tok")
+            print(f"{key:48} {passed}/{len(cases)} ({results[key]['score']:.0%})  "
+                  f"{results[key]['mean_ms']}ms/turn  ${results[key]['usd_per_turn']:.5f}/turn",
+                  flush=True)
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     (ROOT / "eval" / "results" / f"prompts-{stamp}.json").write_text(json.dumps({
         "experiment": "3-prompt-techniques-stage1", "golden_set": "v1",
         "kind": "tool-call accuracy (deterministic asserts, no execution)",
-        "models": MODELS, "variants": VARIANTS, "results": results}, indent=2))
+        "models": models, "variants": VARIANTS, "results": results}, indent=2))
 
     md = ["# Prompt benchmark — Experiment 3, stage 1 (tool-call accuracy)", "",
           "First model action asserted deterministically per golden chat query: right tool, "
           "right args, dates resolved — or correctly NO tool (chitchat/ambiguous). "
-          "No execution, no judge (that's stage 2).", "",
-          "| variant × model | score | mean ms/turn | tokens |", "|---|---|---|---|"]
+          "No execution, no judge (that's stage 2). Cost = measured USD per turn "
+          "(OpenRouter usage accounting).", "",
+          "| variant × model | score | ms/turn | $/turn |", "|---|---|---|---|"]
     for k, r in results.items():
-        md.append(f"| {k} | {r['passed']}/{r['of']} ({r['score']:.0%}) | {r['mean_ms']} | {r['tokens']} |")
+        md.append(f"| {k} | {r['passed']}/{r['of']} ({r['score']:.0%}) | {r['mean_ms']} "
+                  f"| {r['usd_per_turn']:.5f} |")
     md += ["", "## Failures", ""]
     for k, r in results.items():
         fails = [d for d in r["details"] if not d["pass"]]
