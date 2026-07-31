@@ -111,6 +111,7 @@ def build() -> None:
     qrels = md_section(ROOT / "docs" / "embedding-benchmark-qrels.md")
     retrieval = md_section(ROOT / "docs" / "retrieval-benchmark.md")
     prompt = md_section(ROOT / "docs" / "prompt-benchmark.md")
+    stage2 = md_section(ROOT / "docs" / "stage2-benchmark.md")
     now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     ok = py["failed"] == 0
 
@@ -207,6 +208,9 @@ comes from a real run, nothing is hand-edited.</p>
         style="border:none;width:100%;height:980px;border-radius:8px"></iframe>
 <p><a href="prompt-scatter.html">Open the chart full-page</a> (hover for per-cell detail).</p>
 </section>
+
+{section("L4 · Stage 2 — end-to-end answer quality (judge)", stage2,
+         "Not yet run: scripts/benchmark_stage2.py decides CHAT_MODEL.")}
 
 {section("L4 · Prompt-technique benchmark", prompt,
          "Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat "
