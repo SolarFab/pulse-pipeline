@@ -202,6 +202,12 @@ comes from a real run, nothing is hand-edited.</p>
 {section("L4 · Retrieval ladder — Experiment 2", retrieval,
          "Not yet run: scripts/benchmark_retrieval.py (needs qrels_v1).")}
 
+<section><h2>L4 · Accuracy vs. cost — the model × technique grid</h2>
+<iframe src="prompt-scatter.html" title="Tool-call accuracy vs cost per turn"
+        style="border:none;width:100%;height:980px;border-radius:8px"></iframe>
+<p><a href="prompt-scatter.html">Open the chart full-page</a> (hover for per-cell detail).</p>
+</section>
+
 {section("L4 · Prompt-technique benchmark", prompt,
          "Planned (semantic-search spec, task 4.5): promptfoo grid of prompt variants × chat "
          "models over a golden dialog set — tool-arg accuracy, grounding, dialog-policy "

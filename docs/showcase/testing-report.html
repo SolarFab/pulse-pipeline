@@ -35,12 +35,12 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-31 10:32 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-31 10:33 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
   <div class="stat ok"><b>60/60</b>unit tests passing</div>
-  <div class="stat"><b>0.5s</b>suite runtime</div>
+  <div class="stat"><b>0.6s</b>suite runtime</div>
   <div class="stat"><b>8</b>test modules</div>
   <div class="stat"><b>4</b>test layers</div>
 </div>
@@ -304,6 +304,12 @@ comes from a real run, nothing is hand-edited.</p>
 <tr><td>mq</td><td>0.531</td><td>0.492</td><td>0.653</td><td>0.54</td><td>1164</td><td>1044</td><td>0</td></tr>
 <tr><td>hyde</td><td>0.37</td><td>0.415</td><td>0.596</td><td>0.428</td><td>702</td><td>1997</td><td>0</td></tr>
 </table></section>
+
+<section><h2>L4 · Accuracy vs. cost — the model × technique grid</h2>
+<iframe src="prompt-scatter.html" title="Tool-call accuracy vs cost per turn"
+        style="border:none;width:100%;height:980px;border-radius:8px"></iframe>
+<p><a href="prompt-scatter.html">Open the chart full-page</a> (hover for per-cell detail).</p>
+</section>
 
 <section><h2>L4 · Prompt-technique benchmark</h2><p>First model action asserted deterministically per golden chat query: right tool, right args, dates resolved — or correctly NO tool (chitchat/ambiguous). No execution, no judge (that&#x27;s stage 2). Cost = measured USD per turn (OpenRouter usage accounting).</p>
 <table>
