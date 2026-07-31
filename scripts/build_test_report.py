@@ -106,6 +106,7 @@ def md_section(path: Path) -> str | None:
 
 def build() -> None:
     py = run_pytest()
+    findings = md_section(ROOT / "docs" / "FINDINGS.md")
     emb = md_section(ROOT / "docs" / "embedding-benchmark.md")
     qrels = md_section(ROOT / "docs" / "embedding-benchmark-qrels.md")
     retrieval = md_section(ROOT / "docs" / "retrieval-benchmark.md")
@@ -184,6 +185,9 @@ comes from a real run, nothing is hand-edited.</p>
 </div>
 
 <section><h2>Strategy — the four layers</h2>{strategy_html}</section>
+
+{section("Key findings (start here)", findings,
+         "docs/FINDINGS.md missing.")}
 
 <section><h2>L1 · Unit test results (live)</h2>{files_html}</section>
 

@@ -35,7 +35,7 @@
   footer { color:var(--mut); margin-top:2.5rem; font-size:.85em }
 </style></head><body>
 <h1>Pulse — Testing &amp; Evaluation</h1>
-<p class="sub">Generated 2026-07-31 10:23 by <code>scripts/build_test_report.py</code> — every number
+<p class="sub">Generated 2026-07-31 10:32 by <code>scripts/build_test_report.py</code> — every number
 comes from a real run, nothing is hand-edited.</p>
 
 <div class="hero">
@@ -46,6 +46,77 @@ comes from a real run, nothing is hand-edited.</p>
 </div>
 
 <section><h2>Strategy — the four layers</h2><div class='layer'><h3>L1 · Unit</h3><p>Deterministic logic — parsing, taxonomy, facets, embed-text stability. No network, no DB. Runs on every push (GitHub Actions).</p></div><div class='layer'><h3>L2 · Integration</h3><p>The seams — DB-backed tests (local Postgres), RLS user isolation. Opt-in, planned with the preference feed.</p></div><div class='layer'><h3>L3 · End-to-end</h3><p>Browser-driven smoke flows (Playwright / webapp-testing). Planned with the web tasks.</p></div><div class='layer'><h3>L4 · Evals</h3><p>AI quality is scored, not asserted: embedding benchmark (precision@5 + golden queries), retrieval eval, prompt benchmark (promptfoo grid). Regression gates for model/prompt changes.</p></div></section>
+
+<section><h2>Key findings (start here)</h2><p>Each finding: the claim, the evidence (all reproducible from files in this repo), and why it</p>
+<p>matters. Experiments follow the one-variable-at-a-time protocol in [EXPERIMENT.md](EXPERIMENT.md);</p>
+<p>raw run records live in `eval/results/`.</p>
+<h3>1. Proxy metrics would have picked the wrong story</h3>
+<p>On automatic proxy labels (kNN category match), the two embedding candidates looked nearly tied —</p>
+<p>qwen3-8b even *led* on subcategories. Hand-labeled relevance judgments revealed a ~3× quality gap:</p>
+<p>text-embedding-3-small MRR <strong>0.896</strong> vs qwen3-8b 0.646, nDCG@5 0.729 vs 0.337.</p>
+<p>*Evidence:* `embedding-benchmark.md` (proxy) vs `embedding-benchmark-qrels.md` (human).</p>
+<p>*Lesson:* cheap automatic metrics are for regressions, not decisions — decisions need ground truth.</p>
+<h3>2. Human review caught what the pipeline couldn&#x27;t</h3>
+<p>The first frozen eval corpus silently sampled the 300 <strong>oldest</strong> events (all past) — discovered</p>
+<p>only when a human looked at the labeling sheet and asked why &quot;jazz tonight&quot; showed last year&#x27;s</p>
+<p>events. Separately, a scraped description containing an invisible Unicode line separator (U+2028)</p>
+<p>corrupted the corpus file. Both fixed, corpus re-frozen on upcoming events sampled across days.</p>
+<p>*Lesson:* eval data is code — it has bugs, and eyeballs are a test tool.</p>
+<h3>3. Pool bias is real and measurable</h3>
+<p>Relevance labels came from pooled top-K of the *embedding* models — so new retrieval configs</p>
+<p>surfaced events &quot;scored irrelevant&quot; merely because no one had judged them (baseline: 0 unlabeled</p>
+<p>top-5 results; other configs: 6–25). An incremental labeling round over only the new candidates</p>
+<p>fixed it; Multi-Query gained +0.10 R@5 from that correction alone.</p>
+<p>*Lesson:* when the answer key comes from system A, scoring system B against it needs a top-up round.</p>
+<h3>4. Labeling guidelines are part of the architecture</h3>
+<p>qrels v1 judged temporal queries date-aware (&quot;Saturday flea market ✗ for &#x27;Flohmarkt am Sonntag&#x27;&quot;)</p>
+<p>— contradicting the system design, where dates are hard SQL filters and embeddings only rank</p>
+<p>within them. Five queries were re-judged under a written semantic-only guideline → qrels v2</p>
+<p>(versioned; old labels never edited). Baseline MRR rose 0.78 → 0.896 — it had been punished for</p>
+<p>mistakes the production system cannot make.</p>
+<p>*Lesson:* the labeling instruction must match the layer under test; guideline changes are versioned.</p>
+<h3>5. Retrieval: the boring baseline won everything</h3>
+<p>Vector-only retrieval beat BM25+RRF hybrid, Multi-Query and HyDE on every metric</p>
+<p>(R@5 0.621 / MRR 0.896 / nDCG@5 0.729). HyDE — the headline winner in the author&#x27;s prior</p>
+<p>RAG project (riester-kompass, legal corpus) — did <strong>not</strong> replicate: event queries and event</p>
+<p>descriptions share the same vocabulary register, so a hypothetical document only adds</p>
+<p>hallucinated detail. Multi-Query and HyDE also cost 2.1–2.6 s/query — over the chat budget</p>
+<p>regardless of quality.</p>
+<p>*Evidence:* `retrieval-benchmark.md`, per-query audit in `showcase/retrieval-comparison.html`.</p>
+<p>*Lesson:* retrieval tricks are gap-bridgers; with no gap they add noise, latency and cost.</p>
+<h3>6. LLM-dependent evals must pin their LLM outputs</h3>
+<p>Uncached Multi-Query/HyDE scores wobbled run-to-run (HyDE R@5 0.28–0.45 at temperature 0)</p>
+<p>because each run generated fresh query expansions. Expansions are now cached per query —</p>
+<p>runs are reproducible; without pinning, config comparisons were partly noise.</p>
+<h3>7. Prompting: rules tell, examples teach</h3>
+<p>Across the full grid, a rules-only production prompt was no better than a three-line zero-shot</p>
+<p>prompt. Adding <strong>five worked tool-call examples</strong> made few-shot best-or-tied on **all nine</p>
+<p>models** tested. The examples fixed exactly the hard skills: kiez→coordinates and relative-date</p>
+<p>→ ISO resolution failed in every variant *without* examples and nowhere *with* them.</p>
+<p>*Evidence:* `prompt-benchmark.md`; cost/accuracy chart `showcase/prompt-scatter.html`.</p>
+<h3>8. Over-clarification is a measurable failure mode</h3>
+<p>The clarify-first dialog policy (ask a question before searching) collapsed to 31–46% tool-call</p>
+<p>accuracy: models interrogated users whose requests were already fully specified (&quot;free open-air</p>
+<p>cinema&quot;, &quot;rap events&quot;). The answer-first policy (search, show a spread, offer to narrow) won —</p>
+<p>settling a design debate with data rather than taste.</p>
+<h3>9. An open 31B model owns the accuracy-per-dollar frontier</h3>
+<p>On measured cost (OpenRouter usage accounting), <strong>Gemma-4-31B</strong> sits on the Pareto frontier:</p>
+<p>92% tool-call accuracy at <strong>$0.00012/turn</strong> (~1.8 s) — matching claude-haiku-4.5&#x27;s accuracy at</p>
+<p>~1/20th the price. But latency splits the open field: MiniMax-M2.7 and DeepSeek-V4 match on</p>
+<p>accuracy and undercut on price at 4–8 s/turn — disqualifying for interactive chat.</p>
+<p>*Lesson:* cheap per token ≠ viable per turn; report latency next to cost, always.</p>
+<h3>10. Temperature 0 is not determinism</h3>
+<p>The same model × prompt × queries scored 12/13, 13/13, 12/13 across three runs. The flip was a</p>
+<p>single query — q18, the deliberately ambiguous &quot;Plan uns was Schönes&quot; that sits on the</p>
+<p>search-vs-clarify decision boundary. Provider-side effects (batching, floating-point order,</p>
+<p>routing) shift near-tied logits. On a 13-item set one item = 7.7 points, so near scores are</p>
+<p><strong>ties</strong>, not rankings.</p>
+<p>*Evidence:* three timestamped `eval/results/prompts-*.json` with per-query detail.</p>
+<p>*Lesson:* report repeats or ranges; identify boundary cases instead of celebrating single runs.</p>
+<h3>11. The entire program cost almost nothing</h3>
+<p>Embedding 21,784 events: <strong>~$0.10</strong>. All benchmarks (2 embedding models, 5 retrieval configs,</p>
+<p>36 prompt cells across 9 models, with reruns): <strong>under ~$2 total</strong>, each run&#x27;s spend recorded in</p>
+<p>its results JSON. Rigorous evaluation at this scale is a workflow question, not a budget question.</p></section>
 
 <section><h2>L1 · Unit test results (live)</h2><details><summary><code>test_embed_events.py</code><span class='count'>4/4</span></summary><div class='case passed'><span>test_new_event_gets_embedded</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unchanged_event_is_skipped_no_api_call</span><span class='dot'>✓</span></div><div class='case passed'><span>test_changed_text_reembeds</span><span class='dot'>✓</span></div><div class='case passed'><span>test_api_failure_degrades_not_blocks</span><span class='dot'>✓</span></div></details><details><summary><code>test_embedder.py</code><span class='count'>6/6</span></summary><div class='case passed'><span>test_embed_text_is_stable_and_ordered</span><span class='dot'>✓</span></div><div class='case passed'><span>test_hash_changes_when_embed_relevant_field_changes</span><span class='dot'>✓</span></div><div class='case passed'><span>test_missing_fields_do_not_crash</span><span class='dot'>✓</span></div><div class='case passed'><span>test_provider_selection_from_env</span><span class='dot'>✓</span></div><div class='case passed'><span>test_explicit_model_overrides_env</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_provider_rejected</span><span class='dot'>✓</span></div></details><details><summary><code>test_facets.py</code><span class='count'>6/6</span></summary><div class='case passed'><span>test_kid_friendly_food_market</span><span class='dot'>✓</span></div><div class='case passed'><span>test_open_air_cinema_is_outdoor</span><span class='dot'>✓</span></div><div class='case passed'><span>test_free_entry_german_and_price_cents</span><span class='dot'>✓</span></div><div class='case passed'><span>test_no_signal_stays_false</span><span class='dot'>✓</span></div><div class='case passed'><span>test_adults_only_vetoes_family</span><span class='dot'>✓</span></div><div class='case passed'><span>test_age_hint_counts_as_family</span><span class='dot'>✓</span></div></details><details><summary><code>test_golden_set.py</code><span class='count'>4/4</span></summary><div class='case passed'><span>test_golden_set_is_valid_jsonl_with_required_fields</span><span class='dot'>✓</span></div><div class='case passed'><span>test_ids_unique_and_stable_format</span><span class='dot'>✓</span></div><div class='case passed'><span>test_coverage_of_critical_categories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_embedding_subset_size</span><span class='dot'>✓</span></div></details><details><summary><code>test_jsonld_extraction.py</code><span class='count'>8/8</span></summary><div class='case passed'><span>test_extracts_event_from_graph</span><span class='dot'>✓</span></div><div class='case passed'><span>test_event_subtypes_are_recognized</span><span class='dot'>✓</span></div><div class='case passed'><span>test_past_events_are_dropped</span><span class='dot'>✓</span></div><div class='case passed'><span>test_incomplete_events_are_dropped</span><span class='dot'>✓</span></div><div class='case passed'><span>test_non_event_types_are_ignored</span><span class='dot'>✓</span></div><div class='case passed'><span>test_top_level_list_and_offer_list</span><span class='dot'>✓</span></div><div class='case passed'><span>test_zero_price_is_not_labeled</span><span class='dot'>✓</span></div><div class='case passed'><span>test_malformed_json_is_skipped_not_fatal</span><span class='dot'>✓</span></div></details><details><summary><code>test_normalizer.py</code><span class='count'>20/20</span></summary><div class='case passed'><span>test_summer_naive_time_is_cest</span><span class='dot'>✓</span></div><div class='case passed'><span>test_winter_naive_time_is_cet</span><span class='dot'>✓</span></div><div class='case passed'><span>test_summer_midnight_is_berlin_midnight</span><span class='dot'>✓</span></div><div class='case passed'><span>test_t24_rolls_to_next_day_in_berlin_time</span><span class='dot'>✓</span></div><div class='case passed'><span>test_aware_datetime_is_converted_not_reinterpreted</span><span class='dot'>✓</span></div><div class='case passed'><span>test_german_date_format_is_day_first</span><span class='dot'>✓</span></div><div class='case passed'><span>test_garbage_returns_none</span><span class='dot'>✓</span></div><div class='case passed'><span>test_canonical_passthrough</span><span class='dot'>✓</span></div><div class='case passed'><span>test_legacy_aliases_resolve</span><span class='dot'>✓</span></div><div class='case passed'><span>test_case_insensitive</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_becomes_none</span><span class='dot'>✓</span></div><div class='case passed'><span>test_stable_across_case_and_whitespace</span><span class='dot'>✓</span></div><div class='case passed'><span>test_venue_variants_do_not_split_events</span><span class='dot'>✓</span></div><div class='case passed'><span>test_different_dates_differ</span><span class='dot'>✓</span></div><div class='case passed'><span>test_free_variants</span><span class='dot'>✓</span></div><div class='case passed'><span>test_euro_amounts</span><span class='dot'>✓</span></div><div class='case passed'><span>test_no_price</span><span class='dot'>✓</span></div><div class='case passed'><span>test_valid_event_roundtrip</span><span class='dot'>✓</span></div><div class='case passed'><span>test_missing_start_time_is_rejected</span><span class='dot'>✓</span></div><div class='case passed'><span>test_end_before_start_is_dropped</span><span class='dot'>✓</span></div></details><details><summary><code>test_seed_taxonomy.py</code><span class='count'>3/3</span></summary><div class='case passed'><span>test_every_category_and_subcategory_has_labels</span><span class='dot'>✓</span></div><div class='case passed'><span>test_rows_cover_all_and_only_canonical_slugs</span><span class='dot'>✓</span></div><div class='case passed'><span>test_sports_wellness_inactive_until_realignment</span><span class='dot'>✓</span></div></details><details><summary><code>test_taxonomy.py</code><span class='count'>9/9</span></summary><div class='case passed'><span>test_categorizer_and_normalizer_agree_on_categories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_every_synonym_maps_to_a_canonical_subcategory</span><span class='dot'>✓</span></div><div class='case passed'><span>test_subcategory_parent_covers_all_subcategories</span><span class='dot'>✓</span></div><div class='case passed'><span>test_canonical_passthrough</span><span class='dot'>✓</span></div><div class='case passed'><span>test_synonym_resolves</span><span class='dot'>✓</span></div><div class='case passed'><span>test_case_and_whitespace_insensitive</span><span class='dot'>✓</span></div><div class='case passed'><span>test_wrong_category_pair_is_rejected</span><span class='dot'>✓</span></div><div class='case passed'><span>test_unknown_value_is_rejected_not_stored</span><span class='dot'>✓</span></div><div class='case passed'><span>test_empty_input</span><span class='dot'>✓</span></div></details></section>
 
