@@ -70,6 +70,31 @@ CATEGORY_KEYWORDS: dict[str, list[str]] = {
     "workshops": ["workshop", "class", "course", "tutorial", "hack"],
 }
 
+# Luma hides exact venues until registration for many events; geo info then only
+# carries the city. A city is NOT a venue ("@ Berlin" is meaningless in a Berlin app).
+_CITYISH = {"berlin", "potsdam", "deutschland", "germany"}
+
+
+def pick_venue_name(geo_info: dict, address: str | None, location_name: str | None) -> str:
+    """Venue name that is never just a city: place fields first, then the address's
+    first segment (which on Luma is usually the actual venue), else 'TBA'."""
+    city = str(geo_info.get("city") or "").strip()
+
+    def usable(v: str | None) -> str | None:
+        v = (v or "").strip()
+        if not v or v.lower() in _CITYISH or (city and v.lower() == city.lower()):
+            return None
+        return v
+
+    for candidate in (geo_info.get("place_name"), geo_info.get("name"), location_name):
+        if usable(candidate):
+            return usable(candidate)  # type: ignore[return-value]
+    if address:
+        first = address.split(",")[0]
+        if usable(first):
+            return usable(first)  # type: ignore[return-value]
+    return "TBA"
+
 
 class LumaScraper(BaseScraper):
     source_name = "luma"
@@ -311,9 +336,9 @@ class LumaScraper(BaseScraper):
             # Location info
             geo_info = event.get("geo_address_info") or event.get("location") or {}
             if isinstance(geo_info, str):
-                # Sometimes location is just a string
+                # Sometimes location is just a string (may still be a bare city)
                 address = geo_info
-                venue_name = geo_info
+                venue_name = pick_venue_name({}, geo_info, None)
                 lat = None
                 lng = None
             else:
@@ -327,13 +352,7 @@ class LumaScraper(BaseScraper):
                     or geo_info.get("formatted_address")
                     or geo_json_address
                 )
-                venue_name = (
-                    geo_info.get("place_name")
-                    or geo_info.get("name")
-                    or geo_info.get("city")
-                    or event.get("location_name")
-                    or ""
-                )
+                venue_name = pick_venue_name(geo_info, address, event.get("location_name"))
                 lat = geo_info.get("latitude") or geo_info.get("lat")
                 lng = geo_info.get("longitude") or geo_info.get("lng") or geo_info.get("lon")
 
