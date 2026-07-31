@@ -13,7 +13,7 @@ from typing import Any
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from db.supabase import get_client, upsert_events
+from db.supabase import get_client, get_venues_by_names, upsert_events
 from pipeline.categorizer import categorize_batch
 from pipeline.embed_events import attach_embeddings
 from pipeline.facets import detect_facets
@@ -118,6 +118,24 @@ class BaseScraper(ABC):
         # that predate the facet columns)
         for event in categorised:
             event.update(detect_facets(event))
+
+        # Link events to venue rows by normalized name: the map resolves
+        # coordinates through this join, so an unlinked event without its own
+        # coords is invisible (the Berghain bug — 448/545 RA events off-map).
+        unlinked = {e["venue_name"] for e in categorised
+                    if not e.get("venue_id") and e.get("venue_name")}
+        if unlinked:
+            vmap = get_venues_by_names(list(unlinked))
+            linked = 0
+            for event in categorised:
+                if event.get("venue_id"):
+                    continue
+                v = vmap.get((event.get("venue_name") or "").lower().strip())
+                if v:
+                    event["venue_id"] = v["id"]
+                    linked += 1
+            self.logger.info("Venue linking: %d events matched to venue rows "
+                             "(%d names unresolved)", linked, len(unlinked) - len(vmap))
 
         # Embeddings: only new/changed embed text (hash-skip against stored hashes).
         # Failure degrades — events upsert without embeddings and heal next run.
