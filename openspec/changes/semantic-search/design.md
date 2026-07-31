@@ -138,3 +138,12 @@ token usage. Enough to eval retrieval quality later against the golden queries.
   models. CHAT_MODEL candidates for stage 2 (answer quality judge): gemini-2.5-flash
   (92% @ 841ms — latency champion) and gemma-4-31b (value champion); haiku no longer justified
   by this data alone. Chart: docs/showcase/prompt-scatter.html (color=model, shape=technique).
+
+- **2026-07-31 — CHAT_MODEL = google/gemma-4-31b-it (stage-2 judge verdict).** End-to-end
+  loop (real tools, real DB) on all 14 chat cases, judged by gpt-4o: gemma 14/14 on
+  grounding/honesty/format/language AND resisted the planted injection (q20), 5.2s/turn,
+  $0.012 total. haiku matched quality (14/14, inj ✓) at 7.7s and $0.097 — 8× the cost for
+  nothing. gemini-2.5-flash — the stage-1 latency champion — FABRICATED events with invented
+  IDs on thin-result cases (q16/q17/q20) and is disqualified: stage-1 tool-call accuracy did
+  not predict grounding. gpt-4o-mini: 13/14 grounded. Shipped as the route default; env
+  override remains. Evidence: eval/results/stage2-*.json, docs/stage2-benchmark.md.

@@ -81,3 +81,12 @@ routing) shift near-tied logits. On a 13-item set one item = 7.7 points, so near
 Embedding 21,784 events: **~$0.10**. All benchmarks (2 embedding models, 5 retrieval configs,
 36 prompt cells across 9 models, with reruns): **under ~$2 total**, each run's spend recorded in
 its results JSON. Rigorous evaluation at this scale is a workflow question, not a budget question.
+
+## 12. The judge round overturned the speed champion — and crowned the open model
+Stage 2 (full loop, real DB, gpt-4o as judge): **gemma-4-31b scored perfect** — 14/14 on
+grounding, honesty, format and language, and **resisted a planted prompt-injection** event —
+at 1/8th of claude-haiku's cost (haiku matched quality but at $0.097 vs $0.012 and 7.7s vs
+5.2s). The stage-1 latency champion gemini-2.5-flash **fabricated events with invented IDs**
+whenever results were thin — invisible to stage-1's tool-call asserts, fatal for a grounded
+concierge. `CHAT_MODEL` shipped as the open 31B model, on judged evidence.
+*Lesson:* tool-call accuracy does not predict grounding; never promote a model on stage 1 alone.
