@@ -13,6 +13,7 @@ from __future__ import annotations
 import json
 import logging
 import os
+import re
 from pathlib import Path
 from typing import Any
 
@@ -94,6 +95,8 @@ SUBCATEGORY_SYNONYMS: dict[str, str] = {
     "happy hour": "bar-event",
     "stand-up": "comedy",
     "standup": "comedy",
+    "stand up": "comedy",
+    "open mic": "comedy",
     "kabarett": "comedy",
     "art exhibition": "exhibition",
     "ausstellung": "exhibition",
@@ -338,6 +341,20 @@ def categorize_event(event: dict[str, Any]) -> dict[str, Any]:
 
 def categorize_batch(events: list[dict[str, Any]], max_llm: int = 2500) -> list[dict[str, Any]]:
     """Categorize a list of events. Skips already-categorized ones."""
+    # Deterministic beats model: an explicit source tag ("Comedy") or a hard title
+    # signal decides BEFORE the LLM sees it — the "Meanwhile in Berlin" case, where
+    # the LLM filed a Comedy-tagged stand-up show under culture despite prompt rules.
+    for e in events:
+        if e.get("category") == "nightlife" and e.get("subcategory") == "comedy":
+            continue
+        signal_text = " ".join([
+            str(e.get("title") or ""),
+            " ".join(str(t) for t in (e.get("source_tags") or e.get("tags") or [])),
+        ]).lower()
+        if re.search(r"\bcomedy\b|\bstand.?up\b|\bkabarett\b|\bopen mic\b", signal_text):
+            e["category"] = "nightlife"
+            e["subcategory"] = "comedy"
+
     needs_categorization = [
         e for e in events if not (e.get("category") and e.get("subcategory") and e.get("tags"))
     ]

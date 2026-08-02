@@ -5,8 +5,12 @@ Free API key at: https://www.eventbrite.com/platform/api-keys
 
 from __future__ import annotations
 
+import html as ihtml
+import json
 import logging
 import os
+import re
+import time
 from typing import Any
 
 from scrapers.base import BaseScraper
@@ -18,6 +22,50 @@ BERLIN_PLACE_ID = "101748799"  # Who's On First ID for Berlin
 
 
 class EventbriteScraper(BaseScraper):
+
+    _TAGS_RE = re.compile(r"<[^>]+>")
+    _LDJSON_RE = re.compile(r"<script[^>]*application/ld\+json[^>]*>(.*?)</script>", re.DOTALL)
+
+    def _full_description(self, url: str) -> str | None:
+        """Fetch the event page's full description (structuredContent, JSON-LD fallback).
+
+        The listing API only returns a ~140-char teaser; the full text is rich
+        signal for the categorizer, neighborhood detection and embeddings.
+        """
+        try:
+            time.sleep(0.3)  # polite: one extra page fetch per new event
+            resp = self.get(url)
+        except Exception:
+            return None
+        text = resp.text
+
+        def clean(html_text: str) -> str:
+            out = ihtml.unescape(self._TAGS_RE.sub(" ", html_text))
+            return re.sub(r"\s+", " ", out).strip()
+
+        idx = text.find('"structuredContent":')
+        if idx != -1:
+            start = text.find("{", idx)
+            try:
+                blob, _ = json.JSONDecoder().raw_decode(text[start:])
+                parts = [m.get("text", "") for m in blob.get("modules", [])
+                         if isinstance(m, dict) and m.get("type") == "text"]
+                desc = clean(" ".join(parts))
+                if desc:
+                    return desc[:1500]
+            except (json.JSONDecodeError, AttributeError):
+                pass
+        for block in self._LDJSON_RE.findall(text):
+            try:
+                data = json.loads(block)
+            except json.JSONDecodeError:
+                continue
+            for item in data if isinstance(data, list) else [data]:
+                if isinstance(item, dict) and str(item.get("@type", "")).endswith("Event"):
+                    desc = clean(item.get("description") or "")
+                    if desc:
+                        return desc[:1500]
+        return None
     source_name = "eventbrite"
 
     def scrape(self) -> list[dict[str, Any]]:
@@ -100,6 +148,12 @@ class EventbriteScraper(BaseScraper):
             lng = address_obj.get("longitude")
 
             description = (item.get("summary") or "").strip() or None
+            # The listing only carries a ~140-char teaser; the full description
+            # (rich signal for categorizer + embeddings) lives on the event page.
+            if (not description or len(description) < 300) and item.get("url"):
+                full = self._full_description(item["url"])
+                if full and len(full) > len(description or ""):
+                    description = full
 
             # Build ISO timestamps from date + time
             start_time = self._build_timestamp(
