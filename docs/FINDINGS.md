@@ -90,3 +90,19 @@ at 1/8th of claude-haiku's cost (haiku matched quality but at $0.097 vs $0.012 a
 whenever results were thin — invisible to stage-1's tool-call asserts, fatal for a grounded
 concierge. `CHAT_MODEL` shipped as the open 31B model, on judged evidence.
 *Lesson:* tool-call accuracy does not predict grounding; never promote a model on stage 1 alone.
+
+## 13. One wrong answer, five independent defects — and a measured error rate
+A user asked why the concierge denied a comedy show that visibly existed. The autopsy found
+five stacked causes: (1) the scraper stored Eventbrite's 140-char teaser instead of the full
+description (starving categorizer, neighborhood detection and embeddings — the full text
+contained "stand-up" and "Friedrichshain"); (2) the LLM categorizer filed a Comedy-tagged
+show under culture **against its own prompt rule**; (3) `subcategory=comedy` was 99.5% dead in
+the data (1 tagged vs 220 actual) so the concierge's filter could never match; (4) the event
+was unembedded (an orphaned backfill + timeout-killed nightlies — no gauge watched the count);
+(5) by-name lookup was impossible in vector-only ranking. Every fix landed at class level:
+deterministic tag-beats-LLM pre-pass, full-description ingest (+239 enriched), 195 events
+refiled, backfill to zero (+gauge to come), lexical title boost. The first run of the
+embedding-neighbor taxonomy audit then **measured** the residual problem: **6.2%**
+miscategorization-candidate rate, concentrated around `culture` as the junk-drawer category.
+*Lesson:* in an AI product, a wrong answer is usually compound interest on small data sins —
+the model is rarely the main culprit, and each sin needs a gauge, not just a fix.
