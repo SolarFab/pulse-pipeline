@@ -22,8 +22,8 @@ load_dotenv()
 from db.supabase import get_client  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-BATCH = 50
-SAMPLE = 3000
+BATCH = 8
+SAMPLE = 1500
 THRESHOLD = 0.7
 
 

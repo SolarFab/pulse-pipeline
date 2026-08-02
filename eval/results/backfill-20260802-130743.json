@@ -1,0 +1,14 @@
+{
+  "run": "backfill-facets-embeddings",
+  "scope": "active upcoming",
+  "model": "openai/text-embedding-3-small",
+  "events": 3510,
+  "embedded": 3510,
+  "skipped": 0,
+  "failed": 0,
+  "tokens": 848316,
+  "usd": 0.016964,
+  "embed_seconds": 69.9,
+  "wall_seconds": 1888.9,
+  "events_per_second": 1.9
+}

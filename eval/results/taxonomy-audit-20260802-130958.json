@@ -1,0 +1,462 @@
+{
+  "checked": 1000,
+  "flagged": 62,
+  "rate": 0.062,
+  "threshold": 0.7,
+  "pairs": {
+    "meetups -> outdoors": 1,
+    "family -> workshops": 3,
+    "nightlife -> culture": 3,
+    "culture -> music": 4,
+    "culture -> family": 10,
+    "meetups -> nightlife": 1,
+    "meetups -> culture": 8,
+    "culture -> meetups": 12,
+    "outdoors -> meetups": 2,
+    "markets -> food": 1,
+    "workshops -> culture": 4,
+    "food -> meetups": 2,
+    "meetups -> family": 3,
+    "culture -> workshops": 3,
+    "workshops -> family": 1,
+    "nightlife -> meetups": 1,
+    "food -> culture": 1,
+    "family -> culture": 2
+  },
+  "flagged_events": [
+    {
+      "id": "4c3067fb-c3e0-451a-aa5c-7c7c7dae524b",
+      "category": "meetups",
+      "suggested": "outdoors",
+      "agree_frac": 1,
+      "title": "Spazierclub Berlin"
+    },
+    {
+      "id": "b4e6e28a-7aa4-4816-9a94-595ac27cc182",
+      "category": "family",
+      "suggested": "workshops",
+      "agree_frac": 0.8,
+      "title": "Workshop Drucken mit der Nudelpresse"
+    },
+    {
+      "id": "5b51b4ad-5f46-48ed-90b2-bf29faa186cf",
+      "category": "nightlife",
+      "suggested": "culture",
+      "agree_frac": 0.8,
+      "title": "Ausstellung \u201eDas beste Kennenlernen\u201c von J\u00fcrgen Eisenacher"
+    },
+    {
+      "id": "41c98eae-4895-4610-90d9-0b53becf07d8",
+      "category": "culture",
+      "suggested": "music",
+      "agree_frac": 0.7,
+      "title": "SummerSoundsFestival: Klassik, Pop & Poesie"
+    },
+    {
+      "id": "818aeae9-500f-4a5b-afb2-30f30a537922",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.7,
+      "title": "Lust auf Theater?"
+    },
+    {
+      "id": "28a5f98e-f759-4f83-aa43-38ee2b98a5df",
+      "category": "meetups",
+      "suggested": "nightlife",
+      "agree_frac": 0.7,
+      "title": "Midsommar Rituals"
+    },
+    {
+      "id": "86102642-d643-4931-a2e4-76dcdf58e8c1",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Das Beste von Pettersson und Findus"
+    },
+    {
+      "id": "464ffe4b-8d12-4cb7-8f4e-2a372755af4b",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 1,
+      "title": "Vernissage der Ausstellung \u201eZwischen dem M\u00f6glichen und Unm\u00f6glichen tan"
+    },
+    {
+      "id": "640c4b82-527e-41ec-8767-34bff9759349",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.7,
+      "title": "Helden - die Nibelungensage als Rockmusical"
+    },
+    {
+      "id": "cb9c7d2d-c2b1-46ab-8920-ee8748921436",
+      "category": "culture",
+      "suggested": "music",
+      "agree_frac": 0.7,
+      "title": "Movie2Menu presents: Chihiros Reise ins Zauberland"
+    },
+    {
+      "id": "890656cf-666f-41c5-a46e-fd69356e2e43",
+      "category": "culture",
+      "suggested": "music",
+      "agree_frac": 0.7,
+      "title": "OPERNFEST: Die Zauberfl\u00f6te - Mozart"
+    },
+    {
+      "id": "c5ccd4a3-86d3-45e0-b631-ec78b9efe14a",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.7,
+      "title": "Mission Berlin 2026"
+    },
+    {
+      "id": "e752a7e6-c0b0-49fe-b648-7eef4f361954",
+      "category": "outdoors",
+      "suggested": "meetups",
+      "agree_frac": 0.7,
+      "title": "Endorphins & Exchanges \u2013 Founders Co-work & Run"
+    },
+    {
+      "id": "5abcc7e4-32ff-4987-84ce-117226679314",
+      "category": "nightlife",
+      "suggested": "culture",
+      "agree_frac": 0.8,
+      "title": "Ausstellung \u201eDas beste Kennenlernen\u201c von J\u00fcrgen Eisenacher"
+    },
+    {
+      "id": "6307fd79-0be2-4d53-851a-c2b86388d3ae",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.9,
+      "title": "Neurodivergenter kreativer Austauschkreis"
+    },
+    {
+      "id": "aaf8c763-74f9-4792-b18f-bd3d8cea8d4d",
+      "category": "culture",
+      "suggested": "music",
+      "agree_frac": 0.7,
+      "title": "Indian Classical Music Concert"
+    },
+    {
+      "id": "4dd36b3a-70df-48ca-bb51-8863ad4617a3",
+      "category": "nightlife",
+      "suggested": "culture",
+      "agree_frac": 0.8,
+      "title": "Ausstellung \u201eDas beste Kennenlernen\u201c von J\u00fcrgen Eisenacher"
+    },
+    {
+      "id": "54954870-89ba-4a67-ba4d-e3a621d02ea6",
+      "category": "markets",
+      "suggested": "food",
+      "agree_frac": 0.9,
+      "title": "Markt am Maybachufer"
+    },
+    {
+      "id": "1353497f-fce0-40ad-8a4f-351ae6b5a9ea",
+      "category": "workshops",
+      "suggested": "culture",
+      "agree_frac": 1,
+      "title": "Musica di strada \u2013 Italiener*innen in Prenzlauer Berg \u2013 Handel, Handwe"
+    },
+    {
+      "id": "9e124ca0-d016-4b82-9533-4c9d7f4cb3e4",
+      "category": "outdoors",
+      "suggested": "meetups",
+      "agree_frac": 0.7,
+      "title": "F\u00fchrung | Tag der Provenienzforschung"
+    },
+    {
+      "id": "ccb2fe1a-3326-4295-bb2f-7a73460070e3",
+      "category": "food",
+      "suggested": "meetups",
+      "agree_frac": 0.9,
+      "title": "KAJ Pessach BBQ Luncheon - Mittwoch, 08.04."
+    },
+    {
+      "id": "af81958c-42c3-4a9c-87a1-368a9ccbbd07",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Plitsch Platsch \u2013 Forever!"
+    },
+    {
+      "id": "c8b5ce5a-e578-4feb-9b88-5bf39e303e34",
+      "category": "meetups",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Beratungsangebot: DIGITAL-ZEBRA"
+    },
+    {
+      "id": "157021e5-cad7-4638-96e9-36cd97def30d",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.9,
+      "title": "Mentale Gesundheit: Gelassenheit"
+    },
+    {
+      "id": "4ed52bf2-9573-4c8e-9882-32f668ec5faf",
+      "category": "culture",
+      "suggested": "workshops",
+      "agree_frac": 1,
+      "title": "Fahrradkennzeichnung der Direktion 3 Abschnitt 33"
+    },
+    {
+      "id": "74a2b2f7-ae95-4fa4-81b1-22a70434d462",
+      "category": "family",
+      "suggested": "workshops",
+      "agree_frac": 0.7,
+      "title": "Minecraft: Raketenstart zum Mond!"
+    },
+    {
+      "id": "112788ab-e452-4c2d-ab6c-fad6c5714833",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.7,
+      "title": "Sommerleseclub"
+    },
+    {
+      "id": "1e4dbb21-d685-4b12-b96b-3657a099caa5",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Kaffeeklatsch & Lichtbildvortrag"
+    },
+    {
+      "id": "65d64bf6-7768-4cc4-8333-47d6300404ad",
+      "category": "workshops",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Offene digitale Sprechstunde f\u00fcr die Generation Plus"
+    },
+    {
+      "id": "883ae6f3-6fd2-4b17-a815-5c2b7bd7ce7b",
+      "category": "culture",
+      "suggested": "workshops",
+      "agree_frac": 0.8,
+      "title": "Wortlaut: LernBike \u201eSprache gemeinsam erleben\u201d"
+    },
+    {
+      "id": "30acf03c-1bad-4bdd-8064-f73cbb0155d8",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.9,
+      "title": "Zine-Workshop \u2013 Falten, Kleben, Tauschen!"
+    },
+    {
+      "id": "17ffba6e-e07f-4765-87f4-e4b3b4a637f0",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.9,
+      "title": "Zine-Workshop \u2013 Falten, Kleben, Tauschen!"
+    },
+    {
+      "id": "f266b02e-e235-4b15-ac0d-03c5c19839d6",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.9,
+      "title": "Vortrag: Patientenverf\u00fcgung"
+    },
+    {
+      "id": "bc71dd0b-ad85-437d-93ad-d8ef0dcde0a8",
+      "category": "nightlife",
+      "suggested": "meetups",
+      "agree_frac": 1,
+      "title": "Angeleitete Selbsthilfegruppe f\u00fcr Frauen in den Wechseljahren"
+    },
+    {
+      "id": "b68e64b9-99c5-4e95-9366-6e54f83e8e65",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Rumpelm\u00e4rchen in der Bezirkszentralbibliothek Tempelhof - Sch\u00f6neberg"
+    },
+    {
+      "id": "273f8a95-d44d-4401-a03b-c0cb956bfb6c",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 1,
+      "title": "Sanftes Yoga f\u00fcr Frauen"
+    },
+    {
+      "id": "84aaffee-bc14-4349-abc6-e147a004ce0f",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Silent Book Club Session n. 43 - Gleisdreieck Park!"
+    },
+    {
+      "id": "92e26270-cadb-4b83-b2ae-e51dded72f6c",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.8,
+      "title": "Woman Support Group"
+    },
+    {
+      "id": "f4371147-6207-4667-bef5-9f5baa7f7a8b",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.8,
+      "title": "Reihe Ber\u00fchrungen, Teil 1 H\u00e4nde + F\u00fc\u00dfe"
+    },
+    {
+      "id": "cba6cd36-e0b1-4349-a871-1a9f87e28f4c",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.7,
+      "title": "Th\u1ecb Thanh Th\u1ea3o Tr\u1ea7n: \"Menschen wie wir\""
+    },
+    {
+      "id": "05e59e3f-cb9c-46de-b397-ffdf26047075",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.8,
+      "title": "Lesung & Gespr\u00e4ch \"Wiedersehen in Rajasthan\" mit Ute Krause"
+    },
+    {
+      "id": "dcb2a385-2f79-4ea0-9120-e3bbfbb6f4bc",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.7,
+      "title": "70. DACH-Tagung in Berlin: Restrukturierungen und Insolvenzen in Europ"
+    },
+    {
+      "id": "29d956fb-1aa3-49b5-ab81-137a2285b7be",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Handy und Computer Kurs"
+    },
+    {
+      "id": "b8ed04f8-785d-414b-828d-84df993ce65e",
+      "category": "workshops",
+      "suggested": "culture",
+      "agree_frac": 1,
+      "title": "Musica di strada \u2013 Italiener*innen in Prenzlauer Berg \u2013 Handel, Handwe"
+    },
+    {
+      "id": "afcd9a9a-36cc-468c-ba41-22415a979c5d",
+      "category": "workshops",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Ausstellung \u201eWohnen in Berlin\u201c"
+    },
+    {
+      "id": "5fdc9f48-39ed-46b4-8015-3e13fb3922f2",
+      "category": "food",
+      "suggested": "culture",
+      "agree_frac": 0.9,
+      "title": "MONA Lunch Bowl Tasting"
+    },
+    {
+      "id": "2a3b9dcc-39e2-4000-8697-531b01a0206e",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Spielenachmittag"
+    },
+    {
+      "id": "75fabc82-536c-45c0-b1a6-d805421ff92c",
+      "category": "meetups",
+      "suggested": "family",
+      "agree_frac": 1,
+      "title": "Beratungsangebot: DIGITAL-ZEBRA"
+    },
+    {
+      "id": "160c21fe-1b66-4017-a6df-653313b083be",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.8,
+      "title": "BAD1 & Steffen Krach: Shaping the Future of Berlin's Startup Ecosystem"
+    },
+    {
+      "id": "d9d906d1-baf0-4a66-8adc-b484b5d25199",
+      "category": "family",
+      "suggested": "culture",
+      "agree_frac": 0.8,
+      "title": "Kreativ mit Britta in Lichtenrade"
+    },
+    {
+      "id": "e222df7b-4753-4645-be78-dcfb0ceedb46",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 1,
+      "title": "Beratungsangebot f\u00fcr alle"
+    },
+    {
+      "id": "e7431e05-6f98-4c56-a779-90fd366f966e",
+      "category": "family",
+      "suggested": "workshops",
+      "agree_frac": 0.9,
+      "title": "Yoga unterm Sternenhimmel"
+    },
+    {
+      "id": "fd061192-d8f9-413c-b09f-ccb41a973fad",
+      "category": "family",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Familiencaf\u00e9"
+    },
+    {
+      "id": "73f608e6-aa7f-4d1c-a8a9-b78f56399130",
+      "category": "meetups",
+      "suggested": "culture",
+      "agree_frac": 0.7,
+      "title": "Der Sommer der guten Geschichten: der radio3-Lesekreis mit Thomas B\u00f6hm"
+    },
+    {
+      "id": "b18520f5-cd3d-43a0-b024-c62093fe0621",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.8,
+      "title": "Digital-Caf\u00e9"
+    },
+    {
+      "id": "58f0928c-8a28-4f80-a2b4-c9f498edf7d5",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.7,
+      "title": "Wir lesen in polnischer Sprache"
+    },
+    {
+      "id": "9a4f42a5-bbcd-43ad-8d93-6d24a071bb52",
+      "category": "culture",
+      "suggested": "family",
+      "agree_frac": 0.7,
+      "title": "Wir lesen in polnischer Sprache"
+    },
+    {
+      "id": "8a28e3b8-ad02-41b2-b6fd-4717d42c2135",
+      "category": "meetups",
+      "suggested": "family",
+      "agree_frac": 0.8,
+      "title": "Neu in Berlin? Lust auf echte Begegnungen? Workshop mit Miss Sam"
+    },
+    {
+      "id": "53efba2e-d4a4-4eb9-a22f-d0d402c33861",
+      "category": "culture",
+      "suggested": "meetups",
+      "agree_frac": 0.9,
+      "title": "Berlin | Claude Meetup | Claude Constitution Reading"
+    },
+    {
+      "id": "40f1f5c7-b968-4434-a29c-ec56e48c9d6e",
+      "category": "culture",
+      "suggested": "workshops",
+      "agree_frac": 0.7,
+      "title": "Selbstbewusst und kompetent im Ehrenamt \u2013 Fachseminar f\u00fcr ehrenamtlich"
+    },
+    {
+      "id": "3affee8b-2708-445a-9418-0d54401e99af",
+      "category": "workshops",
+      "suggested": "culture",
+      "agree_frac": 0.9,
+      "title": "CRY SESSION - Ceramic Painting Workshop @ Mao Mao (Men-Only)"
+    },
+    {
+      "id": "145a7d9c-728c-4b82-9e14-bfbf6f362f17",
+      "category": "food",
+      "suggested": "meetups",
+      "agree_frac": 0.9,
+      "title": "Heinzelcheesetalks"
+    }
+  ]
+}
