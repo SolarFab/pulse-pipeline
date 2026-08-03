@@ -144,6 +144,11 @@ def main():
 
     if args.run_all:
         run_all(scrapers)
+        # Hard exit: lingering non-daemon threads (playwright/scheduler imports) kept
+        # the process alive until the CI timeout killed it — nightly runs showed
+        # 'INFO done' followed by an orphaned python process and a cancelled job.
+        logging.shutdown()
+        os._exit(0)
         return
 
     # Default: start the scheduler
