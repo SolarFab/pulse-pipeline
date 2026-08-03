@@ -29,6 +29,7 @@ logger = logging.getLogger("nachtkarte")
 def get_scrapers() -> dict:
     from scrapers.berlin_de import BerlinDeScraper
     from scrapers.berlinmitkind import BerlinMitKindScraper
+    from scrapers.discovery_staging import DiscoveryStagingScraper
     from scrapers.eventbrite import EventbriteScraper
     from scrapers.kulturdaten import KulturdatenScraper
     from scrapers.luma import LumaScraper
@@ -77,6 +78,9 @@ def get_scrapers() -> dict:
         "themakery": TheMakeryScraper,
         "venue_website": GenericWebsiteScraper,
         "instagram": InstagramEventsScraper,
+        # Events found by the discovery agent (separate repo), staged in
+        # `discovered_events`. Reads a table, never the agent's code.
+        "discovery_agent": DiscoveryStagingScraper,
     }
 
 
