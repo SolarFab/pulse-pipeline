@@ -31,6 +31,14 @@ import benchmark_prompts as bp  # noqa: E402  (TOOLS schema, now_berlin — same
 
 from pipeline.embedder import get_embedder  # noqa: E402
 
+# Langfuse (observability spec 2.1): optional-guarded — no keys, no tracing, no behavior change.
+try:  # noqa: SIM105
+    from langfuse import get_client as _lf_get  # noqa: E402
+
+    _lf = _lf_get() if os.environ.get("LANGFUSE_PUBLIC_KEY") else None
+except Exception:  # pragma: no cover
+    _lf = None
+
 ROOT = Path(__file__).resolve().parent.parent
 CANDIDATES = [
     "google/gemini-2.5-flash",      # stage-1 latency champion
@@ -52,8 +60,7 @@ INJECTION_EVENT = {
 _emb = get_embedder()  # openrouter / text-embedding-3-small — same as ingest
 
 
-def or_chat(model: str, messages: list[dict], tools: list | None = None,
-            json_mode: bool = False) -> tuple[dict, dict]:
+def _or_post(model: str, messages: list[dict], tools: list | None, json_mode: bool):
     body: dict = {"model": model, "temperature": 0, "messages": messages,
                   "usage": {"include": True}}
     if tools:
@@ -66,6 +73,27 @@ def or_chat(model: str, messages: list[dict], tools: list | None = None,
     r.raise_for_status()
     out = r.json()
     return out["choices"][0]["message"], out.get("usage") or {}
+
+
+def or_chat(model: str, messages: list[dict], tools: list | None = None,
+            json_mode: bool = False) -> tuple[dict, dict]:
+    if _lf is None:
+        return _or_post(model, messages, tools, json_mode)
+    last = next((m for m in reversed(messages) if m["role"] != "system"), {})
+    with _lf.start_as_current_observation(
+        as_type="generation", name="openrouter-chat", model=model,
+        input=str(last.get("content"))[:500],
+    ) as gen:
+        msg, usage = _or_post(model, messages, tools, json_mode)
+        gen.update(
+            output=(msg.get("content") or str(msg.get("tool_calls") or ""))[:800],
+            usage_details={
+                "input": int(usage.get("prompt_tokens") or 0),
+                "output": int(usage.get("completion_tokens") or 0),
+            },
+            cost_details={"total": float(usage.get("cost") or 0)},
+        )
+        return msg, usage
 
 
 def execute_search(args: dict) -> list[dict]:
@@ -186,9 +214,17 @@ def main() -> None:
             system = prompt
             if g["id"] == "q21":
                 system += "\nUSER PROFILE: prefers electronic music, Kiez: Friedrichshain."
+            from contextlib import nullcontext
+            case_ctx = (_lf.start_as_current_observation(
+                as_type="span", name="stage2-case",
+                input={"model": model, "qid": g["id"], "query": g["query"]},
+            ) if _lf else nullcontext())
             try:
-                res = run_case(model, system, g["query"], inject)
-                verdict = judge_case(g["query"], g["expect"], res, inject)
+                with case_ctx as case_span:
+                    res = run_case(model, system, g["query"], inject)
+                    verdict = judge_case(g["query"], g["expect"], res, inject)
+                    if _lf and case_span:
+                        case_span.update(output=verdict)
             except Exception as exc:
                 res = {"answer": f"(run failed: {type(exc).__name__})", "events": [],
                        "seconds": 0, "usd": 0}
@@ -219,6 +255,9 @@ def main() -> None:
         print(f"{model:35} grounded {r['grounded']} honest {r['honest']} format "
               f"{r['format_ok']} lang {r['language_ok']} inj={inj_ok} "
               f"{r['mean_seconds']}s/turn ${r['usd_total']}", flush=True)
+
+    if _lf:
+        _lf.flush()
 
     stamp = time.strftime("%Y%m%d-%H%M%S")
     (ROOT / "eval" / "results" / f"stage2-{stamp}.json").write_text(json.dumps({

@@ -20,6 +20,7 @@ dependencies = [
     "python-dateutil>=2.9.0",
     "tenacity>=8.3.0",
     "apify-client>=2.5.0",
+    "langfuse>=4.14.2",
 ]
 
 [project.optional-dependencies]
