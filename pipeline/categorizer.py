@@ -549,6 +549,7 @@ def save_new_keywords(mappings: list[dict[str, Any]]) -> None:
 
     with open(output_path, "w") as f:
         json.dump(existing, f, indent=2, ensure_ascii=False, sort_keys=True)
+        f.write("\n")  # the repo's end-of-file-fixer hook rewrites the file otherwise
 
     total_new = sum(len(v) for v in new_entries.values())
     logger.info(

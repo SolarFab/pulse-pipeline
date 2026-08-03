@@ -75,9 +75,13 @@ class DiscoveryStagingScraper(BaseScraper):
             )
             ingested_ids.append(row["id"])
 
-        # Mark AFTER building the batch but BEFORE upsert: a crash mid-upsert costs
-        # one batch of events, whereas not marking risks an infinite re-ingest loop.
-        # The event fingerprint makes a re-run idempotent anyway.
+        # "ingested" means HANDED OFF to the pipeline, not "became a row in events".
+        # It cannot mean the latter: the event fingerprint is title+date with no
+        # time, so several showtimes of one film on one day legitimately collapse
+        # into a single event (371 staged rows -> 263 events in the first real run).
+        # Marking only what landed would leave the collapsed rows queued forever,
+        # re-processed every night. A re-run is idempotent via the fingerprint, so
+        # the cost of marking early is at worst one lost batch on a hard crash.
         if ingested_ids and not self.dry_run:
             for event_id in ingested_ids:
                 sb.table("discovered_events").update({"ingested": True}).eq(
