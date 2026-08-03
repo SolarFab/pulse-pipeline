@@ -1,0 +1,4 @@
+-- discovery-agent 1.1: publisher-discovery contract. Applied 2026-08-02 via MCP
+-- (publishers, publisher_sources, scout_runs, discovered_events + venue seed).
+-- Canonical SQL lives in the migration history; this file mirrors it for review.
+-- See pulse-discovery-agent/openspec/changes/discovery-agent/ for the spec.
