@@ -1,11 +1,23 @@
 """
-Categorizer: uses Claude API to assign category + tags to events
-that couldn't be categorized from source metadata alone.
+Categorizer: asks an LLM to assign category + tags to events that couldn't be
+categorized from source metadata alone.
+
+Model-agnostic (AGENTS.md rule 3): every call goes through a config-driven
+gateway, defaulting to OpenRouter — the same route the embedder and the concierge
+use, so one key covers the whole pipeline. Anthropic's native SDK stays available
+as an alternate backend because it supports prompt caching on the system prompt,
+which is the cost lever for a batched workload like this one.
 
 Returns bilingual tags (EN + DE keywords) so that new German keywords
 can be auto-expanded into the taxonomy keyword dictionary.
 
-Uses batched requests (10 events/call) + prompt caching to minimize cost.
+Uses batched requests (10 events/call) to minimize cost.
+
+Env:
+    CATEGORIZE_PROVIDER  openrouter | openai | anthropic   (default: openrouter)
+    CATEGORIZE_MODEL     model id for the chosen provider
+                         (default: anthropic/claude-haiku-4.5 via openrouter)
+    OPENROUTER_API_KEY / OPENAI_API_KEY / ANTHROPIC_API_KEY
 """
 
 from __future__ import annotations
@@ -17,10 +29,29 @@ import re
 from pathlib import Path
 from typing import Any
 
-import anthropic
+import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
+
+_TIMEOUT = 120.0
+MAX_TOKENS = 4096
+
+DEFAULT_PROVIDER = "openrouter"
+DEFAULT_MODELS = {
+    "openrouter": "anthropic/claude-haiku-4.5",
+    "openai": "gpt-4.1-mini",
+    "anthropic": "claude-haiku-4-5-20251001",
+}
+BASE_URLS = {
+    "openrouter": "https://openrouter.ai/api/v1",
+    "openai": "https://api.openai.com/v1",
+}
+KEY_ENV = {
+    "openrouter": "OPENROUTER_API_KEY",
+    "openai": "OPENAI_API_KEY",
+    "anthropic": "ANTHROPIC_API_KEY",
+}
 
 # Collect new keyword mappings discovered by the LLM
 _new_keyword_mappings: list[dict[str, Any]] = []
@@ -267,31 +298,89 @@ def _apply_result(event: dict[str, Any], result: dict[str, Any]) -> None:
     event["quality_score"] = result.get("quality_score")
 
 
+# ── Model gateway ─────────────────────────────────────────────────────────────
+
+
+class OpenAICompatChat:
+    """Any /v1/chat/completions endpoint speaking the OpenAI schema."""
+
+    def __init__(self, provider: str, model: str):
+        self.provider = provider
+        self.model = model
+        self._url = BASE_URLS[provider].rstrip("/") + "/chat/completions"
+        self._key = os.environ.get(KEY_ENV[provider], "")
+
+    def complete(self, system: str, user: str) -> str:
+        resp = httpx.post(
+            self._url,
+            headers={"Authorization": f"Bearer {self._key}"},
+            json={
+                "model": self.model,
+                "max_tokens": MAX_TOKENS,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+            },
+            timeout=_TIMEOUT,
+        )
+        resp.raise_for_status()
+        return resp.json()["choices"][0]["message"]["content"]
+
+
+class AnthropicChat:
+    """Native Anthropic SDK — kept for its system-prompt caching, which matters
+    when the same 2k-token prompt precedes every batch."""
+
+    def __init__(self, model: str):
+        self.provider = "anthropic"
+        self.model = model
+        self._key = os.environ.get(KEY_ENV["anthropic"], "")
+
+    def complete(self, system: str, user: str) -> str:
+        import anthropic  # imported lazily: only this backend needs the SDK
+
+        client = anthropic.Anthropic(api_key=self._key)
+        message = client.messages.create(
+            model=self.model,
+            max_tokens=MAX_TOKENS,
+            system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            messages=[{"role": "user", "content": user}],
+        )
+        return message.content[0].text
+
+
+def has_key(provider: str) -> bool:
+    return bool(os.environ.get(KEY_ENV.get(provider, ""), ""))
+
+
+def get_chat_client():
+    """Resolve the configured backend, falling back to any provider whose key IS
+    present. A stale key on the configured provider should degrade to a working
+    one rather than silently drop categorisation for a whole nightly run."""
+    name = (os.environ.get("CATEGORIZE_PROVIDER") or DEFAULT_PROVIDER).lower()
+    if name not in DEFAULT_MODELS:
+        logger.warning("Unknown CATEGORIZE_PROVIDER %r — using %s", name, DEFAULT_PROVIDER)
+        name = DEFAULT_PROVIDER
+    if not has_key(name):
+        alternate = next((p for p in DEFAULT_MODELS if has_key(p)), None)
+        if alternate is None:
+            return None
+        logger.warning("No %s — falling back to %s for categorization", KEY_ENV[name], alternate)
+        name = alternate
+    model = os.environ.get("CATEGORIZE_MODEL") or DEFAULT_MODELS[name]
+    if name == "anthropic":
+        return AnthropicChat(model)
+    return OpenAICompatChat(name, model)
+
+
 @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
-def _categorize_batch_call(
-    client: anthropic.Anthropic, events: list[dict[str, Any]]
-) -> list[dict[str, Any]]:
-    """
-    Send a batch of events to Claude and return parsed results.
-    Uses prompt caching for the system prompt.
-    """
+def _categorize_batch_call(client, events: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Send a batch of events to the model and return parsed results."""
     payloads = [_make_event_payload(e) for e in events]
     user_content = json.dumps(payloads, ensure_ascii=False)
 
-    message = client.messages.create(
-        model="claude-haiku-4-5-20251001",
-        max_tokens=4096,
-        system=[
-            {
-                "type": "text",
-                "text": SYSTEM_PROMPT,
-                "cache_control": {"type": "ephemeral"},
-            }
-        ],
-        messages=[{"role": "user", "content": user_content}],
-    )
-
-    raw = message.content[0].text.strip()
+    raw = client.complete(SYSTEM_PROMPT, user_content).strip()
     # Strip markdown code fences
     if raw.startswith("```"):
         raw = raw.split("```")[1]
@@ -321,14 +410,11 @@ def categorize_event(event: dict[str, Any]) -> dict[str, Any]:
     ):
         return event
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.warning(
-            "No ANTHROPIC_API_KEY — skipping categorization for '%s'", event.get("title")
-        )
+    client = get_chat_client()
+    if client is None:
+        logger.warning("No LLM API key — skipping categorization for '%s'", event.get("title"))
         return event
 
-    client = anthropic.Anthropic(api_key=api_key)
     try:
         results = _categorize_batch_call(client, [event])
         if results:
@@ -347,10 +433,12 @@ def categorize_batch(events: list[dict[str, Any]], max_llm: int = 2500) -> list[
     for e in events:
         if e.get("category") == "nightlife" and e.get("subcategory") == "comedy":
             continue
-        signal_text = " ".join([
-            str(e.get("title") or ""),
-            " ".join(str(t) for t in (e.get("source_tags") or e.get("tags") or [])),
-        ]).lower()
+        signal_text = " ".join(
+            [
+                str(e.get("title") or ""),
+                " ".join(str(t) for t in (e.get("source_tags") or e.get("tags") or [])),
+            ]
+        ).lower()
         if re.search(r"\bcomedy\b|\bstand.?up\b|\bkabarett\b|\bopen mic\b", signal_text):
             e["category"] = "nightlife"
             e["subcategory"] = "comedy"
@@ -377,12 +465,12 @@ def categorize_batch(events: list[dict[str, Any]], max_llm: int = 2500) -> list[
     if not needs_categorization:
         return events
 
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key:
-        logger.warning("No ANTHROPIC_API_KEY — skipping LLM categorization")
+    client = get_chat_client()
+    if client is None:
+        logger.warning("No LLM API key — skipping LLM categorization")
         return events
 
-    client = anthropic.Anthropic(api_key=api_key)
+    logger.info("Categorizing via %s / %s", client.provider, client.model)
     results = []
 
     # Process in batches of BATCH_SIZE
