@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -17,6 +18,14 @@ logger = logging.getLogger(__name__)
 
 GRAPHQL_URL = "https://ra.co/graphql"
 BERLIN_AREA_ID = 34
+
+
+def _kebab(name: str) -> str:
+    """RA genre name -> canonical tag: 'Hip-Hop' -> 'hip-hop', 'Drum & Bass' -> 'drum-and-bass'."""
+    slug = name.strip().lower().replace("&", " and ")
+    slug = re.sub(r"[^a-z0-9]+", "-", slug)
+    return slug.strip("-")
+
 
 EVENTS_QUERY = """
 query GET_DEFAULT_EVENTS_LISTING($filters: FilterInputDtoInput, $pageSize: Int, $page: Int) {
@@ -43,6 +52,10 @@ query GET_DEFAULT_EVENTS_LISTING($filters: FilterInputDtoInput, $pageSize: Int, 
         }
         artists {
           name
+        }
+        genres {
+          name
+          slug
         }
       }
     }
@@ -150,19 +163,33 @@ class ResidentAdvisorScraper(BaseScraper):
                 else (f"https://ra.co/events/{ra_id}" if ra_id else None)
             )
 
-            # Description from RA content + artist lineup
+            # Description from RA content + artist lineup. 1500 chars matches the
+            # embedder's own cap (build_embed_text) — truncating harder than that
+            # costs recall for events whose genre only appears late in the text.
             content = (event.get("content") or "").strip()
             artists = event.get("artists") or []
             artist_names = [a.get("name", "") for a in artists if a.get("name")]
             lineup = f"Lineup: {', '.join(artist_names[:10])}" if artist_names else ""
             if content and lineup:
-                description = f"{content[:500]}\n\n{lineup}"
+                description = f"{content[:1500]}\n\n{lineup}"
             elif content:
-                description = content[:500]
+                description = content[:1500]
             elif lineup:
                 description = lineup
             else:
                 description = None
+
+            # Promoter-assigned genre tags (curated RA vocabulary, multi-tag,
+            # optional). Real genres replace the old blanket ["electronic","club"]
+            # hardcode, which mislabeled every hip-hop/jazz/dancehall night as
+            # electronic; the hardcode survives only as a fallback for untagged
+            # events. Raw RA slugs go to source_tags for provenance.
+            genres = event.get("genres") or []
+            genre_tags = [
+                _kebab(g["name"]) for g in genres if isinstance(g, dict) and g.get("name")
+            ]
+            tags = genre_tags or ["electronic", "club"]
+            source_tags = [g["slug"] for g in genres if isinstance(g, dict) and g.get("slug")]
 
             return {
                 "title": title,
@@ -176,8 +203,8 @@ class ResidentAdvisorScraper(BaseScraper):
                 "source_url": source_url,
                 "source_id": str(ra_id) if ra_id else None,
                 "category": "nightlife",
-                "tags": ["electronic", "club"],
-                "source_tags": [],
+                "tags": tags,
+                "source_tags": source_tags,
                 "source": self.source_name,
             }
         except Exception as e:
