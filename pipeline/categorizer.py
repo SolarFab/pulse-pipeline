@@ -294,6 +294,9 @@ def _apply_result(event: dict[str, Any], result: dict[str, Any]) -> None:
 
     raw_tags = result.get("tags") or []
     en_tags = _parse_tags(raw_tags)
+    # `tags` stays free-form topic vocabulary. Genre lives in its own column,
+    # written only by the deterministic waterfall (pipeline/genres.py) — the
+    # model's free tags must never reach a filter users trust.
     event["tags"] = en_tags or event.get("tags") or []
     event["quality_score"] = result.get("quality_score")
 

@@ -60,8 +60,11 @@ def attach_embeddings(
     try:
         vecs = emb.embed_batch([t for _, t, _ in todo])
     except Exception as exc:
-        logger.error("embedding batch failed (%s: %s) — events upsert without embeddings",
-                     type(exc).__name__, exc)
+        logger.error(
+            "embedding batch failed (%s: %s) — events upsert without embeddings",
+            type(exc).__name__,
+            exc,
+        )
         metrics["failed"] = len(todo)
         return metrics
 

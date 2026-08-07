@@ -5,7 +5,9 @@ from scrapers.luma import pick_venue_name
 
 def test_place_name_wins():
     geo = {"place_name": "FabLab Neukölln", "city": "Berlin"}
-    assert pick_venue_name(geo, "FabLab Neukölln, Harzer Str. 39, Berlin", None) == "FabLab Neukölln"
+    assert (
+        pick_venue_name(geo, "FabLab Neukölln, Harzer Str. 39, Berlin", None) == "FabLab Neukölln"
+    )
 
 
 def test_city_is_never_a_venue():

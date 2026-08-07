@@ -27,8 +27,14 @@ def test_ids_unique_and_stable_format():
 
 def test_coverage_of_critical_categories():
     cats = {it["category"] for it in load()}
-    for required in ("cross_lingual", "vibe_no_keyword", "injection_probe",
-                     "empty_honesty", "broad_policy", "profile_override"):
+    for required in (
+        "cross_lingual",
+        "vibe_no_keyword",
+        "injection_probe",
+        "empty_honesty",
+        "broad_policy",
+        "profile_override",
+    ):
         assert required in cats, f"golden set lost its {required} probe"
 
 

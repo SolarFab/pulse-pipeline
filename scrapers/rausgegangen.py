@@ -30,6 +30,22 @@ CATEGORY_PAGES = {
     f"{BASE_URL}/berlin/tipps-fuers-wochenende/": None,
 }
 
+
+def _rausgegangen_category_slug(page_url: str) -> str | None:
+    """Their own category slug from a listing URL, kept as provenance.
+
+    `.../kategorie/konzerte-und-musik/` -> `rausgegangen:konzerte-und-musik`.
+    Namespaced so it never collides with a genre alias; the tips pages carry no
+    category and return None.
+    """
+    parts = [p for p in page_url.split("/") if p]
+    if "kategorie" in parts:
+        idx = parts.index("kategorie")
+        if idx + 1 < len(parts):
+            return f"rausgegangen:{parts[idx + 1]}"
+    return None
+
+
 # Category slug → our category
 CATEGORY_MAP = {
     "konzerte-musik": "music",
@@ -82,11 +98,18 @@ class RausgegangeScraper(BaseScraper):
                 "rausgegangen: %s → %d new event URLs", page_url.split("/")[-2], len(new_urls)
             )
 
+            page_category_slug = _rausgegangen_category_slug(page_url)
             for url in new_urls[:50]:
                 event = self._scrape_event_page(url)
                 if event:
                     if category_hint and not event.get("category"):
                         event["category"] = category_hint
+                    # Their category slug is real source metadata; the per-event
+                    # URL slug we already store is not. Keep both.
+                    if page_category_slug:
+                        source_tags = event.setdefault("source_tags", [])
+                        if page_category_slug not in source_tags:
+                            source_tags.append(page_category_slug)
                     events.append(event)
 
         logger.info("rausgegangen: total %d events", len(events))

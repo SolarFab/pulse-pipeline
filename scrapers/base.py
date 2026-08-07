@@ -17,6 +17,7 @@ from db.supabase import get_client, get_venues_by_names, upsert_events
 from pipeline.categorizer import categorize_batch
 from pipeline.embed_events import attach_embeddings
 from pipeline.facets import detect_facets
+from pipeline.genres import merge_genres
 from pipeline.geocoder import geocode_inline
 from pipeline.normalizer import normalize
 
@@ -114,16 +115,21 @@ class BaseScraper(ABC):
         # Categorize only new events (Claude fills in missing category/tags)
         categorised = categorize_batch(new_events) + existing_events
 
-        # Facets for ALL events (cheap regex, idempotent — also heals rows
-        # that predate the facet columns)
+        # Facets + genres for ALL events (cheap regex, idempotent — also heals
+        # rows that predate the columns). Genre order: source-native tags the
+        # scraper already set win, then alias-mapped source_tags, then text
+        # detection; nothing is ever removed, so a promoter's own genre always
+        # outranks our guess.
         for event in categorised:
             event.update(detect_facets(event))
+            event["genres"] = merge_genres(event)
 
         # Link events to venue rows by normalized name: the map resolves
         # coordinates through this join, so an unlinked event without its own
         # coords is invisible (the Berghain bug — 448/545 RA events off-map).
-        unlinked = {e["venue_name"] for e in categorised
-                    if not e.get("venue_id") and e.get("venue_name")}
+        unlinked = {
+            e["venue_name"] for e in categorised if not e.get("venue_id") and e.get("venue_name")
+        }
         if unlinked:
             vmap = get_venues_by_names(list(unlinked))
             linked = 0
@@ -134,8 +140,11 @@ class BaseScraper(ABC):
                 if v:
                     event["venue_id"] = v["id"]
                     linked += 1
-            self.logger.info("Venue linking: %d events matched to venue rows "
-                             "(%d names unresolved)", linked, len(unlinked) - len(vmap))
+            self.logger.info(
+                "Venue linking: %d events matched to venue rows (%d names unresolved)",
+                linked,
+                len(unlinked) - len(vmap),
+            )
 
         # Embeddings: only new/changed embed text (hash-skip against stored hashes).
         # Failure degrades — events upsert without embeddings and heal next run.
@@ -143,14 +152,26 @@ class BaseScraper(ABC):
         fps = [e["fingerprint"] for e in categorised if e.get("fingerprint")]
         if fps:
             for i in range(0, len(fps), 200):
-                res = (get_client().table("events").select("fingerprint,embed_hash")
-                       .in_("fingerprint", fps[i : i + 200]).execute())
-                db_hashes.update({r["fingerprint"]: r["embed_hash"] for r in (res.data or [])
-                                  if r.get("embed_hash")})
+                res = (
+                    get_client()
+                    .table("events")
+                    .select("fingerprint,embed_hash")
+                    .in_("fingerprint", fps[i : i + 200])
+                    .execute()
+                )
+                db_hashes.update(
+                    {
+                        r["fingerprint"]: r["embed_hash"]
+                        for r in (res.data or [])
+                        if r.get("embed_hash")
+                    }
+                )
         emb_metrics = attach_embeddings(categorised, db_hashes)
-        self.logger.info("Embeddings: %(embedded)d new, %(skipped)d unchanged, "
-                         "%(failed)d failed — %(tokens)d tok / $%(usd).4f / %(seconds).1fs",
-                         emb_metrics)
+        self.logger.info(
+            "Embeddings: %(embedded)d new, %(skipped)d unchanged, "
+            "%(failed)d failed — %(tokens)d tok / $%(usd).4f / %(seconds).1fs",
+            emb_metrics,
+        )
 
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)

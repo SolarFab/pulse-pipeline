@@ -20,8 +20,12 @@ class FakeEmbedder:
         return [[0.1, 0.2] for _ in texts]
 
 
-EVENT = {"title": "Jazz Night", "description": "Bebop trio.", "category": "music",
-         "fingerprint": "fp1"}
+EVENT = {
+    "title": "Jazz Night",
+    "description": "Bebop trio.",
+    "category": "music",
+    "fingerprint": "fp1",
+}
 
 
 def test_new_event_gets_embedded():
@@ -40,8 +44,8 @@ def test_unchanged_event_is_skipped_no_api_call():
     fake = FakeEmbedder()
     m = attach_embeddings([e], db_hashes={"fp1": stored}, embedder=fake)
     assert m["skipped"] == 1 and m["embedded"] == 0
-    assert fake.calls == []          # hash-skip means zero API traffic
-    assert "embedding" not in e      # nothing overwritten
+    assert fake.calls == []  # hash-skip means zero API traffic
+    assert "embedding" not in e  # nothing overwritten
 
 
 def test_changed_text_reembeds():
@@ -55,4 +59,4 @@ def test_api_failure_degrades_not_blocks():
     e = dict(EVENT)
     m = attach_embeddings([e], db_hashes={}, embedder=FakeEmbedder(fail=True))
     assert m["failed"] == 1 and m["embedded"] == 0
-    assert "embedding" not in e      # event still upserts, just without a vector
+    assert "embedding" not in e  # event still upserts, just without a vector

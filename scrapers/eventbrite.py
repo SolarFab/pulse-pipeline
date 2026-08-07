@@ -22,7 +22,6 @@ BERLIN_PLACE_ID = "101748799"  # Who's On First ID for Berlin
 
 
 class EventbriteScraper(BaseScraper):
-
     _TAGS_RE = re.compile(r"<[^>]+>")
     _LDJSON_RE = re.compile(r"<script[^>]*application/ld\+json[^>]*>(.*?)</script>", re.DOTALL)
 
@@ -48,8 +47,11 @@ class EventbriteScraper(BaseScraper):
             start = text.find("{", idx)
             try:
                 blob, _ = json.JSONDecoder().raw_decode(text[start:])
-                parts = [m.get("text", "") for m in blob.get("modules", [])
-                         if isinstance(m, dict) and m.get("type") == "text"]
+                parts = [
+                    m.get("text", "")
+                    for m in blob.get("modules", [])
+                    if isinstance(m, dict) and m.get("type") == "text"
+                ]
                 desc = clean(" ".join(parts))
                 if desc:
                     return desc[:1500]
@@ -66,6 +68,7 @@ class EventbriteScraper(BaseScraper):
                     if desc:
                         return desc[:1500]
         return None
+
     source_name = "eventbrite"
 
     def scrape(self) -> list[dict[str, Any]]:

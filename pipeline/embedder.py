@@ -41,6 +41,7 @@ KEY_ENV = {
 # Stable by design: the hash of this text decides whether an event is re-embedded,
 # so field order and formatting must never change casually.
 
+
 def build_embed_text(event: dict) -> str:
     """title + description + category/subcategory + tags, in a fixed layout."""
     parts = [
@@ -60,6 +61,7 @@ def embed_text_hash(text: str) -> str:
 
 # ── Client ────────────────────────────────────────────────────────────────────
 
+
 class OpenAICompatEmbedder:
     """Any /v1/embeddings endpoint speaking the OpenAI schema (OpenRouter, OpenAI)."""
 
@@ -67,13 +69,14 @@ class OpenAICompatEmbedder:
         self.provider = provider
         self.model = model
         self.dim = dim
-        self.total_tokens = 0      # accumulated across calls — cost/latency evaluation
+        self.total_tokens = 0  # accumulated across calls — cost/latency evaluation
         self.total_seconds = 0.0
         self._url = base_url.rstrip("/") + "/embeddings"
         self._key = os.environ.get(KEY_ENV[provider], "")
 
     def embed_batch(self, texts: list[str]) -> list[list[float]]:
         import time
+
         out: list[list[float]] = []
         for i in range(0, len(texts), _BATCH_SIZE):
             chunk = texts[i : i + _BATCH_SIZE]
