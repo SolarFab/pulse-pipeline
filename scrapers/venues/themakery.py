@@ -21,6 +21,39 @@ logger = logging.getLogger(__name__)
 BASE_URL = "https://themakery.de"
 WORKSHOPS_URL = f"{BASE_URL}/workshops/"
 
+# The marketplace's own address, in every page footer. Never a workshop location.
+MAKERY_HQ_STREET = "John-Schehr-Strasse 2"
+# lat_min, lat_max, lng_min, lng_max — a geocode outside this is a wrong match.
+BERLIN_BBOX = (52.3, 52.7, 13.0, 13.8)
+_PLZ_LINE = re.compile(r"^(\d{5})\s+Berlin$")
+
+
+def extract_studio_address(html: str) -> str | None:
+    """The partner studio's address from a workshop detail page, or None.
+
+    Anchored on the unambiguous "<5 digits> Berlin" line and reading the street
+    above it — parsed from TEXT, because street and postcode sit in separate
+    elements and any raw-HTML pattern spanning them has to guess at the markup.
+    The footer block is skipped by STREET rather than by postcode: real partner
+    studios do sit in 10407, and excluding the district would drop them.
+    """
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, "html.parser")
+    for tag in soup(["script", "style"]):
+        tag.decompose()
+    lines = [ln for ln in soup.get_text("\n", strip=True).split("\n") if ln]
+    for n, line in enumerate(lines):
+        m = _PLZ_LINE.match(line)
+        if not m or n < 1:
+            continue
+        street = lines[n - 1]
+        if street == MAKERY_HQ_STREET:
+            continue
+        return f"{street}, {m.group(1)} Berlin"
+    return None
+
+
 # Map Makery categories to NachtKarte categories
 CATEGORY_MAP = {
     "kunst": "workshops",
@@ -239,12 +272,44 @@ class TheMakeryScraper(BaseScraper):
         return events
 
     def _enrich_from_detail_pages(self, events: list[dict[str, Any]]) -> None:
-        """Fetch detail pages to get descriptions and addresses."""
+        """Fetch detail pages for the PARTNER STUDIO's address, and geocode it.
+
+        The Makery is a marketplace, not a venue: every workshop runs at a different
+        partner studio. Each detail page carries two addresses — the platform's own
+        footer (John-Schehr-Strasse 2, 10407) and the studio's. We want the studio's.
+
+        Two bugs lived here, and together they put every Makery event on one pin:
+
+        1. The address regex ran over raw HTML and forbade `<` between street and
+           postcode. On this site they sit in SEPARATE elements, so it could never
+           match and `address` stayed None for every workshop. With no address,
+           pipeline.geocoder fell through to "The Makery, Berlin" — the company —
+           and gave every event the head office in Prenzlauer Berg, while their
+           neighborhoods spanned 46 districts. Now we parse text, not markup, and
+           anchor on the unambiguous "<5 digits> Berlin" line.
+
+        2. The meta description is the SITE-WIDE marketing blurb, identical on every
+           page, and it overwrote the per-workshop description built in
+           _parse_workshop. Dropped: a generic string is worse than a short specific
+           one, and ~1,200 identical descriptions also collapse into near-identical
+           embeddings.
+
+        We geocode here rather than leaving it to pipeline.geocoder because that
+        function resolves the VENUE NAME against the venues table first, which for
+        this source always wins and always yields the marketplace's head office.
+        Emitting coordinates means those events are already resolved and the
+        venue-name shortcut never runs. Geocodes are cached per address — the ~700
+        workshops share far fewer studios.
+        """
         import time
 
         import httpx
 
-        enriched = 0
+        from pipeline.geocoder import geocode
+
+        geo_cache: dict[str, tuple[float, float] | None] = {}
+        found_addr = 0
+
         for i, event in enumerate(events):
             url = event.get("source_url")
             if not url:
@@ -255,29 +320,38 @@ class TheMakeryScraper(BaseScraper):
                     if resp.status_code != 200:
                         continue
 
-                html = resp.text
-
-                # Description — look for meta description or long paragraphs
-                meta = re.search(r'<meta name="description" content="([^"]+)"', html)
-                if meta:
-                    event["description"] = meta.group(1).strip()[:500]
-
-                # Address — look for street pattern in text
-                addr = re.search(
-                    r"(\w[\w\s.-]+(?:Str(?:aße|\.)|straße|weg|platz|allee|damm|ufer)\s*\d+[^,<]{0,30},\s*\d{5}\s*Berlin)",
-                    html,
-                )
+                addr = extract_studio_address(resp.text)
                 if addr:
-                    event["address"] = addr.group(1).strip()
+                    event["address"] = addr
+                    found_addr += 1
 
-                enriched += 1
-                # Respect rate limits
+                if addr:
+                    if addr not in geo_cache:
+                        geo_cache[addr] = geocode(f"{addr}, Germany")
+                        time.sleep(1)  # Nominatim usage policy
+                    hit = geo_cache[addr]
+                    # A hit outside Berlin is a mismatch, not a location — leave the
+                    # event uncoordinated rather than pin it somewhere wrong.
+                    if (
+                        hit
+                        and BERLIN_BBOX[0] <= hit[0] <= BERLIN_BBOX[1]
+                        and BERLIN_BBOX[2] <= hit[1] <= BERLIN_BBOX[3]
+                    ):
+                        event["lat"], event["lng"] = hit
+
                 if (i + 1) % 10 == 0:
-                    self.logger.info("Enriched %d / %d workshops", enriched, len(events))
+                    self.logger.info("Enriched %d / %d workshops", found_addr, len(events))
                     time.sleep(1)
 
             except Exception as e:
                 self.logger.debug("Detail fetch failed for %s: %s", url, e)
                 continue
 
-        self.logger.info("Enriched %d / %d workshops with descriptions", enriched, len(events))
+        located = sum(1 for e in events if e.get("lat"))
+        self.logger.info(
+            "Enriched %d / %d workshops with a studio address, %d geocoded (%d distinct)",
+            found_addr,
+            len(events),
+            located,
+            len(geo_cache),
+        )
