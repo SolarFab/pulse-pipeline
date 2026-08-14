@@ -43,11 +43,19 @@ Substantial items graduate to an OpenSpec change in `openspec/changes/<name>/`.
 
 ### Order of work
 
-1. **Move extraction to OpenRouter.** Same gateway as the concierge, so it uses
-   the existing web key — no new API key, no second account. Model behind a
-   `SCAN_MODEL` env var, as with `CHAT_MODEL`. Note the request-body shape
-   changes: OpenAI-compatible `image_url` with a data URI, not Anthropic's
-   `source.base64` block.
+1. **Move extraction to OpenRouter**, reading `OPENROUTER_FLYER_SCAN_KEY` —
+   its OWN key, already created and set in Vercel. Not a share of the
+   concierge's: a vision call costs multiples of a chat turn (the image alone is
+   thousands of tokens), and the endpoint takes 8 MB uploads, so the abuse
+   profile differs too. The point is blast radius as much as accounting — a
+   scanner being spammed must not drain the budget the chat depends on.
+   Model behind a `SCAN_MODEL` env var, as with `CHAT_MODEL`. Note the
+   request-body shape changes: OpenAI-compatible `image_url` with a data URI,
+   not Anthropic's `source.base64` block.
+
+   Do NOT silently fall back to `OPENROUTER_API_KEY` when the scan key is
+   missing: a forgotten variable would then quietly bill the concierge and
+   defeat the separation. Fail loudly instead.
 2. **Fix the frozen date** — derive it from the request, in Europe/Berlin.
 3. **Validate before building further.** 243 vision models are available through
    the gateway at wildly different prices (from $0.03/M to several dollars). Run
