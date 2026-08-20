@@ -67,7 +67,7 @@ notify() {  # status, summary
   git pull --ff-only 2>&1
   uv sync --frozen 2>&1
   echo "=== run"
-  timeout --signal=TERM --kill-after=60 "${MAX_MINUTES}m" uv run python main.py --all 2>&1
+  timeout --signal=TERM --kill-after=60 "${MAX_MINUTES}m" uv run python main.py --run-all 2>&1
   echo "=== exit $?"
 } >> "$LOG" 2>&1
 
