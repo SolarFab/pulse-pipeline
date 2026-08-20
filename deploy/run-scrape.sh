@@ -15,9 +15,11 @@ REPO_DIR="${REPO_DIR:-$HOME/pulse}"
 LOG_DIR="${LOG_DIR:-$HOME/pulse-logs}"
 LOCK_FILE="/tmp/pulse-scrape.lock"
 KEEP_LOGS=14
-# Generous: the run took ~100 minutes on Actions and was still being cut off.
-# This is a runaway guard, not a schedule.
-MAX_MINUTES="${MAX_MINUTES:-240}"
+# Measured on the first real run: 3h34m wall clock, 206 minutes of it scraping.
+# That is well past the 120-minute cap that was cancelling this job on GitHub —
+# the migration was a precondition, not a tuning exercise. 300 gives ~45 minutes
+# of headroom for a slow night; it is a runaway guard, not a schedule.
+MAX_MINUTES="${MAX_MINUTES:-300}"
 
 mkdir -p "$LOG_DIR"
 STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
