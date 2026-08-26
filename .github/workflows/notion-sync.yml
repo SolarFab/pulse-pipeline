@@ -1,0 +1,42 @@
+name: Notion sync
+
+# Pushes the GitHub-derived phases (5, 6, 7, 8) onto the Pulse Delivery board.
+# Never required, never blocking: a Notion outage must not stop a merge.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, review_requested, closed]
+  pull_request_review:
+    types: [submitted]
+
+# One run per PR; a newer event supersedes an in-flight one.
+concurrency:
+  group: notion-sync-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # Fork PRs have no access to secrets — skip rather than fail.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Update the board
+        continue-on-error: true
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DATABASE_ID: 2e04556297ab40d7a24556f1fc02c52c
+          GH_EVENT: ${{ github.event_name }}
+          GH_ACTION: ${{ github.event.action }}
+          GH_MERGED: ${{ github.event.pull_request.merged }}
+          GH_REVIEW_STATE: ${{ github.event.review.state }}
+          GH_PR_TITLE: ${{ github.event.pull_request.title }}
+          GH_PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+          GH_PR_URL: ${{ github.event.pull_request.html_url }}
+        run: python .github/scripts/notion_sync.py
