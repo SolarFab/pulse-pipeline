@@ -6,6 +6,10 @@
 - [x] 1.5 `run_single()` and `pipeline/scheduler.py` updated to the new shape
 - [x] 2.1 `deploy/run-scrape.sh`: fourth verdict `degraded`; all five branches tested on synthetic logs
 - [x] 2.2 Fourth/fifth verdict split: zero events + failed sources is `error`, not `empty`
+- [x] 2.3 Verdict extracted to `deploy/classify-run.sh` so it is testable at all — inline it was
+      verified only by throwaway scripts, the same "checked once, never again" gap FEAT-9 closes
+- [x] 2.4 `tests/test_run_verdict.py`: the six-case matrix + edge cases, run against the REAL
+      script rather than a Python reimplementation. Mutation-checked: breaking the regex fails 5/9
 - [x] 3.1 Nine tests asserting on the COUNT, not on log text (the failures were always logged)
 - [x] 3.2 Autouse fixture stubs the geocoder — every test here calls run_all, which would
       otherwise hit Nominatim 1500x and write to production (invisible while the net was dead code)
