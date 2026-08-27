@@ -73,21 +73,35 @@ notify() {  # status, summary
   echo "=== exit $?"
 } >> "$LOG" 2>&1
 
-# The pipeline's own summary line is the honest signal: "Total: N upserted".
-# Exit code alone is not enough — a run that scrapes nothing still exits 0, which
-# is exactly how the old harvest job stayed green for weeks while doing nothing.
+# The pipeline's own summary line is the honest signal, not the exit code — a run
+# that scrapes nothing still exits 0. Since #6 the line also carries how many
+# SOURCES failed, which is a different number from how many rows failed to
+# upsert; before that, a night where half the sources died still read "0 failed".
+#
+#   Total: 18444 upserted, 1 failed, 2 source(s) failed (venue_website, instagram)
+#
 RESULT="$(grep -E 'Total: [0-9]+ upserted' "$LOG" | tail -1)"
-UPSERTED="$(printf '%s' "$RESULT" | grep -oE '[0-9]+' | head -1)"
+UPSERTED="$(printf '%s' "$RESULT" | sed -nE 's/.*Total: ([0-9]+) upserted.*/\1/p')"
+BAD_SOURCES="$(printf '%s' "$RESULT" | sed -nE 's/.*, ([0-9]+) source\(s\) failed.*/\1/p')"
 TIMED_OUT="$(grep -c 'exit 124' "$LOG")"
 
 if [ "$TIMED_OUT" != "0" ]; then
   notify "timeout" "killed after ${MAX_MINUTES}m. $(tail -5 "$LOG")"
 elif [ -z "${UPSERTED:-}" ]; then
   notify "error" "no 'Total: N upserted' line — the run did not finish. $(tail -15 "$LOG")"
+elif [ "$UPSERTED" -eq 0 ] && [ -n "${BAD_SOURCES:-}" ] && [ "$BAD_SOURCES" -gt 0 ]; then
+  # Nothing arrived AND sources died: a total outage, not a quiet night. An
+  # earlier version called this "empty", which made "every scraper ran fine and
+  # Berlin had no events" indistinguishable from "every scraper crashed".
+  notify "error" "no events and $BAD_SOURCES source(s) failed. $RESULT"
 elif [ "$UPSERTED" -eq 0 ]; then
-  notify "empty" "finished but upserted 0 events. $(grep -cE '✗|crashed' "$LOG") scraper(s) crashed."
+  notify "empty" "every source ran, none produced events. $RESULT"
+elif [ -n "${BAD_SOURCES:-}" ] && [ "$BAD_SOURCES" -gt 0 ]; then
+  # Events still arrived, so this is not a broken run — but a source is down and
+  # saying "ok" here is how a dead scraper goes unnoticed for months.
+  notify "degraded" "$RESULT — log $(basename "$LOG")"
 else
-  notify "ok" "$RESULT ($(grep -cE '✗|crashed' "$LOG") crashed, log $(basename "$LOG"))"
+  notify "ok" "$RESULT (log $(basename "$LOG"))"
 fi
 
 # Keep a fortnight; a 4 GB box with 19 GB free should not fill up with logs.
