@@ -73,22 +73,26 @@ notify() {  # status, summary
   echo "=== exit $?"
 } >> "$LOG" 2>&1
 
-# The pipeline's own summary line is the honest signal: "Total: N upserted".
-# Exit code alone is not enough — a run that scrapes nothing still exits 0, which
-# is exactly how the old harvest job stayed green for weeks while doing nothing.
+# The verdict lives in its own script so it can be tested — deploy/classify-run.sh,
+# covered by tests/test_run_verdict.py. Keeping it inline here meant the one piece
+# of logic that decides whether anyone gets woken up was verified by throwaway
+# scripts and nothing else.
 RESULT="$(grep -E 'Total: [0-9]+ upserted' "$LOG" | tail -1)"
-UPSERTED="$(printf '%s' "$RESULT" | grep -oE '[0-9]+' | head -1)"
-TIMED_OUT="$(grep -c 'exit 124' "$LOG")"
+VERDICT="$("$(dirname "$0")/classify-run.sh" "$LOG")"
 
-if [ "$TIMED_OUT" != "0" ]; then
-  notify "timeout" "killed after ${MAX_MINUTES}m. $(tail -5 "$LOG")"
-elif [ -z "${UPSERTED:-}" ]; then
-  notify "error" "no 'Total: N upserted' line — the run did not finish. $(tail -15 "$LOG")"
-elif [ "$UPSERTED" -eq 0 ]; then
-  notify "empty" "finished but upserted 0 events. $(grep -cE '✗|crashed' "$LOG") scraper(s) crashed."
-else
-  notify "ok" "$RESULT ($(grep -cE '✗|crashed' "$LOG") crashed, log $(basename "$LOG"))"
-fi
+case "$VERDICT" in
+  timeout)  notify "timeout"  "killed after ${MAX_MINUTES}m. $(tail -5 "$LOG")" ;;
+  error)
+    if [ -n "$RESULT" ]; then
+      notify "error" "no events and one or more sources failed. $RESULT"
+    else
+      notify "error" "no summary line — the run did not finish. $(tail -15 "$LOG")"
+    fi
+    ;;
+  empty)    notify "empty"    "every source ran, none produced events. $RESULT" ;;
+  degraded) notify "degraded" "$RESULT — log $(basename "$LOG")" ;;
+  ok)       notify "ok"       "$RESULT (log $(basename "$LOG"))" ;;
+esac
 
 # Keep a fortnight; a 4 GB box with 19 GB free should not fill up with logs.
 find "$LOG_DIR" -name 'scrape-*.log' -type f -mtime "+$KEEP_LOGS" -delete

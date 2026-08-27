@@ -89,29 +89,63 @@ def run_single(name: str, scrapers: dict) -> None:
         logger.error("Unknown scraper '%s'. Available: %s", name, ", ".join(scrapers))
         sys.exit(1)
     scraper = scrapers[name]()
-    success, fail = scraper.run()
-    logger.info("Done: %d upserted, %d failed", success, fail)
+    outcome = scraper.run()
+    if outcome.crashed:
+        logger.error("Done: %s FAILED — %s", name, outcome.error)
+        sys.exit(1)
+    logger.info("Done: %d upserted, %d failed", outcome.upserted, outcome.rows_failed)
 
 
-def run_all(scrapers: dict) -> None:
-    total_success, total_fail = 0, 0
+def run_all(scrapers: dict) -> list[str]:
+    """Run every scraper. Returns the names of the sources that FAILED.
+
+    A crashing source used to be logged and forgotten: it contributed nothing to
+    `total_fail`, so the summary line said "0 failed" no matter how many died.
+    That is how `venue_website` and `instagram` produced zero rows for months
+    without anyone noticing. Failures are counted and returned now, and the
+    summary reports them separately from individual rows that failed to upsert.
+    """
+    total_success, total_rows_failed = 0, 0
+    failed_sources: list[str] = []
     for name, cls in scrapers.items():
         logger.info("▶ %s", name)
         try:
-            scraper = cls()
-            success, fail = scraper.run()
-            total_success += success
-            total_fail += fail
-            logger.info("  ✓ %d upserted, %d failed", success, fail)
-        except Exception as e:
+            outcome = cls().run()
+        except Exception as e:  # noqa: BLE001 — one bad source never stops the rest
             logger.error("  ✗ %s crashed: %s", name, e)
+            failed_sources.append(name)
+            continue
+        if outcome.crashed:
+            logger.error("  ✗ %s failed: %s", name, outcome.error)
+            failed_sources.append(name)
+            continue
+        total_success += outcome.upserted
+        total_rows_failed += outcome.rows_failed
+        logger.info("  ✓ %d upserted, %d failed", outcome.upserted, outcome.rows_failed)
 
     logger.info("═" * 50)
-    logger.info("Total: %d upserted, %d failed", total_success, total_fail)
-
+    # Keep the wording of this line stable: deploy/run-scrape.sh parses it to
+    # decide whether a nightly run counts as ok, degraded or broken.
+    logger.info(
+        "Total: %d upserted, %d failed, %d source(s) failed%s",
+        total_success,
+        total_rows_failed,
+        len(failed_sources),
+        f" ({', '.join(failed_sources)})" if failed_sources else "",
+    )
     # Safety net: link freshly scraped events to known venues
     # (case-insensitive) and geocode a bounded tail of stragglers —
     # unlinked events have no coordinates and are invisible on the map.
+    #
+    # This runs AFTER the summary and BEFORE the return, deliberately. An earlier
+    # version of this function returned above it and made the whole block dead
+    # code: every nightly run would have skipped venue linking and geocoding, and
+    # newly scraped events would have been invisible on the map. It failed
+    # silently — the six tests around this function all still passed, because
+    # they only ever asserted on the return value.
+    #
+    # It also runs regardless of how many sources failed: the events that DID
+    # arrive still need coordinates.
     if os.environ.get("DRY_RUN", "").lower() != "true":
         try:
             from pipeline.geocoder import run as geocode_run
@@ -120,6 +154,8 @@ def run_all(scrapers: dict) -> None:
             geocode_run(limit=1500)
         except Exception as e:
             logger.error("  ✗ venue linking/geocoding crashed: %s", e)
+
+    return failed_sources
 
 
 def main():
@@ -147,13 +183,15 @@ def main():
         return
 
     if args.run_all:
-        run_all(scrapers)
+        failed_sources = run_all(scrapers)
         # Hard exit: lingering non-daemon threads (playwright/scheduler imports) kept
         # the process alive until the CI timeout killed it — nightly runs showed
         # 'INFO done' followed by an orphaned python process and a cancelled job.
         logging.shutdown()
-        os._exit(0)
-        return
+        # The hard exit stays: lingering non-daemon threads (playwright/scheduler
+        # imports) kept the process alive until CI killed it. But it now carries
+        # the verdict — os._exit(0) meant a run could never report failure at all.
+        os._exit(1 if failed_sources else 0)
 
     # Default: start the scheduler
     logger.info("Starting NachtKarte pipeline scheduler...")

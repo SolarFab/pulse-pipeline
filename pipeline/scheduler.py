@@ -15,9 +15,11 @@ def run_scraper(scraper_class, label: str):
     """Instantiate and run a scraper, log results."""
     logger.info("▶ Running scraper: %s", label)
     try:
-        scraper = scraper_class()
-        success, fail = scraper.run()
-        logger.info("✓ %s: %d upserted, %d failed", label, success, fail)
+        outcome = scraper_class().run()
+        if outcome.crashed:
+            logger.error("✗ %s failed: %s", label, outcome.error)
+            return
+        logger.info("✓ %s: %d upserted, %d failed", label, outcome.upserted, outcome.rows_failed)
     except Exception as e:
         logger.error("✗ %s crashed: %s", label, e)
 

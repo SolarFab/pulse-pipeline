@@ -8,6 +8,7 @@ from __future__ import annotations
 import logging
 import os
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Any
 
 import httpx
@@ -34,6 +35,26 @@ DEFAULT_HEADERS = {
 }
 
 
+@dataclass
+class ScrapeOutcome:
+    """What one source did, with failure distinguishable from emptiness.
+
+    `error` is None when the source ran to completion, whatever it found. A
+    source that legitimately has nothing on tonight is `upserted=0, error=None`;
+    a source that blew up is `upserted=0, error="..."`. Conflating the two is
+    the bug this type exists to prevent.
+    """
+
+    source: str
+    upserted: int = 0
+    rows_failed: int = 0  # individual events rejected during upsert
+    error: str | None = None  # set only when the source itself failed
+
+    @property
+    def crashed(self) -> bool:
+        return self.error is not None
+
+
 class BaseScraper(ABC):
     """
     Abstract base for all NachtKarte scrapers.
@@ -57,10 +78,14 @@ class BaseScraper(ABC):
         """
         ...
 
-    def run(self) -> tuple[int, int]:
-        """
-        Full pipeline: scrape → normalize → categorize → upsert.
-        Returns (success_count, fail_count).
+    def run(self) -> ScrapeOutcome:
+        """Full pipeline: scrape → normalize → categorize → upsert.
+
+        Returns an outcome rather than a bare (success, fail) tuple, because the
+        tuple could not tell "this source found nothing tonight" apart from "this
+        source crashed" — both were (0, 0). That ambiguity is why `venue_website`
+        and `instagram` produced zero rows for months while every run reported
+        success. A caller must be able to count failures, so `error` carries them.
         """
         self.logger.info("Starting scrape: %s", self.source_name)
 
@@ -68,7 +93,7 @@ class BaseScraper(ABC):
             raw_events = self.scrape()
         except Exception as e:
             self.logger.error("Scrape failed for %s: %s", self.source_name, e)
-            return 0, 0
+            return ScrapeOutcome(self.source_name, error=f"{type(e).__name__}: {e}")
 
         self.logger.info("Scraped %d raw events from %s", len(raw_events), self.source_name)
 
@@ -176,7 +201,7 @@ class BaseScraper(ABC):
         # Upsert
         success, fail = upsert_events(categorised, dry_run=self.dry_run)
         self.logger.info("Upserted %d, failed %d", success, fail)
-        return success, fail
+        return ScrapeOutcome(self.source_name, upserted=success, rows_failed=fail)
 
     # ── HTTP helpers ──────────────────────────────────────────────────────────
 
