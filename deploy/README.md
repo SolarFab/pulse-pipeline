@@ -88,3 +88,7 @@ grep -E '▶|✓|✗' ~/pulse-logs/scrape-*.log     # per-scraper results
 The GitHub workflow is not deleted, only unscheduled. Restore the `schedule:`
 block in `.github/workflows/scrape.yml` and it takes over again — assuming the
 Actions allowance has reset.
+
+**Stop the Hetzner cron first.** Both run at 02:00 UTC, so restoring the
+schedule without commenting out the crontab line gives you two scrapes
+competing for the same rows. This is a rollback, not a second copy.
