@@ -1,10 +1,22 @@
 name: Daily Scrape
 
+# Unscheduled on purpose. The nightly scrape runs on Hetzner now
+# (deploy/run-scrape.sh, cron at 02:00 UTC) because this job had a 120-minute
+# cap that cancelled 7 of 8 runs, and because Actions minutes on a private repo
+# ran out on 17 August and stopped the catalogue for four days.
+#
+# The schedule is removed rather than the workflow, so this stays available as
+# a manual fallback if the box dies. Restoring the `schedule:` block below is
+# the rollback — but only after stopping the Hetzner cron, never both at once:
+# two runs at 02:00 UTC would compete for the same rows.
+#
+#   schedule:
+#     - cron: "0 2 * * *"
+#
+# Timing matters: the Actions allowance resets on 1 September, and a schedule
+# left in place would silently start a second nightly scrape that day.
 on:
-  schedule:
-    # 4am Berlin time (2am UTC in winter, 2am UTC in summer = 4am CEST)
-    - cron: "0 2 * * *"
-  workflow_dispatch: # allow manual trigger
+  workflow_dispatch: # manual fallback only
 
 env:
   SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
