@@ -10,7 +10,10 @@ dist/
 .playwright/
 web/
 node_modules/
-.claude/
+# Agent config is shared: skills and /opsx: commands are tracked so they travel
+# with the repo. Only the machine-local files are ignored.
+.claude/settings.local.json
+.claude/launch.json
 .vercel
 .DS_Store
 
