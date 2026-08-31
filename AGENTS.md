@@ -61,6 +61,29 @@ Substantial features are planned as OpenSpec changes in `openspec/changes/<name>
 (proposal → design → specs → tasks). Use `/opsx:propose "<idea>"` to start one and `/opsx:apply` to
 implement. For small/mechanical work, ad-hoc is fine.
 
+## Delivery pipeline
+Every change is a card on the Notion **Pulse Delivery** board with an ID like `FEAT-12`. Put that ID
+in the branch (`feat/FEAT-12-slug`), the PR title and the commits — it is the only thread linking
+ticket, spec, ADR, PR and deploy.
+
+GitHub drives phases 5, 6, 7 and 8 automatically (`.github/workflows/notion-sync.yml`). **You must
+set the ones GitHub cannot see: 2 Spec, 3 Spec Review, 4 Architecture, 10 Closed.** Phase 10 means
+`/opsx:archive` + `/opsx:sync` have run — a change is not done until the specs match reality.
+See the `pulse-delivery` skill for the full phase contract.
+
+## Repo boundaries — read this before touching web/
+`web/` is **a separate git repository** (`SolarFab/nachtkarte`) nested inside this one, and it is in
+this repo's `.gitignore`. Commits, branches and PRs for the web app happen *inside* `web/`, against
+its own remote. Nothing under `web/` is ever staged from the repo root, and this repo's CI cannot
+see it.
+
+## Environment quirks
+- **`git commit` fails from an unactivated shell**: the pre-commit hook calls bare `pre-commit`,
+  which lives in `.venv/bin`. Use `uv run git commit …` or `source .venv/bin/activate` first.
+- **The nightly scrape runs on the Hetzner box, not GitHub Actions** (`deploy/README.md`). The
+  Actions `schedule:` in `scrape.yml` is deliberately commented out — both used 02:00 UTC and the
+  `flock` in `run-scrape.sh` cannot see a GitHub runner. Do not "fix" the missing cron.
+
 ## Don'ts
 - Don't use the `service_role` key for user requests.
 - Don't pass raw scraped text to a model as if it were trusted instructions.
