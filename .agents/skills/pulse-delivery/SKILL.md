@@ -1,6 +1,6 @@
 ---
 name: pulse-delivery
-description: The Pulse delivery lifecycle — the eleven phases a change moves through, who owns each one (Fabian, Claude, Codex or automation), which skills each phase needs, and the Definition of Ready and Done. Use when starting, specifying, reviewing, implementing, verifying or closing any change, and whenever a card's phase needs updating.
+description: The Pulse delivery lifecycle — the eleven phases a change moves through, who owns each one (Fabian, Claude, Codex or automation), and which reference to read for the phase you are in. Use when starting, specifying, reviewing, implementing, verifying, releasing or closing any change, and whenever a card's phase needs updating.
 ---
 
 # Pulse delivery pipeline
@@ -10,7 +10,7 @@ work stands, it does not gate anything. The real gates are CI, required checks, 
 
 - Board: https://app.notion.com/p/2e04556297ab40d7a24556f1fc02c52c
 - Notion data source: `ab84fad6-44f8-47af-bedc-641692b48518`
-- Sync workflow: `.github/workflows/notion-sync.yml` (present in both GitHub repos)
+- Sync workflow: `.github/workflows/notion-sync.yml` (in both GitHub repos)
 
 Every change is a card with an ID like `FEAT-12`. That ID goes in the branch
 (`feat/FEAT-12-slug`), the PR title, and the commits. It is the only thread linking ticket, spec,
@@ -18,28 +18,26 @@ ADR, PR and deploy.
 
 ## Who owns which phase
 
-The rule underneath: **whoever produces an artifact never grades it.**
+The rule underneath: **whoever produces an artifact never grades it.** Claude makes, Codex reviews,
+Fabian owns the two ends.
 
-| Phase | Owner | Skills |
+| Phase | Owner | Read |
 |---|---|---|
-| `0 · Backlog` | 🧑 Fabian | — |
-| `1 · Ready` | 🧑 Fabian | pulse-delivery |
-| `2 · Spec` | 🟣 Claude | pulse-delivery, openspec-propose |
-| `3 · Spec Review` | 🟢 Codex | pulse-delivery, openspec-explore |
-| `4 · Architecture` | 🟢 Codex | pulse-delivery, openspec-explore, improve-codebase-architecture, openspec-update-change |
-| `5 · Development` | 🟣 Claude | openspec-apply-change, tdd |
-| `6 · Review` | 🟢 Codex | pulse-delivery, tdd, improve-codebase-architecture |
-| `7 · Verification` | 🟣 Claude | webapp-testing |
-| `8 · Deployment` | 🧑 Fabian | — |
-| `9 · Post-deploy` | ⚙️ automated | — |
-| `10 · Closed` | 🟣 Claude | openspec-archive-change, openspec-sync-specs |
+| `0 · Backlog`, `1 · Ready` | 🧑 Fabian | `references/intake.md` |
+| `2 · Spec` | 🟣 Claude | `references/spec.md` |
+| `3 · Spec Review` | 🟢 Codex | `references/spec.md` |
+| `4 · Architecture` | 🟢 Codex | `references/architecture.md` |
+| `5 · Development` | 🟣 Claude | `references/development.md` |
+| `6 · Review` | 🟢 Codex | `references/review.md` |
+| `7 · Verification` | 🟣 Claude | `references/verification.md` |
+| `8 · Deployment`, `9 · Post-deploy`, `10 · Closed` | 🧑 Fabian → ⚙️ → 🟣 Claude | `references/release.md` |
 
-Plus, wherever the card declares them: **`langfuse`** on every LLM-touching phase from 2 onward,
-**`vercel-react-best-practices`** at 5, 6 and 7 for web work.
+**Read only the reference for the phase you are acting on.** Each names the skills that phase needs
+and the exact entry and exit conditions.
 
 Phase 7 is the one deliberate exception to the produce/grade rule — Claude verifies its own
-implementation because the work there is mechanical (run the evals, open the preview). If
-verification starts rubber-stamping, move it to Codex.
+implementation because the work there is mechanical. If verification starts rubber-stamping, move it
+to Codex.
 
 ## Who writes the phase to Notion
 
@@ -54,146 +52,29 @@ the workflow:
 | PR merged | `8 · Deployment` |
 
 **A PR carrying only specs, ADRs or docs must be labelled `spec-only`** — the sync then makes no
-phase change at all. Without the label a spec PR would drag its card into Development the moment it
-opened. The label is opt-out on purpose: `chore/`, `docs/` and `fix/` branches are frequently real
-implementations here, so a branch-name rule would be wrong more often than right.
+phase change. Without it a spec PR drags its card into Development the moment it opens. The label is
+opt-out on purpose: `chore/`, `docs/` and `fix/` branches are frequently real implementations here,
+so a branch-name rule would be wrong more often than right.
 
 Everything else is written by whoever owns the phase. Phase strings must match **exactly**,
 including the `·` (U+00B7) and the spaces around it.
 
-Set `Blocked` (checkbox) rather than inventing a phase — the phase a card stalled in is the
-information you would otherwise lose.
+## Declared at intake, and they change the route
 
-## Declared at intake, not discovered later
+Set at phase 1. Forgetting one silently disables the rules that depend on it.
 
-Three card properties change what the pipeline requires. All are set at phase 1:
+- **`Risk`** — Low skips `4 · Architecture`. Medium runs the full line. High runs everything plus an
+  explicit go from Fabian *before* the merge.
+- **`Touches LLM`** — any model call, prompt, embedding or eval. Pulls `langfuse` in **from phase 2**,
+  not phase 7. An acceptance criterion nobody can observe cannot be verified.
+- **`Touches web`** — changes in `SolarFab/nachtkarte`, a separate repository. Pulls
+  `vercel-react-best-practices` in at 5, 6 and 7.
 
-- **`Risk`** — Low skips `4 · Architecture` and usually `7 · Verification`. Medium runs the full
-  line. High runs everything plus a human production approval at 8.
-- **`Touches LLM`** — any model call, prompt, embedding or eval. Pulls `langfuse` in **from phase 2
-  onward**. Observability is a requirement, not a late step: an acceptance criterion nobody can
-  observe cannot be verified, span shape and cost budget are architecture decisions, and you
-  instrument while building rather than after.
-- **`Touches web`** — changes in `SolarFab/nachtkarte`, which is a separate repository.
+## Blocked cards
 
-## The phases
-
-### 0 · Backlog — 🧑 Fabian
-- **Enter:** the idea exists. Nothing else required.
-- **Do:** decide whether it is real.
-- **Leave:** it is worth specifying.
-
-### 1 · Ready — 🧑 Fabian
-- **Enter:** the Definition of Ready below is met.
-- **Do:** create the GitHub issue carrying problem, criteria, edge cases and non-goals. Set `Risk`,
-  `Touches LLM`, `Touches web`.
-- **Leave:** the issue exists and its link is on the card.
-
-### 2 · Spec — 🟣 Claude
-- **Enter:** a ready ticket.
-- **Do:** `/opsx:propose` writes `openspec/changes/<name>/` — proposal, spec deltas, task list. If
-  `Touches LLM`, the acceptance criteria must say what will be observable in traces.
-- **Leave:** proposal and tasks exist, `Spec` link is on the card.
-
-### 3 · Spec Review — 🟢 Codex
-- **Enter:** there is a spec to read.
-- **Do:** review **the spec, not code**. Does it solve the stated problem? Are the criteria
-  testable? Are the non-goals real? Correcting a paragraph costs a minute; correcting a 900-line
-  diff costs an afternoon.
-- **Leave:** approved, or back to 2 with specific objections.
-
-### 4 · Architecture — 🟢 Codex
-- **Skipped for Low risk.**
-- **Enter:** an approved spec touching structure, data, a security boundary, or a new dependency.
-- **Do:** read the proposal against the repo and the rules in `AGENTS.md`. Answer one question —
-  does this violate a decision already made, or does it *make* a new one? If it makes one, write
-  the ADR before any code exists. Name the anti-pattern explicitly, so a later refactor cannot
-  quietly undo the reasoning.
-- **Leave:** plan accepted, `ADR` link on the card if one was needed.
-- **If blocked:** the card stays here and stays Codex's. Tick `Blocked`, name the external
-  dependency, and keep going up to the point where it actually bites — a blocked ticket is not an
-  unowned one.
-
-### 5 · Development — 🟣 Claude
-- **Enter:** an approved plan.
-- **Do:** branch `feat/FEAT-nn-slug`, work the task list with `/opsx:apply`, tests alongside the
-  code. Close your own loop against `make check` — hand over evidence, not assurances.
-- **Leave:** PR open and CI green.
-
-### 6 · Review — 🟢 Codex
-- **Enter:** CI passes. Not before — do not spend a review pass on code that does not build.
-- **Do:** review the diff against the spec and `AGENTS.md`. Correctness, security (rules 1 and 2),
-  tests that assert behaviour rather than mocks, scope creep, unrelated changes. Report findings;
-  do not fix.
-- **Leave:** approved. **Or back to 5** — normal, and counted in `Repair attempts`.
-
-### 7 · Verification — 🟣 Claude
-- **Enter:** the code is approved. The sync writes this on approval, so phase 7 is never skipped —
-  what varies is how much work it takes.
-- **Do:** the preview deployment, E2E where it exists, and the golden-set evals. This asks a
-  different question from Review: not *is this code good* but *does the acceptance criterion hold
-  for a user*. **Low risk with neither `Touches LLM` nor `Touches web` is satisfied by green CI
-  alone** — record that on the card and move on. That is the whole rule; there is no "usually".
-- **Leave:** verified and **awaiting Fabian's merge**. **Or back to 5.**
-
-### 8 · Deployment — 🧑 Fabian merges, the card follows
-- **Enter:** the merge event. Fabian merges at the 7 → 8 boundary and `notion-sync.yml` then writes
-  phase 8. Nobody sets this by hand, and **phase 8 does not mean "merge now"** — it means the change
-  is deploying or live. High risk waits for Fabian's explicit go *before* the merge, not after.
-- **Do:** watch the deploy.
-- **Leave:** deployed and serving.
-
-### 9 · Post-deploy — ⚙️ automated
-- **Enter:** deployed.
-- **Do:** smoke checks, the nightly quality gauges, and the traces. Watch for what only production
-  reveals.
-- **Leave — this is the trigger that wakes Claude for phase 10:** one healthy nightly run has
-  completed *after* the deploy — `run-scrape.sh` reporting `ok` with gauges under threshold. For a
-  change the nightly does not exercise (docs, CI, agent config), 24 hours with no new error in the
-  traces or logs. Until that event, the card stays here.
-
-### 10 · Closed — 🟣 Claude
-- **Enter:** stable in production.
-- **Do:** `/opsx:archive <change>` then `/opsx:sync`, so `openspec/specs/` describes the system as
-  it now is.
-- **Leave:** nothing. This is the end, and the phase most often skipped — skipping it is why a spec
-  folder fills with proposals and stops describing the product.
-
-## Definition of Ready — before a card leaves `1 · Ready`
-
-- [ ] Problem stated, not just a solution
-- [ ] Who benefits and how
-- [ ] Acceptance criteria that are testable — "When \<trigger\>, the system shall \<response\>"
-- [ ] Edge cases considered
-- [ ] Dependencies named
-- [ ] Security and privacy implications considered (OWASP LLM Top 10, GDPR — see `AGENTS.md`)
-- [ ] **Does this touch a model?** If yes, tick `Touches LLM` and say what must be observable
-- [ ] **Does this touch the web app?** If yes, tick `Touches web` — that is a separate repository
-- [ ] Non-goals written down
-- [ ] `Risk` assigned
-
-Without these, an agent implements a fuzzy request precisely. That is the expensive failure.
-
-## Definition of Done — before a card reaches `10 · Closed`
-
-1. `make check` passes (ruff + pytest)
-2. Web changes are a **separate PR in `SolarFab/nachtkarte`** — `web/` is its own repo, nested and
-   gitignored here. Its lint/test/build run there.
-3. The diff is reviewed against the acceptance criteria, not just for style
-4. No unrelated changes rode along
-5. If `Touches LLM`: traces appear in Langfuse and the golden-set eval shows no regression
-6. Docs and specs updated
-7. **`/opsx:archive <change>` then `/opsx:sync`** — not done until `openspec/specs/` matches reality
-
-Step 7 is the one that gets skipped. When it is, `openspec/changes/` fills with proposals and the
-spec folder stops describing the product. That has already happened here once.
-
-## Changes that span both repos
-
-`web/` is a separate repository, and a card carries one `GitHub PR`. So a feature touching both the
-pipeline and the web app is **two cards**, one per repo, each with its own PR driving its own phase.
-Give them the same title and cross-link them in the body. Do not try to run one card through two
-repos — the sync would overwrite one PR link with the other and the phases would fight.
+`Blocked` is a checkbox, not a phase. Tick it and leave the card where it is, so the phase it
+stalled in is not lost. **A blocked card is still owned by whoever owns its phase** — keep going up
+to the point where the dependency actually bites.
 
 ## The repair loop
 
@@ -201,14 +82,21 @@ Bouncing `6 → 5` or `7 → 5` is normal — that is review doing its job. The 
 `Repair attempts` each time.
 
 **Cap at 3.** On the third the workflow ticks `Blocked` automatically. Stop, write the diagnosis on
-the card, hand it to a human. Two agents passing work back and forth without a limit is how a
-ticket quietly becomes expensive.
+the card, hand it to a human. Two agents passing work back and forth without a limit is how a ticket
+quietly becomes expensive.
 
 A bounce all the way back to `2 · Spec` means the specification was wrong, not the code. Note it —
 it is the signal that the spec review gate is being rushed.
 
+## Changes that span both repos
+
+`web/` is a separate repository and a card carries one `GitHub PR`. A feature touching both the
+pipeline and the web app is **two cards**, one per repo, each with its own PR driving its own phase.
+Same title, cross-linked. One card cannot run through two repos — the sync would overwrite one PR
+link with the other and the phases would fight.
+
 ## Loading caveat
 
 This skill lives in `.agents/skills/pulse-delivery/`, symlinked into `.claude/skills/`, so Codex and
-Claude read the same file. It only loads when the agent is started from inside a repo that has it —
+Claude read the same files. It only loads when the agent starts from inside a repo that has it —
 running from the `pulse/` workspace root loads none of this repo's skills or `/opsx:*` commands.
