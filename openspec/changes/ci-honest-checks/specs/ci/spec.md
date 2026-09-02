@@ -2,17 +2,17 @@
 
 ## ADDED Requirements
 
-### Requirement: CI validates both halves of the repository
-Continuous integration SHALL execute the Python and web checks on every pull request. A pull
-request that touches only one half MAY skip the other, but no pull request SHALL merge with either
-half unvalidated.
+### Requirement: CI validates both product repositories
+Continuous integration SHALL execute the Python checks on every `nachtkarte-pipeline` pull request
+and the web checks on every `nachtkarte` pull request. Each repository SHALL expose an always-present
+stable check that can be required independently.
 
 #### SC-CI-01: Python changes
-- **WHEN** a pull request changes `scrapers/`, `pipeline/`, `db/`, `main.py` or `tests/`
+- **WHEN** a pull request is opened in `nachtkarte-pipeline`
 - **THEN** CI runs Ruff and pytest, and fails on either
 
 #### SC-CI-02: Web changes
-- **WHEN** a pull request changes `web/`
+- **WHEN** a pull request is opened in `SolarFab/nachtkarte`
 - **THEN** CI runs lint, type checking, unit tests and a production build, and fails on any
 
 #### SC-CI-03: A failing check blocks the merge

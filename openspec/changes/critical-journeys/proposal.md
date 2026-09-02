@@ -28,8 +28,9 @@ Journey 2 must not fail because the catalogue is empty — inventory belongs to 
 journey owns the rendering chain. Conflating them reports a UI defect when the problem is upstream.
 
 ## Impact
-`web/` gains Playwright, a config and two spec files. Needs a test account and OpenRouter credit —
-the concierge journey makes a real model call.
+The implementation and final OpenSpec change live in the separate `SolarFab/nachtkarte` repository,
+which gains Playwright, a config and two spec files. Needs a test account and OpenRouter credit —
+the live concierge canary makes a real model call.
 
 ## Non-goals
 Filters, login flows, saved events, responsive layouts, visual regression. After the user test,

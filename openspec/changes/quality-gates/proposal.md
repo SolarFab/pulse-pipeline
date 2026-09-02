@@ -9,16 +9,14 @@ the class-level instruments so regressions surface within a day, not when a user
 - **Ingest checks** (pipeline, deterministic): price sanity (no "Free – 86.41 EUR" ranges,
   currency plausibility), time plausibility (no 03:00 kids events, end>start, duration <24h),
   neighborhood derivation from PLZ/address when missing.
-- **Nightly quality report**: one artifact with the load-bearing gauges — unembedded-upcoming
-  count, unlinked-venue count, invisible-on-map count, dead-subcategory usage, taxonomy-audit
-  rate (weekly), duplicate-venue candidates, per-source freshness. Fails loudly (issue/log
-  annotation) when a gauge crosses its threshold.
+- Nightly catalogue reporting moved to the dedicated `data-gauges` change, which owns its
+  thresholds, verdict composition and alerting dependency.
 - **Venue dedup pass** (one-off + monitor): merge exact-name/near-name duplicates (ANOHA ×2,
   Galli ×2, Punch Line ×2...), keeping the coords-bearing row; alias table for spelling variants.
 
 ## Capabilities
 ### New Capabilities
-- `quality-gates` — ingest validations, gauges, nightly report, dedup.
+- `quality-gates` — ingest validations and venue deduplication.
 
 ## Impact
 Pipeline only (+1 small migration for venue aliases). No user-facing changes except better data.

@@ -1,8 +1,9 @@
 # Tasks — Nightly data gauges (issue #11)
-- [ ] 0.1 Reconcile with the existing `quality-gates` change — one of them owns this
+- [ ] 0.1 Remove the nightly-report requirement and tasks 2.1–2.2 from `quality-gates`;
+      `data-gauges` is the sole owner, while `quality-gates` retains ingest validation and venue dedup
 - [ ] 1.1 Gauge module: each gauge is a named SQL query + threshold, returning a status
 - [ ] 1.2 Thresholds file, per source, with a comment per number explaining its origin
-- [ ] 2.1 Wire into `deploy/run-scrape.sh` after the scrape, before the verdict
+- [ ] 2.1 After FEAT-14 lands, wire into `deploy/run-scrape.sh` after the scrape, before the verdict
 - [ ] 2.2 Combine gauge severity with the run verdict into one message
 - [ ] 3.1 Backdate-test each gauge against the incident it should have caught:
       rausgegangen pre-fix, Makery pre-backfill, match_events pre-migration, the 16-20 Aug freeze

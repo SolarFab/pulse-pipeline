@@ -15,15 +15,6 @@ neighborhood from PLZ/address when the source omits it.
 - **WHEN** an event has address "…, 10245 Berlin" and no neighborhood
 - **THEN** neighborhood = Friedrichshain is derived at ingest
 
-### Requirement: Nightly quality gauges
-A nightly job SHALL emit: unembedded-upcoming, unlinked-venues, invisible-on-map,
-subcategory-usage vs taxonomy, duplicate-venue candidates, per-source freshness; each gauge
-SHALL have a threshold that fails the job loudly when crossed.
-
-#### Scenario: Embedding gap regrows
-- **WHEN** unembedded-upcoming exceeds its threshold
-- **THEN** the nightly run reports failure with the count (no more silent 3,401s)
-
 ### Requirement: Venue deduplication
 Duplicate venue rows SHALL be merged (events relinked, coords-bearing row kept) with an alias
 table preserving name variants for future matching.

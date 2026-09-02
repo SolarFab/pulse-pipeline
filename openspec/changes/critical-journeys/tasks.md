@@ -1,4 +1,6 @@
 # Tasks — Two critical journeys (issue #14)
+- [ ] 0.0 Move the approved OpenSpec change to `SolarFab/nachtkarte` and update the Notion card's
+      repository/spec link before implementation; do not write into this repo's ignored `web/`
 - [ ] 0.1 AFTER the Berlin user test — the UI will change based on it
 - [ ] 1.1 Playwright in web/, config targeting a preview deployment
 - [ ] 1.2 Test account with a stable session; document how it is provisioned

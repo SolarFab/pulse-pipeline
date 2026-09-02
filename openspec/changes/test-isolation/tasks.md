@@ -6,5 +6,5 @@
 - [ ] 2.2 Confirm the FEAT-9 case: `test_scrape_failure_reporting.py` passes with its local
       autouse fixture REMOVED, because the global fence covers it
 - [ ] 3.1 CI passes a test-scoped environment, not the production one
-- [ ] 4.1 Web: verify Vitest does not reach Supabase or OpenRouter (routing.test.ts already stubs
-      fetch — check the other two files)
+- [ ] 4.1 Raise a separate `SolarFab/nachtkarte` card for Vitest network and credential isolation;
+      this pipeline card does not cross the repository boundary
