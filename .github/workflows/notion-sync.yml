@@ -5,7 +5,7 @@ name: Notion sync
 
 on:
   pull_request:
-    types: [opened, reopened, ready_for_review, review_requested, closed]
+    types: [opened, reopened, ready_for_review, review_requested, labeled, unlabeled, closed]
   pull_request_review:
     types: [submitted]
 
@@ -39,4 +39,5 @@ jobs:
           GH_PR_TITLE: ${{ github.event.pull_request.title }}
           GH_PR_BRANCH: ${{ github.event.pull_request.head.ref }}
           GH_PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: python .github/scripts/notion_sync.py

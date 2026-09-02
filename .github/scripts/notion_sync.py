@@ -16,6 +16,7 @@ Env:
   GH_MERGED           true|false (pull_request.closed only)
   GH_REVIEW_STATE     approved | changes_requested | commented
   GH_PR_TITLE, GH_PR_BRANCH, GH_PR_URL
+  GH_PR_LABELS        comma-joined; "spec-only" suppresses every transition
 """
 
 import json
@@ -59,6 +60,13 @@ def call(method, path, payload=None):
 
 def target_phase():
     """The phase this event implies, or None to leave the card alone."""
+    # A spec or architecture PR carries artifacts, not an implementation. Without this
+    # the card would jump to Development the moment the PR opened. Opt-out rather than
+    # opt-in by branch prefix: chore/, docs/ and fix/ branches are real implementations.
+    labels = [x.strip().lower() for x in env("GH_PR_LABELS").split(",")]
+    if "spec-only" in labels:
+        return None
+
     event, action = env("GH_EVENT"), env("GH_ACTION")
 
     if event == "pull_request_review" and action == "submitted":

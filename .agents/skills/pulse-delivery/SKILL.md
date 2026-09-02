@@ -26,7 +26,7 @@ The rule underneath: **whoever produces an artifact never grades it.**
 | `1 · Ready` | 🧑 Fabian | pulse-delivery |
 | `2 · Spec` | 🟣 Claude | pulse-delivery, openspec-propose |
 | `3 · Spec Review` | 🟢 Codex | pulse-delivery, openspec-explore |
-| `4 · Architecture` | 🟢 Codex | openspec-explore, improve-codebase-architecture, openspec-update-change |
+| `4 · Architecture` | 🟢 Codex | pulse-delivery, openspec-explore, improve-codebase-architecture, openspec-update-change |
 | `5 · Development` | 🟣 Claude | openspec-apply-change, tdd |
 | `6 · Review` | 🟢 Codex | pulse-delivery, tdd, improve-codebase-architecture |
 | `7 · Verification` | 🟣 Claude | webapp-testing |
@@ -52,6 +52,11 @@ the workflow:
 | PR ready for review, or review requested | `6 · Review` |
 | Review approved | `7 · Verification` |
 | PR merged | `8 · Deployment` |
+
+**A PR carrying only specs, ADRs or docs must be labelled `spec-only`** — the sync then makes no
+phase change at all. Without the label a spec PR would drag its card into Development the moment it
+opened. The label is opt-out on purpose: `chore/`, `docs/` and `fix/` branches are frequently real
+implementations here, so a branch-name rule would be wrong more often than right.
 
 Everything else is written by whoever owns the phase. Phase strings must match **exactly**,
 including the `·` (U+00B7) and the spaces around it.
@@ -105,6 +110,9 @@ Three card properties change what the pipeline requires. All are set at phase 1:
   the ADR before any code exists. Name the anti-pattern explicitly, so a later refactor cannot
   quietly undo the reasoning.
 - **Leave:** plan accepted, `ADR` link on the card if one was needed.
+- **If blocked:** the card stays here and stays Codex's. Tick `Blocked`, name the external
+  dependency, and keep going up to the point where it actually bites — a blocked ticket is not an
+  unowned one.
 
 ### 5 · Development — 🟣 Claude
 - **Enter:** an approved plan.
@@ -120,22 +128,29 @@ Three card properties change what the pipeline requires. All are set at phase 1:
 - **Leave:** approved. **Or back to 5** — normal, and counted in `Repair attempts`.
 
 ### 7 · Verification — 🟣 Claude
-- **Enter:** the code is approved.
+- **Enter:** the code is approved. The sync writes this on approval, so phase 7 is never skipped —
+  what varies is how much work it takes.
 - **Do:** the preview deployment, E2E where it exists, and the golden-set evals. This asks a
   different question from Review: not *is this code good* but *does the acceptance criterion hold
-  for a user*.
-- **Leave:** every acceptance criterion demonstrably met. **Or back to 5.**
+  for a user*. **Low risk with neither `Touches LLM` nor `Touches web` is satisfied by green CI
+  alone** — record that on the card and move on. That is the whole rule; there is no "usually".
+- **Leave:** verified and **awaiting Fabian's merge**. **Or back to 5.**
 
-### 8 · Deployment — 🧑 Fabian
-- **Enter:** verified.
-- **Do:** merge. Low and Medium deploy automatically; High waits for your go.
-- **Leave:** live.
+### 8 · Deployment — 🧑 Fabian merges, the card follows
+- **Enter:** the merge event. Fabian merges at the 7 → 8 boundary and `notion-sync.yml` then writes
+  phase 8. Nobody sets this by hand, and **phase 8 does not mean "merge now"** — it means the change
+  is deploying or live. High risk waits for Fabian's explicit go *before* the merge, not after.
+- **Do:** watch the deploy.
+- **Leave:** deployed and serving.
 
 ### 9 · Post-deploy — ⚙️ automated
-- **Enter:** it shipped.
+- **Enter:** deployed.
 - **Do:** smoke checks, the nightly quality gauges, and the traces. Watch for what only production
   reveals.
-- **Leave:** stable, nothing to roll back.
+- **Leave — this is the trigger that wakes Claude for phase 10:** one healthy nightly run has
+  completed *after* the deploy — `run-scrape.sh` reporting `ok` with gauges under threshold. For a
+  change the nightly does not exercise (docs, CI, agent config), 24 hours with no new error in the
+  traces or logs. Until that event, the card stays here.
 
 ### 10 · Closed — 🟣 Claude
 - **Enter:** stable in production.
@@ -172,6 +187,13 @@ Without these, an agent implements a fuzzy request precisely. That is the expens
 
 Step 7 is the one that gets skipped. When it is, `openspec/changes/` fills with proposals and the
 spec folder stops describing the product. That has already happened here once.
+
+## Changes that span both repos
+
+`web/` is a separate repository, and a card carries one `GitHub PR`. So a feature touching both the
+pipeline and the web app is **two cards**, one per repo, each with its own PR driving its own phase.
+Give them the same title and cross-link them in the body. Do not try to run one card through two
+repos — the sync would overwrite one PR link with the other and the phases would fight.
 
 ## The repair loop
 
