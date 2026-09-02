@@ -66,10 +66,20 @@ Every change is a card on the Notion **Pulse Delivery** board with an ID like `F
 in the branch (`feat/FEAT-12-slug`), the PR title and the commits — it is the only thread linking
 ticket, spec, ADR, PR and deploy.
 
-GitHub drives phases 5, 6, 7 and 8 automatically (`.github/workflows/notion-sync.yml`). **You must
-set the ones GitHub cannot see: 2 Spec, 3 Spec Review, 4 Architecture, 10 Closed.** Phase 10 means
-`/opsx:archive` + `/opsx:sync` have run — a change is not done until the specs match reality.
-See the `pulse-delivery` skill for the full phase contract.
+**Ownership** — whoever produces an artifact never grades it.
+**Fabian** owns 1 Ready and 8 Deployment · **Claude** writes: 2 Spec, 5 Development,
+7 Verification, 10 Closed · **Codex** reviews: 3 Spec Review, 4 Architecture, 6 Review.
+
+GitHub derives phases 5–8 from PR events (`.github/workflows/notion-sync.yml`) — **never set those
+by hand.** Everything else is written by whoever owns the phase, and the phase string must match the
+board exactly, `·` included.
+
+At intake tick **`Touches LLM`** (any model call, prompt, embedding or eval — it pulls Langfuse in
+from phase 2, because an acceptance criterion nobody can observe cannot be verified) and
+**`Touches web`**. Phase 10 means `/opsx:archive` + `/opsx:sync` have run — a change is not done
+until the specs match reality.
+
+See the `pulse-delivery` skill for the full contract.
 
 ## Repo boundaries — read this before touching web/
 `web/` is **a separate git repository** (`SolarFab/nachtkarte`) nested inside this one, and it is in
