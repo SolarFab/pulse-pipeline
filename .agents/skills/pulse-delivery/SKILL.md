@@ -52,9 +52,12 @@ the workflow:
 | PR merged | `8 · Deployment` |
 
 **A PR carrying only specs, ADRs or docs must be labelled `spec-only`** — the sync then makes no
-phase change. Without it a spec PR drags its card into Development the moment it opens. The label is
-opt-out on purpose: `chore/`, `docs/` and `fix/` branches are frequently real implementations here,
-so a branch-name rule would be wrong more often than right.
+phase change. Create it with the label (`gh pr create --label spec-only`): labelling afterwards
+cannot undo the `opened` event, so the sync corrects the card back to `2 · Spec` instead, and the
+history still shows a phase it was never really in.
+
+The label is opt-out on purpose: `chore/`, `docs/` and `fix/` branches are frequently real
+implementations here, so a branch-name rule would be wrong more often than right.
 
 Everything else is written by whoever owns the phase. Phase strings must match **exactly**,
 including the `·` (U+00B7) and the spaces around it.

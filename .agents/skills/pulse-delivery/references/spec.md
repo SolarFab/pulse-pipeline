@@ -9,8 +9,15 @@ Skills: `pulse-delivery`, `openspec-propose` (+ `langfuse` if `Touches LLM`)
   criterion nobody can observe cannot be verified later.
 - **Leave:** proposal and tasks exist, `Spec` link on the card.
 
-Label the PR `spec-only` if it carries specs and nothing else, or the sync will drag the card into
-Development.
+**Open the PR with the label already on it:**
+
+```
+gh pr create --label spec-only --title "FEAT-nn: ..." --body "..."
+```
+
+Labelling afterwards is second best — the `opened` event has already moved the card to Development
+by then. The sync corrects it back to `2 · Spec` when the label lands, but a card that flickers
+through Development is a card whose history lies.
 
 ## 3 · Spec Review — 🟢 Codex
 Skills: `pulse-delivery`, `openspec-explore`

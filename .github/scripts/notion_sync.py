@@ -29,6 +29,7 @@ import urllib.request
 API = "https://api.notion.com/v1"
 VERSION = "2022-06-28"
 
+SPEC = "2 · Spec"
 DEV = "5 · Development"
 REVIEW = "6 · Review"
 VERIFY = "7 · Verification"
@@ -65,7 +66,10 @@ def target_phase():
     # opt-in by branch prefix: chore/, docs/ and fix/ branches are real implementations.
     labels = [x.strip().lower() for x in env("GH_PR_LABELS").split(",")]
     if "spec-only" in labels:
-        return None
+        # Labelling after the fact does not undo the opened event, which already
+        # pushed the card to Development. Put it back where a spec PR belongs.
+        # Better still: open the PR with the label — gh pr create --label spec-only.
+        return SPEC if env("GH_ACTION") == "labeled" else None
 
     event, action = env("GH_EVENT"), env("GH_ACTION")
 
