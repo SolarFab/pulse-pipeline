@@ -32,7 +32,10 @@ Depends on: `event-embeddings` (pgvector column + backfill) and the taxonomy tab
 ## 4. Quality
 
 - [ ] 4.1 [web] Injection test: adversarial description in a fixture event does not alter behaviour
-- [ ] 4.2 [pipeline] Reuse the benchmark golden queries as a retrieval eval against `search_events` (are the right events in top-5?)
+- [x] 4.2 [pipeline] Retrieval regression gate against the production `match_events` path
+      (`scripts/eval_retrieval_gate.py`). Baseline recorded; floors set 10% under it. The
+      qrels window had to be pinned — every labelled event is now in the past, so against
+      `p_date_from = now()` the gate would read 0 forever.
 - [ ] 4.3 [web] Verify end-to-end with the webapp-testing skill: "jazz tonight", "kostenlos am Sonntag draußen", "was geht im SchwuZ", empty-result case
 - [ ] 4.4 Log per turn: tools called, result counts, latency, tokens (basis for later evals)
 - [x] 4.5 Prompt benchmark (promptfoo): golden dialog set (~20 cases incl. broad/ambiguous/explicit-ask/profile cases), deterministic tool-arg assertions + LLM-rubric grounding/policy checks, grid = prompt variants (zero-shot, few-shot, +reasoning, policy variants) × ≥2 chat models via OpenRouter; document results in docs/, ship the winner
