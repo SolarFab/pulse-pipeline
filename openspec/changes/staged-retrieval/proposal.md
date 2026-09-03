@@ -59,12 +59,15 @@ Per the delivery contract this is **two cards and two PRs**:
 
 - **FEAT-22 · venue location propagation.** `match_events` filters `COALESCE(e.neighborhood,
   v.neighborhood)`, which is a text label of mixed granularity. Structured `postal_code`, `city`
-  and `district` now exist on `venues` (postcode on 2,392 of 3,325). **Exit:** the RPC resolves a
-  named area through postcode/district with a radius fallback, and "Prenzlauer Berg" returns the
-  2,340 upcoming events its 144 venues host rather than the 188 the label finds.
-- **FEAT-23 · deduplication before limiting.** 23% of upcoming rows are duplicates; 1,134 groups
-  disagree on `subcategory`. **Exit:** `match_events` returns a stable dedup key and collapses
-  duplicates before `LIMIT`, so copies cannot satisfy a sufficiency test one event would not.
+  and `district` now exist on `venues` (postcode on 2,392 of 3,325). Resolution must stay
+  **event-first at every tier**: 654 of The Makery's 763 upcoming events carry coordinates that
+  differ from their venue row, so a venue-first lookup would relabel them. **Exit:** a named area
+  resolves event-first through postcode/district with a radius fallback, and "Prenzlauer Berg"
+  reaches the 2,340 upcoming events its 144 venues host rather than the 188 the label finds.
+- **FEAT-23 · deduplication.** 23% of upcoming rows are duplicates; 1,134 groups disagree on
+  `subcategory`. **FEAT-23 owns the key, its normalisation and the SQL collapse**; this change
+  consumes them and does not reimplement them. **Exit:** `match_events` returns a stable
+  `dedup_key`, duplicates collapse before `LIMIT`, and winner selection is deterministic.
 
 ## Non-goals
 
