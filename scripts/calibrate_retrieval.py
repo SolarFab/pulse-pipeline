@@ -88,7 +88,7 @@ def search(vec: list[float], case: dict, limit: int = 20) -> list[dict]:
         timeout=30,
     )
     if r.status_code == 404:
-        sys.exit("match_events_v2 not found — apply migrations 011 and 012 first.")
+        sys.exit("match_events_v2 not found — apply migrations 013 and 014 first.")
     r.raise_for_status()
     return r.json()
 

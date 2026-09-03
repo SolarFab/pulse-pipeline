@@ -13,7 +13,7 @@ from pathlib import Path
 import pytest
 
 SQL = (
-    Path(__file__).resolve().parent.parent / "db" / "migrations" / "011_retrieval_contract.sql"
+    Path(__file__).resolve().parent.parent / "db" / "migrations" / "013_retrieval_contract.sql"
 ).read_text()
 
 
@@ -142,7 +142,7 @@ SQL12 = (
     Path(__file__).resolve().parent.parent
     / "db"
     / "migrations"
-    / "012_retrieval_dedup_and_location.sql"
+    / "014_retrieval_dedup_and_location.sql"
 ).read_text()
 
 
@@ -215,8 +215,8 @@ def test_both_helpers_fix_their_search_path():
         assert "set search_path = public, pg_temp" in fn.split("as $")[0]
 
 
-def test_migration_011_refuses_to_run_before_feat_22():
-    """011 indexes venues.postal_code and derives centroids from it, both created
+def test_migration_013_refuses_to_run_before_feat_22():
+    """013 indexes venues.postal_code and derives centroids from it, both created
     by FEAT-22. Without the guard it would fail halfway, leaving areas seeded and
     the RPC absent."""
     assert "information_schema.columns" in SQL
