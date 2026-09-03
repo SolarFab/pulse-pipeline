@@ -56,7 +56,7 @@ as $$
         coalesce(regexp_replace(lower(unaccent_safe(p_title)), '[^a-z0-9]+', '', 'g'), '') || '|' ||
         coalesce(regexp_replace(lower(unaccent_safe(p_venue)), '[^a-z0-9]+', '', 'g'), '') || '|' ||
         to_char(date_trunc('minute', p_start at time zone 'UTC'), 'YYYY-MM-DD"T"HH24:MI'),
-        'UTF8'), 'sha256'), 'hex');
+        'UTF8')), 'hex');
 $$;
 
 create index if not exists events_dedup_key_idx
@@ -65,6 +65,15 @@ create index if not exists events_dedup_key_idx
 -- ---------------------------------------------------------------------------
 -- match_events_v2, revised: dedup before LIMIT, and the full location ladder.
 -- ---------------------------------------------------------------------------
+-- PostgreSQL cannot CREATE OR REPLACE a function when OUT columns change. The
+-- drop and create run in this migration's single transaction, so callers never
+-- observe a window without the function.
+drop function if exists match_events_v2(
+    text, text, text, text, text[], text, text, text,
+    timestamptz, timestamptz, text, text, boolean, boolean, boolean,
+    integer, double precision, double precision, double precision, integer
+);
+
 create or replace function match_events_v2(
     query_embedding    text     default null,
     p_query_text       text     default null,
@@ -144,7 +153,10 @@ as $function$
         select case
             when p_area_id is null then null
             when not exists (select 1 from area) then 'area_unknown'
-            when exists (select 1 from base b where b.eff_postcode = any((select postcodes from area))) then 'postcode'
+            when exists (
+                select 1 from base b cross join area a
+                where b.eff_postcode = any(a.postcodes)
+            ) then 'postcode'
             when exists (select 1 from base b where b.eff_district = (select district from area)) then 'district'
             when exists (select 1 from base b where b.eff_neighborhood ilike '%' || (select name from area) || '%') then 'neighborhood_label'
             when (select centroid_lat from area) is not null then 'centroid_radius'
@@ -154,7 +166,9 @@ as $function$
         select b.* from base b, tier t
         where p_area_id is null
            or t.src in ('area_unknown', 'area_unmatched')
-           or (t.src = 'postcode'           and b.eff_postcode = any((select postcodes from area)))
+           or (t.src = 'postcode' and exists (
+               select 1 from area a where b.eff_postcode = any(a.postcodes)
+           ))
            or (t.src = 'district'           and b.eff_district = (select district from area))
            or (t.src = 'neighborhood_label' and b.eff_neighborhood ilike '%' || (select name from area) || '%')
            or (t.src = 'centroid_radius'    and b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3))
@@ -226,6 +240,7 @@ begin
     return new_id;
 end $$;
 
-revoke all on function set_active_retrieval_config(real, integer, text, integer, text, date) from public, anon;
+revoke all on function set_active_retrieval_config(real, integer, text, integer, text, date)
+    from public, anon, authenticated;
 grant execute on function set_active_retrieval_config(real, integer, text, integer, text, date)
     to service_role;

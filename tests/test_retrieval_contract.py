@@ -245,4 +245,23 @@ def test_the_config_swap_is_one_transaction():
 
 def test_the_config_writer_is_not_public():
     assert "revoke all on function set_active_retrieval_config" in SQL12
+    assert "authenticated" in SQL12
     assert "to service_role" in SQL12
+
+
+def test_dedup_hash_uses_postgres_sha256_signature():
+    assert "sha256(convert_to(" in SQL12
+    assert "'UTF8')), 'hex'" in SQL12
+    assert "'UTF8'), 'sha256'" not in SQL12
+
+
+def test_v2_is_dropped_before_its_return_shape_changes():
+    drop = "drop function if exists match_events_v2("
+    create = "create or replace function match_events_v2("
+    assert drop in SQL12
+    assert SQL12.index(drop) < SQL12.index(create)
+
+
+def test_postcode_array_comparison_uses_an_area_row():
+    assert "b.eff_postcode = any(a.postcodes)" in SQL12
+    assert "any((select postcodes from area))" not in SQL12
