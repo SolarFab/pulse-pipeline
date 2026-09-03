@@ -65,3 +65,62 @@ def test_a_studio_that_happens_to_sit_in_10407_is_still_accepted():
         <section><h3>Ateliers</h3><div>Storkowerstrasse 115</div>
         <div>10407 Berlin</div></section></body></html>"""
     assert extract(page) == "Storkowerstrasse 115, 10407 Berlin"
+
+
+# --- Street normalisation ------------------------------------------------------
+#
+# Every string below is a real value the marketplace produced. Concatenated
+# unchanged with ", <plz> Berlin" they yield addresses no geocoder accepts; the
+# geocode then failed and the event silently inherited the venue's coordinates,
+# putting Neukoelln workshops on the platform's Prenzlauer Berg pin.
+
+import pytest  # noqa: E402
+
+from scrapers.venues.themakery import clean_street  # noqa: E402
+
+
+@pytest.mark.parametrize(
+    "raw,expected",
+    [
+        # postcode and house number repeated after the street
+        ("Reuterstraße 82, 12053 82", "Reuterstraße 82"),
+        # city and country interleaved, house number orphaned at the end
+        ("Reuterstraße , Berlin, Allemagne 82", "Reuterstraße 82"),
+        # house number repeated
+        ("Wrangelstrasse 31a 31a", "Wrangelstrasse 31a"),
+        # double space
+        ("Golzstraße  32", "Golzstraße 32"),
+        ("Storkowerstrasse  115", "Storkowerstrasse 115"),
+        # legitimate shapes must survive untouched
+        ("Moosdorferstrasse 7-9", "Moosdorferstrasse 7-9"),
+        ("Gerichstr. 12-13", "Gerichstr. 12-13"),
+        ("Markgrafendamm 24, Haus 18", "Markgrafendamm 24, Haus 18"),
+        ("Schleiermacherstraße 18", "Schleiermacherstraße 18"),
+    ],
+)
+def test_clean_street_normalises_real_marketplace_values(raw, expected):
+    assert clean_street(raw) == expected
+
+
+@pytest.mark.parametrize("raw", ["", "Route", "Kreuzberg", "12053", "PLÖTTJES STUDIO"])
+def test_clean_street_rejects_lines_that_are_not_streets(raw):
+    """None means 'no address', which is recoverable. A wrong address is not:
+    it geocodes to somewhere real and nothing downstream can tell it is wrong."""
+    assert clean_street(raw) is None
+
+
+def test_a_malformed_street_yields_no_address_rather_than_a_wrong_one():
+    page = """<html><body>
+        <section><h3>Studio</h3><div>Kreuzberg</div>
+        <div>12053 Berlin</div></section></body></html>"""
+    assert extract(page) is None
+
+
+def test_the_reuterstrasse_workshops_now_resolve_to_neukoelln():
+    """The two events Fabian found pinned in Prenzlauer Berg."""
+    page = """<html><body>
+        <footer><div>the Makery</div><div>John-Schehr-Strasse 2</div>
+        <div>10407 Berlin</div></footer>
+        <section><h3>Studio</h3><div>Reuterstraße 82, 12053 82</div>
+        <div>12053 Berlin</div></section></body></html>"""
+    assert extract(page) == "Reuterstraße 82, 12053 Berlin"

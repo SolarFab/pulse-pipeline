@@ -27,6 +27,53 @@ MAKERY_HQ_STREET = "John-Schehr-Strasse 2"
 BERLIN_BBOX = (52.3, 52.7, 13.0, 13.8)
 _PLZ_LINE = re.compile(r"^(\d{5})\s+Berlin$")
 
+# A German house number: 82, 31a, 12-13, 7 - 9.
+_HOUSE = r"\d+\s*[a-zA-Z]?(?:\s*[-\u2013]\s*\d+\s*[a-zA-Z]?)?"
+# Tokens some listings interleave into the street line. Never part of a street name.
+_PLACE_TOKENS = re.compile(r"\b(?:Berlin|Deutschland|Germany|Allemagne|Alemania)\b", re.I)
+_TRAILING_DUP = re.compile(rf"\b({_HOUSE})\s+\1\s*$")
+_STARTS_WITH_WORDS = re.compile(r"^[^\d]{3,}")
+_ENDS_WITH_HOUSE = re.compile(rf"{_HOUSE}\s*$")
+
+
+def clean_street(line: str) -> str | None:
+    """The street part of a studio address line, or None if it is not one.
+
+    The line above the "<5 digits> Berlin" anchor is *usually* just the street, but
+    the marketplace's own listings are hand-entered and several shapes reach us:
+
+        "Reutersr. 82, 12053 82"        postcode and house number repeated
+        "Reuterstr. , Berlin, Allemagne 82"  city and country interleaved
+        "Wrangelstrasse 31a 31a"        house number repeated
+        "Golzstrasse  32"               double space
+
+    Concatenating those with ", <plz> Berlin" produced addresses no geocoder would
+    accept. The geocode then failed and the event silently inherited the venue's
+    coordinates — the marketplace's own studio — so a Neukoelln workshop was drawn
+    in Prenzlauer Berg. Returning None is the safe failure: no address beats a
+    confident wrong one.
+    """
+    # Everything from the first postcode onward repeats the anchor we already have.
+    s = re.split(r"\b\d{5}\b", line, maxsplit=1)[0]
+    s = _PLACE_TOKENS.sub(" ", s)
+
+    # Rebuild from comma-separated parts, dropping the empties the removals leave.
+    parts = [re.sub(r"\s+", " ", p).strip() for p in s.split(",")]
+    parts = [p for p in parts if p]
+    if not parts:
+        return None
+    # A trailing part that is only a house number belongs to the street before it.
+    if len(parts) > 1 and re.fullmatch(_HOUSE, parts[-1]):
+        parts[-2:] = [f"{parts[-2]} {parts[-1]}"]
+    s = ", ".join(parts)
+
+    s = _TRAILING_DUP.sub(r"\1", s)
+    s = re.sub(r"\s+", " ", s).strip(" ,")
+
+    if not (_STARTS_WITH_WORDS.match(s) and _ENDS_WITH_HOUSE.search(s)):
+        return None
+    return s
+
 
 def extract_studio_address(html: str) -> str | None:
     """The partner studio's address from a workshop detail page, or None.
@@ -47,8 +94,12 @@ def extract_studio_address(html: str) -> str | None:
         m = _PLZ_LINE.match(line)
         if not m or n < 1:
             continue
-        street = lines[n - 1]
-        if street == MAKERY_HQ_STREET:
+        raw_street = lines[n - 1]
+        if raw_street == MAKERY_HQ_STREET:
+            continue
+        street = clean_street(raw_street)
+        if street is None:
+            logger.warning("Unparseable studio street %r — leaving address unset", raw_street)
             continue
         return f"{street}, {m.group(1)} Berlin"
     return None
