@@ -185,27 +185,6 @@ def test_location_is_event_first_at_the_postcode_tier():
     assert "coalesce(substring(e.address from '\\m1[0-9]{4}\\M'), v.postal_code)" in SQL12
 
 
-def test_the_location_tiers_are_in_the_accepted_order():
-    tier = SQL12.split("tier as (")[1].split("),")[0]
-    for earlier, later in [
-        ("postcode", "district"),
-        ("district", "neighborhood_label"),
-        ("neighborhood_label", "centroid_radius"),
-    ]:
-        assert tier.index(f"'{earlier}'") < tier.index(f"'{later}'")
-
-
-def test_one_tier_answers_for_the_whole_query():
-    """A mixed result set would make 'which source answered' meaningless."""
-    assert "tier as (" in SQL12
-    assert "(select src from tier)" in SQL12
-
-
-def test_an_unmatched_area_does_not_filter_to_nothing():
-    assert "'area_unmatched'" in SQL12
-    assert "t.src in ('area_unknown', 'area_unmatched')" in SQL12
-
-
 def test_dedup_key_is_indexed():
     assert "events_dedup_key_idx" in SQL12
 
@@ -246,3 +225,52 @@ def test_the_config_swap_is_one_transaction():
 def test_the_config_writer_is_not_public():
     assert "revoke all on function set_active_retrieval_config" in SQL12
     assert "to service_role" in SQL12
+
+
+def test_location_tiers_are_additive_not_winner_take_all():
+    """The live failure: "comedy in Prenzlauer Berg" excluded Cosmic Comedy, which
+    is labelled Prenzlauer Berg and 1.3 km from the asker, because its postcode is
+    10119 while other venues had a 104xx one and the tier locked to 'postcode'."""
+    located = SQL12.split("located as (")[1].split("),")[0]
+    # a row qualifies on ANY tier
+    assert located.count("or b.eff_") >= 2
+    assert "or (b.dist_km is not null" in located
+    # and no single tier is selected for the whole query any more
+    assert "tier as (" not in SQL12
+
+
+def test_the_matched_tier_ranks_rather_than_filters():
+    order_block = SQL12.split("order by")[-1]
+    assert "d.loc_src when 'postcode' then 0" in order_block
+    assert order_block.index("loc_src") < order_block.index("d.sim desc")
+
+
+def test_a_label_match_is_returned():
+    located = SQL12.split("located as (")[1].split("),")[0]
+    assert "eff_neighborhood ilike" in located
+
+
+def test_every_location_tier_is_a_qualifying_route():
+    """Replaces the old 'one tier answers for the whole query'. That design was
+    winner-take-all: the first tier with any match fixed the tier and dropped
+    every row matching only a weaker one."""
+    located = SQL12.split("located as (")[1].split("),")[0]
+    for route in ["eff_postcode", "eff_district", "eff_neighborhood", "dist_km"]:
+        assert route in located, f"{route} must be able to qualify a row on its own"
+
+
+def test_an_unknown_area_still_applies_no_constraint():
+    located = SQL12.split("located as (")[1].split("),")[0]
+    assert "not exists (select 1 from area)" in located
+
+
+def test_tier_strength_orders_results():
+    """Postcode evidence outranks a label, but a label match is returned."""
+    order_block = SQL12.split("order by")[-1]
+    for tier, rank in [
+        ("postcode", "0"),
+        ("district", "1"),
+        ("neighborhood_label", "2"),
+        ("centroid_radius", "3"),
+    ]:
+        assert f"'{tier}' then {rank}" in order_block

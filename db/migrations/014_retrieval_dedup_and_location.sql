@@ -140,24 +140,34 @@ as $function$
     ),
     -- The tier that answers is decided ONCE for the whole query, not per row:
     -- a mixed result set would make "which source answered" meaningless.
-    tier as (
-        select case
-            when p_area_id is null then null
-            when not exists (select 1 from area) then 'area_unknown'
-            when exists (select 1 from base b where b.eff_postcode = any((select postcodes from area))) then 'postcode'
-            when exists (select 1 from base b where b.eff_district = (select district from area)) then 'district'
-            when exists (select 1 from base b where b.eff_neighborhood ilike '%' || (select name from area) || '%') then 'neighborhood_label'
-            when (select centroid_lat from area) is not null then 'centroid_radius'
-            else 'area_unmatched' end as src
-    ),
+    -- Every tier that matches, not the first one that does.
+    --
+    -- This was winner-take-all: if ANY event matched the area by postcode, the
+    -- tier was fixed to 'postcode' and every other row was dropped — including
+    -- venues whose only evidence of belonging is their neighbourhood label.
+    -- "Comedy in Prenzlauer Berg" therefore excluded Cosmic Comedy, which is
+    -- labelled Prenzlauer Berg and sits 1.3 km from the asker, because its
+    -- postcode is 10119 and other venues had a 104xx one.
+    --
+    -- Sources disagree about where a venue is, and discarding the ones that
+    -- disagree is not the same as being right. So a row qualifies on ANY tier and
+    -- carries the strongest tier it matched, which then ORDERS the results:
+    -- postcode matches first, label matches after, nothing silently dropped.
     located as (
-        select b.* from base b, tier t
+        select b.*,
+            case
+                when b.eff_postcode = any((select postcodes from area))            then 'postcode'
+                when b.eff_district = (select district from area)                  then 'district'
+                when b.eff_neighborhood ilike '%' || (select name from area) || '%' then 'neighborhood_label'
+                when b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3) then 'centroid_radius'
+            end as loc_src
+        from base b
         where p_area_id is null
-           or t.src in ('area_unknown', 'area_unmatched')
-           or (t.src = 'postcode'           and b.eff_postcode = any((select postcodes from area)))
-           or (t.src = 'district'           and b.eff_district = (select district from area))
-           or (t.src = 'neighborhood_label' and b.eff_neighborhood ilike '%' || (select name from area) || '%')
-           or (t.src = 'centroid_radius'    and b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3))
+           or not exists (select 1 from area)
+           or b.eff_postcode = any((select postcodes from area))
+           or b.eff_district = (select district from area)
+           or b.eff_neighborhood ilike '%' || (select name from area) || '%'
+           or (b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3))
     ),
     -- Collapse BEFORE the limit. Ranking inside the group is the same comparator
     -- chain, so the surviving copy is the best-tagged one deterministically —
@@ -177,7 +187,7 @@ as $function$
     )
     select d.id, d.title, d.venue_name, d.start_time, d.category, d.subcategory,
            d.price, d.eff_neighborhood, d.genres, d.dist_km,
-           d.sim, d.p_ok, d.p_unknown, (select src from tier), d.dkey
+           d.sim, d.p_ok, d.p_unknown, d.loc_src, d.dkey
     from deduped d
     where d.rn = 1
     order by
@@ -187,6 +197,13 @@ as $function$
              when p_rank_category    is not null and d.category    = p_rank_category    then 1
              when p_rank_genres      is not null and d.genres && p_rank_genres           then 2
              else 3 end,
+        -- Location evidence: a postcode match outranks a label match, and a label
+        -- match is still RETURNED rather than dropped. Sources disagree about
+        -- where a venue is; discarding the ones that disagree is not the same as
+        -- being right.
+        case d.loc_src when 'postcode' then 0 when 'district' then 1
+                       when 'neighborhood_label' then 2 when 'centroid_radius' then 3
+                       else 4 end,
         d.sim desc nulls last,
         case when p_lat is not null or p_area_id is not null then d.dist_km end asc nulls last,
         d.start_time asc,
