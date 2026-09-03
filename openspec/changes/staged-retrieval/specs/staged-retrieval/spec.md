@@ -2,6 +2,24 @@
 
 ## ADDED Requirements
 
+### Requirement: Ranking taxonomy and filtering taxonomy are separate parameters
+The RPC SHALL accept disjoint parameter sets — `p_rank_category`, `p_rank_subcategory`,
+`p_rank_genres` affecting order only, and `p_filter_category`, `p_filter_subcategory` excluding
+rows. Filter parameters SHALL be set only from an explicit user selection. The combined legacy
+parameters SHALL be removed rather than reinterpreted.
+
+#### Scenario: A ranking parameter never excludes
+- **WHEN** `p_rank_subcategory = 'comedy'` is supplied
+- **THEN** events with a different or NULL subcategory remain eligible, ranked lower
+
+#### Scenario: A filter parameter excludes
+- **WHEN** `p_filter_category = 'workshops'` is supplied from a UI selection
+- **THEN** events in other categories are not returned
+
+#### Scenario: A stale caller fails loudly
+- **WHEN** a caller passes the removed legacy `p_subcategory`
+- **THEN** the call fails rather than silently applying a hard gate
+
 ### Requirement: Inferred taxonomy ranks, it does not exclude
 The system SHALL NOT apply an inferred `category`, `subcategory` or `genres` as an exclusive filter,
 and SHALL order results by taxonomy agreement instead. A NULL taxonomy field SHALL be treated as a
@@ -15,13 +33,18 @@ non-match, never as an exclusion.
 - **WHEN** the user selected "Workshops only" in the interface
 - **THEN** `category = 'workshops'` is applied as a hard constraint
 
-### Requirement: Results are ordered by a deterministic comparator chain
+### Requirement: Results are ordered by a deterministic total comparator chain
 Ordering SHALL be exact title match, then taxonomy agreement, then similarity descending with NULLs
-last, then distance when an area or radius was requested, then `start_time`. Ordering SHALL be total.
+last, then distance when an area or radius was requested, then `start_time`, then event `id`.
+The final `id` tier SHALL make the ordering total.
 
 #### Scenario: Ordering is stable across identical inputs
 - **WHEN** the same query runs twice against an unchanged catalogue
 - **THEN** the returned order is identical
+
+#### Scenario: Events sharing a start time still order deterministically
+- **WHEN** two events tie on every comparator through `start_time`
+- **THEN** they are ordered by `id`, and the order does not vary between runs
 
 #### Scenario: A tagged match outranks an untagged one of equal similarity
 - **WHEN** two events have equal similarity and only one matches the inferred subcategory
@@ -77,13 +100,36 @@ golden set SHALL NOT gate product behaviour.
 - **WHEN** the floor is calibrated
 - **THEN** the source is the dated fixture, and its capture date is recorded with the floor
 
-### Requirement: The floor record is versioned and fails closed
-A floor SHALL be stored with embedding model id, embedding dimension, fixture id, fixture capture
-date, calibration date, and `k`. On mismatch the system SHALL run unrelaxed and report uncalibrated.
+### Requirement: The floor record is a single active database row
+The floor SHALL live in a `retrieval_config` table holding floor, `k`, embedding model, embedding
+dimension, fixture id, fixture capture date and calibration date. Exactly one row SHALL be active,
+enforced by a unique index. It SHALL be readable by the anonymous role in one statement and
+writable only by the service role, and replacement SHALL be atomic.
+
+#### Scenario: A reader never sees a half-applied calibration
+- **WHEN** a calibration replaces the active record while a search is running
+- **THEN** the search reads either the old or the new record, never neither and never both
 
 #### Scenario: Changing the embedding model invalidates the floor
-- **WHEN** the configured model differs from the recorded one
+- **WHEN** the configured model differs from the active record's
 - **THEN** the search does not relax, and the response and trace say the floor is uncalibrated
+
+#### Scenario: A missing active record fails closed
+- **WHEN** no active record exists
+- **THEN** the search runs unrelaxed and reports uncalibrated, rather than assuming a default floor
+
+### Requirement: Fixture freshness has a defined maximum age
+The scenario fixture's `fixture_captured_at` SHALL be within a configurable maximum age, default
+14 days, evaluated in `Europe/Berlin`, and the check SHALL use the recorded capture date rather
+than file modification time.
+
+#### Scenario: The boundary is defined
+- **WHEN** the fixture was captured exactly 14 days ago
+- **THEN** the suite passes; at 15 days it fails
+
+#### Scenario: Re-saving does not refresh a stale fixture
+- **WHEN** a stale fixture file is rewritten without recapture
+- **THEN** the suite still fails, because the capture date is unchanged
 
 ### Requirement: Location resolves event-first at every tier
 Location SHALL resolve postcode, then district, then label, then centroid radius, and within each
@@ -105,9 +151,10 @@ NOT be passed as a location identifier.
 - **WHEN** the user names an area absent from the mapping
 - **THEN** no area constraint is applied, `area_unknown` is recorded, and the answer says the search was city-wide
 
-#### Scenario: An ambiguous area is rejected
-- **WHEN** a name matches several areas
-- **THEN** `area_ambiguous` is returned and the model asks which was meant
+#### Scenario: Alias ambiguity is resolved before the RPC
+- **WHEN** the user's words match several areas
+- **THEN** the web resolver emits `area_ambiguous` and asks which was meant
+- **AND** the RPC is not called, because raw words never reach it
 
 ### Requirement: Relaxation is a deterministic ladder in application code
 The system SHALL relax one constraint per attempt, venue → area → radius → city-wide, decided
@@ -125,17 +172,38 @@ outside the model, and SHALL NOT relax the date window, `is_active`, or a stated
 `match_events` SHALL meet a recorded latency budget on representative windows, SHALL bound its
 limit, and SHALL fix its `search_path`.
 
-#### Scenario: Latency is asserted, not assumed
+#### Scenario: Plan evidence and latency evidence are separate measurements
 - **WHEN** the RPC is changed
-- **THEN** `EXPLAIN (ANALYZE, BUFFERS)` is recorded for representative windows and p95 stays under 400 ms
+- **THEN** `EXPLAIN (ANALYZE, BUFFERS)` is recorded for three representative queries, showing index use and no sequential scan on `events`
+- **AND** a separate benchmark of 200 warm-cache runs per query at production volume reports p50 and p95, with p95 under 400 ms
 
 #### Scenario: search_path cannot be redirected
 - **WHEN** the function is called by an anonymous client
 - **THEN** it executes with `search_path = public, pg_temp`
 
+### Requirement: Traces carry structured arguments, never raw user text
+The system SHALL record structured arguments verbatim, SHALL record the user's free text only as a
+salted hash with its length and detected language, and SHALL NOT record scraped event descriptions,
+credentials, embedding vectors, or user identifiers beyond an opaque session id. Traces SHALL expire
+after 30 days and SHALL be deletable by session id.
+
+#### Scenario: Free text is not stored in production
+- **WHEN** a user asks a question containing personal detail
+- **THEN** the trace records a salted hash, its length and language, and not the text
+- **AND** verbatim capture is possible only behind a development-only flag
+
+#### Scenario: Scraped descriptions never enter a span
+- **WHEN** results are traced
+- **THEN** only event ids and scores are recorded, not their descriptions
+
+#### Scenario: Traces honour deletion
+- **WHEN** an account deletion is processed
+- **THEN** the spans for that session id are removed within the retention window
+
 ### Requirement: Every attempt is traced well enough to diagnose routing
-The system SHALL emit per attempt the arguments as sent, rung, answering location tier, `area_id`,
-result ids, similarities, relaxation reason, model and config version, and catalogue timestamp.
+The system SHALL emit per attempt the allowlisted structured arguments, rung, answering location
+tier, `area_id`, result ids, similarities, relaxation reason, model and config version, and
+catalogue timestamp.
 
 #### Scenario: A complaint is diagnosable from the trace
 - **WHEN** a user reports an empty or narrow answer

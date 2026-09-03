@@ -31,12 +31,14 @@ was likewise wrong. Both errors are corrected here; no task depends on them.
 Constraints are classified by how hard they really are, and sufficiency becomes a quality test
 rather than a row count.
 
-- **Always hard** — date and time window, `is_active`, an explicitly stated price limit, and access
-  constraints. Never relaxed.
+- **Always hard** — the date and time window, `is_active`, and an explicitly stated price limit.
+  Never relaxed. Nothing else qualifies: there is no field for access or availability beyond
+  `is_active`, so neither is promised here.
 - **Initially hard, relaxable** — venue, neighbourhood, radius, in that order.
 - **Semantic by default** — comedy, romantic, underground, chill. Never a taxonomy gate.
-- **Ranking signals** — category, subcategory, genres, title match, popularity. They order results;
-  they do not exclude them.
+- **Ranking signals** — category, subcategory, genres and title match. They order results; they do
+  not exclude them. **Popularity is out of scope** — the catalogue records no views, clicks or
+  saves, and `quality_score` measures ingest quality, not interest.
 - **Hard taxonomy only on explicit request** — a "Workshops only" UI toggle, never an inferred intent.
 
 A deterministic ladder in **application code** widens one constraint at a time until the result
