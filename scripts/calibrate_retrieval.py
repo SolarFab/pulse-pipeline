@@ -58,6 +58,18 @@ def load_fixture(path: Path) -> dict:
         )
     if not fx.get("cases"):
         sys.exit(f"fixture {fx['id']} has no cases")
+    judged = sum(
+        1
+        for c in fx["cases"]
+        for cand in c.get("candidates", [])
+        if cand.get("relevant") is not None
+    )
+    if judged == 0:
+        sys.exit(
+            f"fixture {fx['id']} carries no judgements. Run scripts/capture_fixture.py, "
+            "label each candidate true or false, then calibrate. Labels cannot be "
+            "invented: a floor measured against a guess looks calibrated and is not."
+        )
     return fx
 
 
@@ -149,20 +161,32 @@ def main() -> None:
 
     fx = load_fixture(args.fixture)
     embedder = get_embedder()
-    model = os.environ.get("EMBED_MODEL") or "unknown"
+    # The CONCRETE model, taken from the embedder that actually produced the
+    # vectors — never the env var, which is absent by default while
+    # get_embedder() still selects a real default. Recording "unknown" made every
+    # later comparison vacuous, so a model change could not invalidate the floor.
+    model = getattr(embedder, "model", None) or ""
+    if not model:
+        sys.exit("embedder exposes no model name — cannot record what the floor was measured under")
     dim = int(os.environ.get("EMBED_DIM") or 1536)
     print(f"fixture {fx['id']} captured {fx['captured_at']} · model {model} · dim {dim}")
 
     scored: list[tuple[float, bool]] = []
     for case in fx["cases"]:
+        # Judgements are the fixture's, not this run's: re-searching would compare
+        # today's results against yesterday's labels and silently mislabel both.
+        judged = {
+            c["id"]: c["relevant"]
+            for c in case.get("candidates", [])
+            if c.get("relevant") is not None
+        }
         vec = embedder.embed_batch([case["query"]])[0]
-        relevant = set(case.get("relevant_ids", []))
         rows = search(vec, case)
         for r in rows:
-            if r.get("similarity") is None:
+            if r.get("similarity") is None or r["id"] not in judged:
                 continue
-            scored.append((float(r["similarity"]), r["id"] in relevant))
-        print(f"  {case['query'][:44]:<44} {len(rows):>3} rows")
+            scored.append((float(r["similarity"]), bool(judged[r["id"]])))
+        print(f"  {case['query'][:44]:<44} {len(rows):>3} rows, {len(judged)} judged")
 
     floor, j = sweep(scored)
     print(f"\nfloor {floor} (Youden's J {j:.3f}) over {len(scored)} scored results")

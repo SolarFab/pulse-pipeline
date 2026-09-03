@@ -231,3 +231,17 @@ def test_umlauts_fold_to_two_letters_not_one():
     assert "'ü', 'ue'" in SQL12
     assert "'ö', 'oe'" in SQL12
     assert "'ß', 'ss'" in SQL12
+
+
+def test_the_config_swap_is_one_transaction():
+    """Two REST calls leave a window with no active row if the second fails, and
+    FEAT-25 then reads the system as uncalibrated and silently stops widening."""
+    assert "create or replace function set_active_retrieval_config" in SQL12
+    fn = SQL12.split("set_active_retrieval_config")[1]
+    assert "update retrieval_config set active = false" in fn
+    assert "insert into retrieval_config" in fn
+    assert fn.index("update retrieval_config") < fn.index("insert into retrieval_config")
+
+
+def test_the_config_writer_is_not_public():
+    assert "revoke all on function set_active_retrieval_config" in SQL12

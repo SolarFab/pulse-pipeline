@@ -21,6 +21,14 @@ cal = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(cal)
 
 
+JUDGED = [
+    {
+        "query": "comedy",
+        "candidates": [{"id": "a", "relevant": True}, {"id": "b", "relevant": False}],
+    }
+]
+
+
 def fixture(tmp_path: Path, age_days: int, cases=None) -> Path:
     p = tmp_path / "fx.json"
     p.write_text(
@@ -28,7 +36,7 @@ def fixture(tmp_path: Path, age_days: int, cases=None) -> Path:
             {
                 "id": "test-fx",
                 "captured_at": (date.today() - timedelta(days=age_days)).isoformat(),
-                "cases": cases if cases is not None else [{"query": "comedy", "relevant_ids": []}],
+                "cases": cases if cases is not None else JUDGED,
             }
         )
     )
@@ -103,3 +111,43 @@ def test_a_dry_run_needs_no_credentials(monkeypatch, capsys):
     monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
     cal.write_config(0.5, 3, "m", 1536, {"id": "f", "captured_at": "2026-09-03"}, dry=True)
     assert "dry run" in capsys.readouterr().out
+
+
+def test_an_unjudged_fixture_is_refused_with_the_next_step(tmp_path):
+    """The review's finding: the shipped fixture had no labels, so sweep() could
+    never separate anything. Refusing loudly beats calibrating against nothing."""
+    p = tmp_path / "fx.json"
+    p.write_text(
+        json.dumps(
+            {
+                "id": "unjudged",
+                "captured_at": date.today().isoformat(),
+                "cases": [{"query": "comedy", "candidates": [{"id": "a", "relevant": None}]}],
+            }
+        )
+    )
+    with pytest.raises(SystemExit) as e:
+        cal.load_fixture(p)
+    assert "capture_fixture" in str(e.value)
+
+
+def test_a_judged_fixture_loads(tmp_path):
+    p = tmp_path / "fx.json"
+    p.write_text(
+        json.dumps(
+            {
+                "id": "judged",
+                "captured_at": date.today().isoformat(),
+                "cases": [
+                    {
+                        "query": "comedy",
+                        "candidates": [
+                            {"id": "a", "relevant": True},
+                            {"id": "b", "relevant": False},
+                        ],
+                    }
+                ],
+            }
+        )
+    )
+    assert cal.load_fixture(p)["id"] == "judged"

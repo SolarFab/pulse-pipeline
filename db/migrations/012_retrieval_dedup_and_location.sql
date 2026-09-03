@@ -193,3 +193,37 @@ as $function$
         d.id asc
     limit least(greatest(p_limit, 1), 20)
 $function$;
+
+-- ---------------------------------------------------------------------------
+-- Atomic config replacement (FEAT-24 review finding 2).
+--
+-- The calibrator did this as two REST calls — deactivate, then insert — and
+-- called it atomic in a comment. It is not: a failure between them leaves NO
+-- active row, and FEAT-25 then treats the system as uncalibrated and stops
+-- widening entirely. The failure is silent and looks like normal fail-closed
+-- behaviour, which is the worst kind.
+--
+-- One function, one transaction. Either the new row is active or the old one
+-- still is; there is no moment with neither.
+-- ---------------------------------------------------------------------------
+create or replace function set_active_retrieval_config(
+    p_floor real, p_k integer, p_embedding_model text, p_embedding_dim integer,
+    p_fixture_id text, p_fixture_captured_at date
+) returns bigint
+language plpgsql
+security definer
+set search_path = public, pg_temp
+as $$
+declare
+    new_id bigint;
+begin
+    update retrieval_config set active = false where active;
+    insert into retrieval_config (
+        active, floor, k, embedding_model, embedding_dim, fixture_id, fixture_captured_at
+    ) values (
+        true, p_floor, p_k, p_embedding_model, p_embedding_dim, p_fixture_id, p_fixture_captured_at
+    ) returning id into new_id;
+    return new_id;
+end $$;
+
+revoke all on function set_active_retrieval_config(real, integer, text, integer, text, date) from public, anon;
