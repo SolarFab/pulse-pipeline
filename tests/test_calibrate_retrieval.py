@@ -93,3 +93,13 @@ def test_the_shipped_fixture_is_valid_and_carries_the_real_failures():
 def test_dry_run_writes_nothing(capsys):
     cal.write_config(0.5, 3, "m", 1536, {"id": "f", "captured_at": "2026-09-03"}, dry=True)
     assert "dry run" in capsys.readouterr().out
+
+
+def test_a_dry_run_needs_no_credentials(monkeypatch, capsys):
+    """The reason CI caught this: write_config read SUPABASE_URL before checking
+    the dry flag, so a dry run demanded credentials it never used. A command that
+    cannot run without production access cannot run where production must not."""
+    monkeypatch.delenv("SUPABASE_URL", raising=False)
+    monkeypatch.delenv("SUPABASE_SERVICE_KEY", raising=False)
+    cal.write_config(0.5, 3, "m", 1536, {"id": "f", "captured_at": "2026-09-03"}, dry=True)
+    assert "dry run" in capsys.readouterr().out

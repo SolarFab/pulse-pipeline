@@ -104,7 +104,6 @@ def sweep(scored: list[tuple[float, bool]]) -> tuple[float, float]:
 
 def write_config(floor: float, k: int, model: str, dim: int, fx: dict, dry: bool) -> None:
     """Replace the active row atomically: no window with none active, and never two."""
-    url, key = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
     row = {
         "active": True,
         "floor": floor,
@@ -117,6 +116,9 @@ def write_config(floor: float, k: int, model: str, dim: int, fx: dict, dry: bool
     if dry:
         print("  [dry run] would write:", json.dumps(row))
         return
+    # Credentials are read only on the writing path: a dry run must work with none,
+    # or it cannot run anywhere the real thing must not — CI included.
+    url, key = os.environ["SUPABASE_URL"], os.environ["SUPABASE_SERVICE_KEY"]
     h = {
         "apikey": key,
         "Authorization": f"Bearer {key}",
