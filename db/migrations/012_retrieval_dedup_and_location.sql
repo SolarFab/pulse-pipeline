@@ -227,3 +227,5 @@ begin
 end $$;
 
 revoke all on function set_active_retrieval_config(real, integer, text, integer, text, date) from public, anon;
+grant execute on function set_active_retrieval_config(real, integer, text, integer, text, date)
+    to service_role;

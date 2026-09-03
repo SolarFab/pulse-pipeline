@@ -113,6 +113,41 @@ def test_a_dry_run_needs_no_credentials(monkeypatch, capsys):
     assert "dry run" in capsys.readouterr().out
 
 
+def test_config_write_uses_the_atomic_rpc(monkeypatch):
+    calls = []
+
+    class Response:
+        def raise_for_status(self):
+            return None
+
+    def post(url, **kwargs):
+        calls.append((url, kwargs))
+        return Response()
+
+    monkeypatch.setenv("SUPABASE_URL", "https://example.supabase.co")
+    monkeypatch.setenv("SUPABASE_SERVICE_KEY", "service-key")
+    monkeypatch.setattr(cal.httpx, "post", post)
+    monkeypatch.setattr(
+        cal.httpx,
+        "patch",
+        lambda *args, **kwargs: pytest.fail("config swap must not use a separate PATCH"),
+    )
+
+    cal.write_config(0.5, 3, "model", 1536, {"id": "f", "captured_at": "2026-09-03"}, False)
+
+    assert len(calls) == 1
+    url, request = calls[0]
+    assert url.endswith("/rest/v1/rpc/set_active_retrieval_config")
+    assert request["json"] == {
+        "p_floor": 0.5,
+        "p_k": 3,
+        "p_embedding_model": "model",
+        "p_embedding_dim": 1536,
+        "p_fixture_id": "f",
+        "p_fixture_captured_at": "2026-09-03",
+    }
+
+
 def test_an_unjudged_fixture_is_refused_with_the_next_step(tmp_path):
     """The review's finding: the shipped fixture had no labels, so sweep() could
     never separate anything. Refusing loudly beats calibrating against nothing."""

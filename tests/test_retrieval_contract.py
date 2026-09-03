@@ -245,3 +245,4 @@ def test_the_config_swap_is_one_transaction():
 
 def test_the_config_writer_is_not_public():
     assert "revoke all on function set_active_retrieval_config" in SQL12
+    assert "to service_role" in SQL12

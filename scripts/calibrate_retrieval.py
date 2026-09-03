@@ -135,19 +135,22 @@ def write_config(floor: float, k: int, model: str, dim: int, fx: dict, dry: bool
         "apikey": key,
         "Authorization": f"Bearer {key}",
         "Content-Type": "application/json",
-        "Prefer": "return=representation",
     }
-    # The partial unique index permits only one active row, so the old one is
-    # stood down first. Both statements are required; a failure between them
-    # leaves no active row, which fails closed rather than serving a stale floor.
-    httpx.patch(
-        f"{url}/rest/v1/retrieval_config?active=eq.true",
-        headers=h,
-        json={"active": False},
-        timeout=30,
-    ).raise_for_status()
+    # The database function performs the deactivate + insert in one transaction.
+    # Keeping both statements behind one RPC is the only way a failed request can
+    # leave the previous active configuration intact.
     httpx.post(
-        f"{url}/rest/v1/retrieval_config", headers=h, json=row, timeout=30
+        f"{url}/rest/v1/rpc/set_active_retrieval_config",
+        headers=h,
+        json={
+            "p_floor": row["floor"],
+            "p_k": row["k"],
+            "p_embedding_model": row["embedding_model"],
+            "p_embedding_dim": row["embedding_dim"],
+            "p_fixture_id": row["fixture_id"],
+            "p_fixture_captured_at": row["fixture_captured_at"],
+        },
+        timeout=30,
     ).raise_for_status()
     print(f"  wrote active config: floor={floor} k={k} model={model}")
 
