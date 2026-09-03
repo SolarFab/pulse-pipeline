@@ -7,7 +7,10 @@ Revised twice: after the first review (ten findings) and the second (nine).
 
 - [ ] 0.1 **FEAT-22 venue location propagation.** Exit: postcode and district resolvable per event,
       **event-first**; "Prenzlauer Berg" reaches the 2,340 upcoming events its 144 venues host.
-- [ ] 0.2 **FEAT-23 deduplication — owns the key, the normalisation and the SQL collapse.**
+- [ ] 0.2 **FEAT-26 geocode provenance.** Exit: every event carries `geocoded` /
+      `venue_inherited` / `absent`; a failed geocode never inherits silently. Without this,
+      event-first resolution returns the organiser's HQ as though it were the event's location.
+- [ ] 0.3 **FEAT-23 deduplication — owns the key, the normalisation and the SQL collapse.**
       Exit: `match_events` returns a stable `dedup_key`, duplicates collapse before `LIMIT`, winner
       selection is deterministic, and a nightly gauge asserts the duplicate rate.
       **FEAT-24 consumes this and does not reimplement it.**
@@ -24,7 +27,9 @@ Revised twice: after the first review (ten findings) and the second (nine).
 - [ ] 1.6 `areas` table (`area_id`, `name`, `aliases[]`, `postcodes[]`, `district`, centroid) and
       `p_area_id` parameter; no raw strings as identifiers
 - [ ] 1.7 Location resolution event-first per tier: postcode → district → label → radius; return the
-      answering tier. **Regression: The Makery's 654 event-located rows keep their own location**
+      answering tier. A `venue_inherited` coordinate counts as the venue's, not the event's.
+      **Regressions:** The Makery's 654 genuinely event-located rows keep their own location, and
+      the two Reuterstraße 82 workshops do **not** resolve to Prenzlauer Berg
 - [ ] 1.8 Return `area_unknown` / `area_ambiguous` reason codes rather than silently filtering
 
 ## 2. Performance and safety (`event-map`)
@@ -50,7 +55,8 @@ Revised twice: after the first review (ten findings) and the second (nine).
 - [ ] 4.2 Regression cases: comedy tonight · comedy in Prenzlauer Berg with only city-wide
       alternatives · duplicate Tati events · hip-hop with missing taxonomy · nothing suitable
       anywhere · embedding-model change invalidates the floor · unknown-price cannot satisfy a
-      stated limit · The Makery event-location precedence
+      stated limit · The Makery event-location precedence · a venue-inherited coordinate is not
+      treated as an event location
 
 ## 5. Handoff to FEAT-25 (`nachtkarte`)
 

@@ -64,6 +64,10 @@ Per the delivery contract this is **two cards and two PRs**:
   differ from their venue row, so a venue-first lookup would relabel them. **Exit:** a named area
   resolves event-first through postcode/district with a radius fallback, and "Prenzlauer Berg"
   reaches the 2,340 upcoming events its 144 venues host rather than the 188 the label finds.
+- **FEAT-26 · geocode provenance.** Event-first resolution assumes an event's coordinate is its
+  own. When geocoding fails the pipeline silently inherits the venue's, and the two are
+  indistinguishable — so event-first would return the organiser's HQ as fact. **Exit:** provenance
+  is recorded per event and a failed geocode is `absent`, never a silent inheritance.
 - **FEAT-23 · deduplication.** 23% of upcoming rows are duplicates; 1,134 groups disagree on
   `subcategory`. **FEAT-23 owns the key, its normalisation and the SQL collapse**; this change
   consumes them and does not reimplement them. **Exit:** `match_events` returns a stable

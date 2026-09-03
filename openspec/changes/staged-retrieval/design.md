@@ -32,6 +32,19 @@ The first tier producing candidates answers, and the answering tier is returned 
 `events` has no structured postcode column today; until it does, tier 1 reads the venue only for
 events with **no event-level address**, and events with their own address fall through to tier 4.
 
+### Event-first requires knowing the coordinate is really the event's
+
+Event-first is only safe when an event's coordinate was genuinely derived from its own address. It
+is not, today: when geocoding fails the pipeline **silently falls back to the venue's coordinates**,
+and the result is indistinguishable from a real geocode. Two Makery workshops at `Reuterstraße 82,
+12053` (Neukölln) are pinned at the organiser's Prenzlauer Berg studio, 6 km away, because their
+source addresses were malformed. Eight of Makery's fifteen mis-pins sit on exactly that HQ
+coordinate, and `luma` mis-pins 40% of its located events.
+
+So location resolution consumes a **provenance flag** (`geocoded` / `venue_inherited` / `absent`),
+and a `venue_inherited` coordinate is treated as the venue's for tier purposes, not the event's.
+Without the flag, event-first confidently returns the organiser's HQ. **Blocked on FEAT-26.**
+
 ### Area parameter contract
 
 The RPC takes `p_area_id` — a **canonical identifier** from a checked-in `areas` table
