@@ -1,0 +1,34 @@
+{
+  "id": "beta-scenarios-v1",
+  "captured_at": "2026-09-03",
+  "note": "Real failures from 2-3 September. Recapture when stale; the calibrator refuses one older than FIXTURE_MAX_AGE_DAYS.",
+  "cases": [
+    {
+      "query": "comedy tonight",
+      "args": {},
+      "relevant_ids": []
+    },
+    {
+      "query": "comedy in Prenzlauer Berg",
+      "args": {
+        "p_area_id": "prenzlauer-berg"
+      },
+      "relevant_ids": []
+    },
+    {
+      "query": "hip hop tonight or tomorrow",
+      "args": {},
+      "relevant_ids": []
+    },
+    {
+      "query": "jazz konzert heute abend",
+      "args": {},
+      "relevant_ids": []
+    },
+    {
+      "query": "kostenlos am Sonntag draussen mit Kindern",
+      "args": {},
+      "relevant_ids": []
+    }
+  ]
+}

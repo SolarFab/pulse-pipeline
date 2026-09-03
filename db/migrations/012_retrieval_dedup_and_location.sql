@@ -30,13 +30,20 @@
 -- would silently merge them — the opposite defect, and a worse one, because a
 -- lost event leaves no trace.
 -- ---------------------------------------------------------------------------
--- Cheap ASCII fold: umlauts differ between sources for the same event
--- ("Bühnen Rausch" / "Buehnen Rausch"), and unaccent is not guaranteed present.
+-- ASCII fold. German umlauts expand to TWO letters — ue, not u — because that is
+-- how the other spelling actually appears: sources write "Bühnen Rausch" and
+-- "Buehnen Rausch" for the same venue. translate() is one-to-one and cannot do
+-- that, so the umlauts are replaced first and translate only handles accents.
 create or replace function unaccent_safe(t text) returns text
 language sql immutable
 set search_path = public, pg_temp
 as $$
-    select translate(coalesce(t, ''), 'äöüÄÖÜßéèêáàâíìîóòôúùû', 'aouAOUseeeaaaiiiooouuu');
+    select translate(
+        replace(replace(replace(replace(replace(replace(replace(
+            coalesce(t, ''),
+            'ä', 'ae'), 'ö', 'oe'), 'ü', 'ue'),
+            'Ä', 'Ae'), 'Ö', 'Oe'), 'Ü', 'Ue'), 'ß', 'ss'),
+        'éèêëáàâíìîóòôúùû', 'eeeeaaaiiiooouuu');
 $$;
 
 create or replace function event_dedup_key(

@@ -1,0 +1,95 @@
+"""Calibration: freshness, the sweep, and the config it writes.
+
+No database and no embedding calls — the parts that decide the floor are pure,
+and they are the parts a wrong answer would silently corrupt.
+"""
+
+from __future__ import annotations
+
+import importlib.util
+import json
+import sys
+from datetime import date, timedelta
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT))
+spec = importlib.util.spec_from_file_location("cal", ROOT / "scripts" / "calibrate_retrieval.py")
+cal = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(cal)
+
+
+def fixture(tmp_path: Path, age_days: int, cases=None) -> Path:
+    p = tmp_path / "fx.json"
+    p.write_text(
+        json.dumps(
+            {
+                "id": "test-fx",
+                "captured_at": (date.today() - timedelta(days=age_days)).isoformat(),
+                "cases": cases if cases is not None else [{"query": "comedy", "relevant_ids": []}],
+            }
+        )
+    )
+    return p
+
+
+def test_a_fresh_fixture_loads(tmp_path):
+    assert cal.load_fixture(fixture(tmp_path, 1))["id"] == "test-fx"
+
+
+def test_the_boundary_is_exactly_the_limit(tmp_path):
+    """14 days passes, 15 fails — stated, so it cannot drift into a judgement call."""
+    assert cal.load_fixture(fixture(tmp_path, cal.FIXTURE_MAX_AGE_DAYS))
+    with pytest.raises(SystemExit):
+        cal.load_fixture(fixture(tmp_path, cal.FIXTURE_MAX_AGE_DAYS + 1))
+
+
+def test_a_stale_fixture_cannot_be_refreshed_by_rewriting_it(tmp_path):
+    """Age comes from the recorded capture date, never file mtime."""
+    p = fixture(tmp_path, 99)
+    p.write_text(p.read_text())  # touch
+    with pytest.raises(SystemExit):
+        cal.load_fixture(p)
+
+
+def test_an_empty_fixture_is_refused(tmp_path):
+    with pytest.raises(SystemExit):
+        cal.load_fixture(fixture(tmp_path, 1, cases=[]))
+
+
+def test_the_sweep_finds_the_separating_floor():
+    # relevant cluster high, irrelevant low: the floor belongs between them
+    scored = [(0.9, True), (0.85, True), (0.8, True), (0.3, False), (0.2, False), (0.1, False)]
+    floor, j = cal.sweep(scored)
+    assert 0.3 < floor <= 0.8
+    assert j == pytest.approx(1.0)
+
+
+def test_the_sweep_does_not_pick_a_floor_that_rejects_everything():
+    """Accuracy alone would maximise by rejecting all when most are irrelevant —
+    the degenerate floor that stops the ladder ever widening. Youden's J does not."""
+    scored = [(0.9, True)] + [(0.1, False)] * 50
+    floor, _ = cal.sweep(scored)
+    assert floor <= 0.9, "a floor above every relevant score would reject them all"
+
+
+def test_labels_on_one_side_only_are_refused():
+    with pytest.raises(SystemExit):
+        cal.sweep([(0.9, True), (0.8, True)])
+    with pytest.raises(SystemExit):
+        cal.sweep([(0.1, False), (0.2, False)])
+
+
+def test_the_shipped_fixture_is_valid_and_carries_the_real_failures():
+    fx = json.loads((ROOT / "eval" / "fixtures" / "beta-scenarios-v1.json").read_text())
+    queries = " ".join(c["query"].lower() for c in fx["cases"])
+    for scenario in ["comedy tonight", "prenzlauer berg", "hip hop"]:
+        assert scenario in queries
+    date.fromisoformat(fx["captured_at"])
+
+
+def test_dry_run_writes_nothing(capsys):
+    cal.write_config(0.5, 3, "m", 1536, {"id": "f", "captured_at": "2026-09-03"}, dry=True)
+    assert "dry run" in capsys.readouterr().out

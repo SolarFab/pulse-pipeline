@@ -213,3 +213,21 @@ def test_dedup_key_is_indexed():
 def test_both_helpers_fix_their_search_path():
     for fn in SQL12.split("create or replace function")[1:]:
         assert "set search_path = public, pg_temp" in fn.split("as $")[0]
+
+
+def test_migration_011_refuses_to_run_before_feat_22():
+    """011 indexes venues.postal_code and derives centroids from it, both created
+    by FEAT-22. Without the guard it would fail halfway, leaving areas seeded and
+    the RPC absent."""
+    assert "information_schema.columns" in SQL
+    assert "raise exception" in SQL
+    guard_at = SQL.index("raise exception")
+    assert guard_at < SQL.index("insert into areas"), "the guard must precede any write"
+
+
+def test_umlauts_fold_to_two_letters_not_one():
+    """Sources write both 'Bühnen Rausch' and 'Buehnen Rausch'. translate() is
+    one-to-one and maps ü->u, which does not equate them; replace() does."""
+    assert "'ü', 'ue'" in SQL12
+    assert "'ö', 'oe'" in SQL12
+    assert "'ß', 'ss'" in SQL12

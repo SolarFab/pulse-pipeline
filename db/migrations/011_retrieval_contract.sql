@@ -20,6 +20,23 @@
 -- moment; the postcode tier arrives with FEAT-22.
 
 -- ---------------------------------------------------------------------------
+-- ORDERING GUARD. This migration indexes venues.postal_code and derives area
+-- centroids from it, both of which FEAT-22 creates. Applied to a database
+-- without that column it would fail halfway, leaving areas seeded and the RPC
+-- absent. Fail at the first statement instead, with the reason.
+-- ---------------------------------------------------------------------------
+do $$
+begin
+    if not exists (
+        select 1 from information_schema.columns
+        where table_name = 'venues' and column_name = 'postal_code'
+    ) then
+        raise exception
+            'venues.postal_code is missing — apply the FEAT-22 venue-location migration and its backfill before this one';
+    end if;
+end $$;
+
+-- ---------------------------------------------------------------------------
 -- areas: canonical location identifiers. Raw model strings must never choose a
 -- SQL identifier, so the web resolver maps words -> area_id and passes the id.
 -- Alias ambiguity is FEAT-25's job: raw words never reach this layer.
