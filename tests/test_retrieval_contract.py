@@ -134,3 +134,82 @@ def test_dedup_and_location_tiers_are_left_to_their_own_tickets():
     assert "dedup_key" not in returns_block
     assert "postcode" not in returns_block
     assert "postcodes" in SQL  # the areas table is seeded, ready for FEAT-22
+
+
+# --- Review findings 1 and 3: dedup and the location ladder --------------------
+
+SQL12 = (
+    Path(__file__).resolve().parent.parent
+    / "db"
+    / "migrations"
+    / "012_retrieval_dedup_and_location.sql"
+).read_text()
+
+
+def test_helper_is_defined_before_the_function_that_calls_it():
+    """Postgres validates a SQL function body at creation, so a forward reference
+    fails the migration rather than deferring."""
+    assert SQL12.index("function unaccent_safe") < SQL12.index("function event_dedup_key")
+
+
+def test_dedup_key_normalises_the_punctuation_that_actually_differs():
+    """The three Tati Comedy rows differ only by `_`, `-` and a double space."""
+    assert "'[^a-z0-9]+', '', 'g'" in SQL12
+    assert "lower(unaccent_safe" in SQL12
+
+
+def test_dedup_key_keeps_minute_precision():
+    """Rounding to the day would merge two showings of one play into one row —
+    the opposite defect, and worse: a lost event leaves no trace."""
+    assert "date_trunc('minute'" in SQL12
+    assert "date_trunc('day'" not in SQL12
+
+
+def test_duplicates_collapse_before_the_limit():
+    dedup_at = SQL12.index("row_number() over (")
+    limit_at = SQL12.rindex("limit least(greatest(p_limit")
+    assert dedup_at < limit_at, "dedup must precede LIMIT or copies consume the limit"
+
+
+def test_the_surviving_copy_is_chosen_deterministically():
+    """1,134 duplicate groups disagree about subcategory, so which copy wins
+    decides whether the event is findable at all."""
+    window = SQL12.split("row_number() over (")[1].split(") as rn")[0]
+    assert "subcategory is not null then 0" in window
+    assert "id asc" in window, "must end in a unique tie-break"
+
+
+def test_location_is_event_first_at_the_postcode_tier():
+    """654 of The Makery's 763 upcoming events know their location better than
+    their venue row does. Venue-first would relabel every one."""
+    assert "coalesce(substring(e.address from '\\m1[0-9]{4}\\M'), v.postal_code)" in SQL12
+
+
+def test_the_location_tiers_are_in_the_accepted_order():
+    tier = SQL12.split("tier as (")[1].split("),")[0]
+    for earlier, later in [
+        ("postcode", "district"),
+        ("district", "neighborhood_label"),
+        ("neighborhood_label", "centroid_radius"),
+    ]:
+        assert tier.index(f"'{earlier}'") < tier.index(f"'{later}'")
+
+
+def test_one_tier_answers_for_the_whole_query():
+    """A mixed result set would make 'which source answered' meaningless."""
+    assert "tier as (" in SQL12
+    assert "(select src from tier)" in SQL12
+
+
+def test_an_unmatched_area_does_not_filter_to_nothing():
+    assert "'area_unmatched'" in SQL12
+    assert "t.src in ('area_unknown', 'area_unmatched')" in SQL12
+
+
+def test_dedup_key_is_indexed():
+    assert "events_dedup_key_idx" in SQL12
+
+
+def test_both_helpers_fix_their_search_path():
+    for fn in SQL12.split("create or replace function")[1:]:
+        assert "set search_path = public, pg_temp" in fn.split("as $")[0]
