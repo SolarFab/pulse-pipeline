@@ -87,7 +87,7 @@ def test_search_path_is_fixed_on_the_anonymous_function():
 
 
 def test_limit_stays_bounded():
-    assert "least(greatest(p_limit, 1), 20)" in SQL
+    assert "least(greatest(p_limit, 1), 200)" in SQL12
 
 
 def test_exactly_one_active_config_row_is_enforced():
@@ -227,41 +227,10 @@ def test_the_config_writer_is_not_public():
     assert "to service_role" in SQL12
 
 
-def test_location_tiers_are_additive_not_winner_take_all():
-    """The live failure: "comedy in Prenzlauer Berg" excluded Cosmic Comedy, which
-    is labelled Prenzlauer Berg and 1.3 km from the asker, because its postcode is
-    10119 while other venues had a 104xx one and the tier locked to 'postcode'."""
-    located = SQL12.split("located as (")[1].split("),")[0]
-    # a row qualifies on ANY tier
-    assert located.count("or b.eff_") >= 2
-    assert "or (b.dist_km is not null" in located
-    # and no single tier is selected for the whole query any more
-    assert "tier as (" not in SQL12
-
-
 def test_the_matched_tier_ranks_rather_than_filters():
     order_block = SQL12.split("order by")[-1]
     assert "d.loc_src when 'postcode' then 0" in order_block
     assert order_block.index("loc_src") < order_block.index("d.sim desc")
-
-
-def test_a_label_match_is_returned():
-    located = SQL12.split("located as (")[1].split("),")[0]
-    assert "eff_neighborhood ilike" in located
-
-
-def test_every_location_tier_is_a_qualifying_route():
-    """Replaces the old 'one tier answers for the whole query'. That design was
-    winner-take-all: the first tier with any match fixed the tier and dropped
-    every row matching only a weaker one."""
-    located = SQL12.split("located as (")[1].split("),")[0]
-    for route in ["eff_postcode", "eff_district", "eff_neighborhood", "dist_km"]:
-        assert route in located, f"{route} must be able to qualify a row on its own"
-
-
-def test_an_unknown_area_still_applies_no_constraint():
-    located = SQL12.split("located as (")[1].split("),")[0]
-    assert "not exists (select 1 from area)" in located
 
 
 def test_tier_strength_orders_results():
@@ -274,3 +243,20 @@ def test_tier_strength_orders_results():
         ("centroid_radius", "3"),
     ]:
         assert f"'{tier}' then {rank}" in order_block
+
+
+def test_area_annotates_and_never_filters():
+    """Retrieve wide, rank in code, show narrow. With a date window the candidate
+    set is ~400 rows; every exclusion here was a way to lose Cosmic Comedy."""
+    located = SQL12.split("located as (")[1].split("),")[0]
+    assert "loc_src" in located
+    assert "where" not in located.lower(), "location must annotate, not exclude"
+    for tier in ["postcode", "district", "neighborhood_label", "centroid_radius"]:
+        assert f"'{tier}'" in located
+
+
+def test_retrieval_breadth_is_sized_from_measurement():
+    """Latency is flat in the limit (~474 bytes/row, scan paid regardless), so a
+    low cap only discards work already done. Default 100, ceiling 200."""
+    assert "p_limit            integer  default 100" in SQL12
+    assert "least(greatest(p_limit, 1), 200)" in SQL12

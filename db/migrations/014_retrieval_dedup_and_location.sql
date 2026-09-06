@@ -85,7 +85,7 @@ create or replace function match_events_v2(
     p_lat              double precision default null,
     p_lng              double precision default null,
     p_radius_km        double precision default 1.5,
-    p_limit            integer  default 10
+    p_limit            integer  default 100
 )
 returns table (
     id uuid, title text, venue_name text, start_time timestamptz,
@@ -153,21 +153,21 @@ as $function$
     -- disagree is not the same as being right. So a row qualifies on ANY tier and
     -- carries the strongest tier it matched, which then ORDERS the results:
     -- postcode matches first, label matches after, nothing silently dropped.
+    -- Location ANNOTATES, it does not filter. Every row gets loc_src — the
+    -- strongest evidence tying it to the requested area, or NULL — and the caller
+    -- partitions on it. Retrieve wide, rank in code, show narrow: with a date
+    -- window the candidate set is ~400 rows, so there is nothing to protect by
+    -- excluding here, and every exclusion was a way to lose Cosmic Comedy.
     located as (
         select b.*,
             case
+                when p_area_id is null or not exists (select 1 from area) then null
                 when b.eff_postcode = any((select postcodes from area))            then 'postcode'
                 when b.eff_district = (select district from area)                  then 'district'
                 when b.eff_neighborhood ilike '%' || (select name from area) || '%' then 'neighborhood_label'
                 when b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3) then 'centroid_radius'
             end as loc_src
         from base b
-        where p_area_id is null
-           or not exists (select 1 from area)
-           or b.eff_postcode = any((select postcodes from area))
-           or b.eff_district = (select district from area)
-           or b.eff_neighborhood ilike '%' || (select name from area) || '%'
-           or (b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3))
     ),
     -- Collapse BEFORE the limit. Ranking inside the group is the same comparator
     -- chain, so the surviving copy is the best-tagged one deterministically —
@@ -208,7 +208,7 @@ as $function$
         case when p_lat is not null or p_area_id is not null then d.dist_km end asc nulls last,
         d.start_time asc,
         d.id asc
-    limit least(greatest(p_limit, 1), 20)
+    limit least(greatest(p_limit, 1), 200)
 $function$;
 
 -- ---------------------------------------------------------------------------
