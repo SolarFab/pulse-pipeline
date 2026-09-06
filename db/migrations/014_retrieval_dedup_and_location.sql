@@ -56,7 +56,7 @@ as $$
         coalesce(regexp_replace(lower(unaccent_safe(p_title)), '[^a-z0-9]+', '', 'g'), '') || '|' ||
         coalesce(regexp_replace(lower(unaccent_safe(p_venue)), '[^a-z0-9]+', '', 'g'), '') || '|' ||
         to_char(date_trunc('minute', p_start at time zone 'UTC'), 'YYYY-MM-DD"T"HH24:MI'),
-        'UTF8'), 'sha256'), 'hex');
+        'UTF8')), 'hex');
 $$;
 
 create index if not exists events_dedup_key_idx

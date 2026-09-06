@@ -260,3 +260,11 @@ def test_retrieval_breadth_is_sized_from_measurement():
     low cap only discards work already done. Default 100, ceiling 200."""
     assert "p_limit            integer  default 100" in SQL12
     assert "least(greatest(p_limit, 1), 200)" in SQL12
+
+
+def test_dedup_key_uses_the_builtin_one_argument_sha256():
+    """sha256(bytea) takes one argument; the 'sha256' string belongs to pgcrypto's
+    digest(). The two-argument form fails at apply time with 42883 — caught
+    only when the migration was actually applied, not by any text test."""
+    assert "sha256(convert_to(" in SQL12
+    assert "'UTF8'), 'sha256')" not in SQL12
