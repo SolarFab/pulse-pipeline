@@ -250,7 +250,9 @@ def test_area_annotates_and_never_filters():
     set is ~400 rows; every exclusion here was a way to lose Cosmic Comedy."""
     located = SQL12.split("located as (")[1].split("),")[0]
     assert "loc_src" in located
-    assert "where" not in located.lower(), "location must annotate, not exclude"
+    # No row-level WHERE on the CTE: it must end at `from base b`. (A `where`
+    # inside the exists() subquery is membership, not exclusion.)
+    assert located.rstrip().endswith("from base b"), "location must annotate, not exclude"
     for tier in ["postcode", "district", "neighborhood_label", "centroid_radius"]:
         assert f"'{tier}'" in located
 
