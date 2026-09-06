@@ -268,3 +268,11 @@ def test_dedup_key_uses_the_builtin_one_argument_sha256():
     only when the migration was actually applied, not by any text test."""
     assert "sha256(convert_to(" in SQL12
     assert "'UTF8'), 'sha256')" not in SQL12
+
+
+def test_postcode_membership_does_not_use_the_any_subquery_form():
+    """`x = any((select arr from t))` is parsed as the ANY(subquery) form and
+    compares text to a text[] ROW — 42883 at apply time. The exists/any(column)
+    form is unambiguous."""
+    assert "= any((select postcodes from area))" not in SQL12
+    assert "b.eff_postcode = any(a.postcodes)" in SQL12

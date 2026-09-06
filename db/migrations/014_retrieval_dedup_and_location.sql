@@ -162,7 +162,7 @@ as $function$
         select b.*,
             case
                 when p_area_id is null or not exists (select 1 from area) then null
-                when b.eff_postcode = any((select postcodes from area))            then 'postcode'
+                when exists (select 1 from area a where b.eff_postcode = any(a.postcodes)) then 'postcode'
                 when b.eff_district = (select district from area)                  then 'district'
                 when b.eff_neighborhood ilike '%' || (select name from area) || '%' then 'neighborhood_label'
                 when b.dist_km is not null and b.dist_km <= greatest(p_radius_km, 3) then 'centroid_radius'
