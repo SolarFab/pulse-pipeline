@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """Inspect kulturdaten API for website/URL fields and check Supabase source_url coverage."""
 

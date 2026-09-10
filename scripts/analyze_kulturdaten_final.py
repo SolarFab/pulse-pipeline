@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 Final analysis: kulturdaten "00:00 - 00:00" hypothesis check.

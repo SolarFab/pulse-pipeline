@@ -25,3 +25,8 @@ analyze_tags.py
 genre_analysis.py
 kulturdaten_analysis.py
 eval/cache/
+
+# office documents saved into the tree by accident
+*.pages
+*.numbers
+*.key
